@@ -1,0 +1,122 @@
+// use prisma-8
+
+enum Role {
+  ADMIN
+  REQUESTER
+  APPROVER
+  FINANCE
+}
+
+enum EventStatus {
+  DRAFT
+  REQUESTED
+  APPROVED
+  REJECTED
+  BOOKED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Company {
+  id       Int      @id @default(autoincrement())
+  name     String
+  slug     String   @unique
+  users    User[]
+  events   Event[]
+  venues   Venue[]
+  policies Policy[]
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  clerkId   String  @unique
+  email     String  @unique
+  name      String
+  role      Role
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+  events    Event[]
+  approvals Approval[]
+}
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  companyId   Int
+  company     Company     @relation(fields: [companyId], references: [id])
+  createdById Int
+  createdBy   User        @relation(fields: [createdById], references: [id])
+  eventType   String
+  city        String
+  dateTime    TimestamptzString
+  attendees   Int
+  budget      Int
+  diet        String
+  status      EventStatus @default(DRAFT)
+  approvals   Approval[]
+  bookings    Booking[]
+}
+
+model Venue {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+  city      String
+  capacity  Int
+  cuisine   String
+  priceBand String
+  tags      String[]
+  rating    Float
+  bookings  Booking[]
+}
+
+model Policy {
+  id            Int      @id @default(autoincrement())
+  companyId     Int
+  company       Company  @relation(fields: [companyId], references: [id])
+  maxBudget     Int
+  perPersonCap  Int
+  allowedCities String[]
+  approverRole  Role
+}
+
+model Approval {
+  id         Int            @id @default(autoincrement())
+  eventId    Int
+  event      Event          @relation(fields: [eventId], references: [id])
+  approverId Int
+  approver   User           @relation(fields: [approverId], references: [id])
+  status     ApprovalStatus @default(PENDING)
+  reason     String?
+}
+
+model Booking {
+  id              Int           @id @default(autoincrement())
+  eventId         Int
+  event           Event         @relation(fields: [eventId], references: [id])
+  venueId         Int
+  venue           Venue         @relation(fields: [venueId], references: [id])
+  amount          Int
+  taxAmount       Int
+  currency        String
+  paymentStatus   PaymentStatus @default(PENDING)
+  razorpayOrderId String?
+  invoice         Invoice?
+}
+
+model Invoice {
+  id        Int     @id @default(autoincrement())
+  bookingId Int     @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  pdfUrl    String
+  gstin     String
+}
