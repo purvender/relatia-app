@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, Show, UserButton } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -22,7 +22,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      dynamic
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      afterSignOutUrl="/"
+    >
       <html
         lang="en"
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
@@ -30,14 +35,24 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <body className="flex min-h-full flex-col">
           <header className="border-b border-border bg-background">
             <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
-              <span className="text-sm font-semibold tracking-tight">Relatia</span>
+              <Link href="/" className="text-sm font-semibold tracking-tight">
+                Relatia
+              </Link>
               <nav className="flex items-center gap-2">
-                <Link href="/sign-in" className={buttonVariants({ variant: "ghost" })}>
-                  Sign in
-                </Link>
-                <Link href="/sign-up" className={buttonVariants()}>
-                  Get started
-                </Link>
+                <Show when="signed-out">
+                  <Link href="/sign-in" className={buttonVariants({ variant: "ghost" })}>
+                    Sign in
+                  </Link>
+                  <Link href="/sign-up" className={buttonVariants()}>
+                    Get started
+                  </Link>
+                </Show>
+                <Show when="signed-in">
+                  <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
+                    Dashboard
+                  </Link>
+                  <UserButton />
+                </Show>
               </nav>
             </div>
           </header>

@@ -13,6 +13,8 @@ enum EventStatus {
   APPROVED
   REJECTED
   BOOKED
+  COMPLETED
+  CANCELLED
 }
 
 enum ApprovalStatus {
@@ -25,6 +27,7 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
+  REFUNDED
 }
 
 model Company {
@@ -53,36 +56,54 @@ model Event {
   id          Int         @id @default(autoincrement())
   companyId   Int
   company     Company     @relation(fields: [companyId], references: [id])
+
   createdById Int
   createdBy   User        @relation(fields: [createdById], references: [id])
+
+  title       String
   eventType   String
+  purpose     String?
   city        String
   dateTime    TimestamptzString
   attendees   Int
+
+  // Store money in paise, not rupees.
   budget      Int
-  diet        String
+
+  diet        String      @default("NONE")
   status      EventStatus @default(DRAFT)
+  createdAt   TimestamptzString @default(now())
+
   approvals   Approval[]
-  bookings    Booking[]
+
+  // One confirmed booking per event for MVP.
+  booking     Booking?
 }
 
 model Venue {
   id        Int      @id @default(autoincrement())
   companyId Int
   company   Company  @relation(fields: [companyId], references: [id])
+
+  name      String
   city      String
+  address   String?
   capacity  Int
   cuisine   String
   priceBand String
   tags      String[]
   rating    Float
+  active    Boolean  @default(true)
+
   bookings  Booking[]
 }
 
 model Policy {
   id            Int      @id @default(autoincrement())
-  companyId     Int
+  companyId     Int      @unique
   company       Company  @relation(fields: [companyId], references: [id])
+
+  // All monetary values are paise.
   maxBudget     Int
   perPersonCap  Int
   allowedCities String[]
@@ -93,23 +114,34 @@ model Approval {
   id         Int            @id @default(autoincrement())
   eventId    Int
   event      Event          @relation(fields: [eventId], references: [id])
+
   approverId Int
   approver   User           @relation(fields: [approverId], references: [id])
+
   status     ApprovalStatus @default(PENDING)
   reason     String?
+
+  @@unique([eventId, approverId])
 }
 
 model Booking {
   id              Int           @id @default(autoincrement())
-  eventId         Int
+
+  eventId         Int           @unique
   event           Event         @relation(fields: [eventId], references: [id])
+
   venueId         Int
   venue           Venue         @relation(fields: [venueId], references: [id])
+
+  // Store all values in paise.
   amount          Int
   taxAmount       Int
-  currency        String
+  currency        String        @default("INR")
+
   paymentStatus   PaymentStatus @default(PENDING)
-  razorpayOrderId String?
+  razorpayOrderId String?       @unique
+  createdAt       TimestamptzString @default(now())
+
   invoice         Invoice?
 }
 

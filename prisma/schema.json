@@ -80,6 +80,14 @@
               {
                 "name": "BOOKED",
                 "value": "BOOKED"
+              },
+              {
+                "name": "COMPLETED",
+                "value": "COMPLETED"
+              },
+              {
+                "name": "CANCELLED",
+                "value": "CANCELLED"
               }
             ]
           },
@@ -97,6 +105,10 @@
               {
                 "name": "FAILED",
                 "value": "FAILED"
+              },
+              {
+                "name": "REFUNDED",
+                "value": "REFUNDED"
               }
             ]
           },
@@ -232,6 +244,13 @@
                   "kind": "scalar"
                 }
               },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "currency": {
                 "nullable": false,
                 "type": {
@@ -342,6 +361,9 @@
               "fields": {
                 "amount": {
                   "column": "amount"
+                },
+                "createdAt": {
+                  "column": "createdAt"
                 },
                 "currency": {
                   "column": "currency"
@@ -501,6 +523,13 @@
                   "kind": "scalar"
                 }
               },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "createdById": {
                 "nullable": false,
                 "type": {
@@ -536,6 +565,13 @@
                   "kind": "scalar"
                 }
               },
+              "purpose": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "status": {
                 "nullable": false,
                 "type": {
@@ -547,6 +583,13 @@
                   "entityName": "EventStatus",
                   "namespaceId": "public",
                   "plane": "domain"
+                }
+              },
+              "title": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
                 }
               }
             },
@@ -566,8 +609,9 @@
                   "namespace": "public"
                 }
               },
-              "bookings": {
-                "cardinality": "1:N",
+              "booking": {
+                "cardinality": "1:1",
+                "nullable": true,
                 "on": {
                   "localFields": [
                     "id"
@@ -628,6 +672,9 @@
                 "companyId": {
                   "column": "companyId"
                 },
+                "createdAt": {
+                  "column": "createdAt"
+                },
                 "createdById": {
                   "column": "createdById"
                 },
@@ -643,8 +690,14 @@
                 "id": {
                   "column": "id"
                 },
+                "purpose": {
+                  "column": "purpose"
+                },
                 "status": {
                   "column": "status"
+                },
+                "title": {
+                  "column": "title"
                 }
               },
               "namespaceId": "public",
@@ -940,6 +993,20 @@
           },
           "Venue": {
             "fields": {
+              "active": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "address": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "capacity": {
                 "nullable": false,
                 "type": {
@@ -972,6 +1039,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -1033,6 +1107,12 @@
             },
             "storage": {
               "fields": {
+                "active": {
+                  "column": "active"
+                },
+                "address": {
+                  "column": "address"
+                },
                 "capacity": {
                   "column": "capacity"
                 },
@@ -1047,6 +1127,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "name": {
+                  "column": "name"
                 },
                 "priceBand": {
                   "column": "priceBand"
@@ -1177,13 +1260,20 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "eventId",
+                    "approverId"
+                  ]
+                }
+              ]
             },
             "booking": {
               "checks": [
                 {
-                  "expression": "\"paymentStatus\" IN ('PENDING', 'PAID', 'FAILED')",
-                  "name": "booking_paymentStatus_check_c913b4d1",
+                  "expression": "\"paymentStatus\" IN ('PENDING', 'PAID', 'FAILED', 'REFUNDED')",
+                  "name": "booking_paymentStatus_check_60515b20",
                   "prefix": "booking_paymentStatus_check"
                 }
               ],
@@ -1193,8 +1283,21 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
                 "currency": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "INR"
+                  },
                   "nativeType": "text",
                   "nullable": false
                 },
@@ -1280,14 +1383,6 @@
               "indexes": [
                 {
                   "columns": [
-                    "eventId"
-                  ],
-                  "name": "booking_eventId_idx_6a266d47",
-                  "prefix": "booking_eventId_idx",
-                  "unique": false
-                },
-                {
-                  "columns": [
                     "venueId"
                   ],
                   "name": "booking_venueId_idx_b49e8dab",
@@ -1300,7 +1395,18 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "eventId"
+                  ]
+                },
+                {
+                  "columns": [
+                    "razorpayOrderId"
+                  ]
+                }
+              ]
             },
             "company": {
               "columns": {
@@ -1342,8 +1448,8 @@
             "event": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'REJECTED', 'BOOKED')",
-                  "name": "event_status_check_e86f1c56",
+                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED')",
+                  "name": "event_status_check_3bca4d65",
                   "prefix": "event_status_check"
                 }
               ],
@@ -1368,6 +1474,15 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
                 "createdById": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -1380,6 +1495,10 @@
                 },
                 "diet": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "NONE"
+                  },
                   "nativeType": "text",
                   "nullable": false
                 },
@@ -1397,6 +1516,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "purpose": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "status": {
                   "codecId": "pg/text@1",
                   "default": {
@@ -1411,6 +1535,11 @@
                     "namespaceId": "public",
                     "plane": "storage"
                   }
+                },
+                "title": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
                 }
               },
               "foreignKeys": [
@@ -1605,22 +1734,19 @@
                   }
                 }
               ],
-              "indexes": [
-                {
-                  "columns": [
-                    "companyId"
-                  ],
-                  "name": "policy_companyId_idx_33acc5ed",
-                  "prefix": "policy_companyId_idx",
-                  "unique": false
-                }
-              ],
+              "indexes": [],
               "primaryKey": {
                 "columns": [
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "companyId"
+                  ]
+                }
+              ]
             },
             "user": {
               "checks": [
@@ -1727,6 +1853,20 @@
                 }
               ],
               "columns": {
+                "active": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "address": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "capacity": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -1754,6 +1894,11 @@
                     "kind": "function"
                   },
                   "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
                   "nullable": false
                 },
                 "priceBand": {
@@ -1825,7 +1970,9 @@
                 "REQUESTED",
                 "APPROVED",
                 "REJECTED",
-                "BOOKED"
+                "BOOKED",
+                "COMPLETED",
+                "CANCELLED"
               ]
             },
             "PaymentStatus": {
@@ -1833,7 +1980,8 @@
               "values": [
                 "PENDING",
                 "PAID",
-                "FAILED"
+                "FAILED",
+                "REFUNDED"
               ]
             },
             "Role": {
@@ -1851,7 +1999,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "3038b1f8defba3b2152d60a8ee0ca09feed194de2a8c35fc30f910ea59122e3e"
+    "storageHash": "f3c89d651871e03f1e55de294d51716a1d020b12bb10d232a84063374ac128db"
   },
   "capabilities": {
     "postgres": {
