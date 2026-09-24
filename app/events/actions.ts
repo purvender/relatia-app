@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { requireAppUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
+import { submitEventForApproval } from "@/lib/events/submit-event-for-approval";
 
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -106,4 +107,11 @@ export async function createEventAction(formData: FormData) {
   });
 
   redirect(`/events`);
+}
+
+export async function submitEventForApprovalAction(eventId: number) {
+  if (!Number.isInteger(eventId) || eventId <= 0) {
+    throw new Error("Invalid event ID.");
+  }
+  return await submitEventForApproval(eventId);
 }
