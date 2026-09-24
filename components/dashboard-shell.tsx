@@ -36,6 +36,11 @@ const NAV_ITEMS: NavItem[] = [
     icon: Calendar,
   },
   {
+    label: "Venues",
+    href: "/venues",
+    icon: Building2,
+  },
+  {
     label: "Approvals",
     href: "/dashboard/approvals",
     icon: CheckSquare,
