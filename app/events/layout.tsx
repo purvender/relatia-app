@@ -1,7 +1,7 @@
 import { requireAppUser } from "@/lib/auth";
 import { DashboardShell } from "@/components/dashboard-shell";
 
-export default async function DashboardLayout({
+export default async function EventsLayout({
   children,
 }: {
   children: React.ReactNode;
