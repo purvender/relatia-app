@@ -1,16 +1,21 @@
 import "server-only";
 
 export type EventVenueDiscoveryInput = {
+  eventId?: number | null;
   city?: string | null;
   attendees?: number | null;
 };
 
 /**
  * Builds the URL search parameters string for venue discovery based on event context.
- * e.g., city="Bengaluru", attendees=120 -> "/venues?city=Bengaluru&minCapacity=100"
+ * e.g., eventId=12, city="Bengaluru", attendees=120 -> "/venues?city=Bengaluru&minCapacity=100&eventId=12"
  */
 export function getVenueDiscoveryUrl(input: EventVenueDiscoveryInput): string {
   const params = new URLSearchParams();
+
+  if (input.eventId && input.eventId > 0) {
+    params.set("eventId", String(input.eventId));
+  }
 
   if (input.city && input.city.trim()) {
     params.set("city", input.city.trim());
@@ -30,3 +35,4 @@ export function getVenueDiscoveryUrl(input: EventVenueDiscoveryInput): string {
   const queryString = params.toString();
   return queryString ? `/venues?${queryString}` : "/venues";
 }
+

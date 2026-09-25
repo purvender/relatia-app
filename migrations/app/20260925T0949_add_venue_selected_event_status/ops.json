@@ -1,0 +1,86 @@
+[
+  {
+    "id": "dropCheckConstraint.event.event_status_check_3bca4d65",
+    "label": "Drop check constraint \"event_status_check_3bca4d65\" on \"event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_status_check_3bca4d65",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_status_check_3bca4d65\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_3bca4d65",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"event_status_check_3bca4d65\"",
+        "sql": "ALTER TABLE \"public\".\"event\" DROP CONSTRAINT \"event_status_check_3bca4d65\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_status_check_3bca4d65\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_3bca4d65",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.event.event_status_check_59f4e26b",
+    "label": "Add check constraint \"event_status_check_59f4e26b\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_status_check_59f4e26b",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_status_check_59f4e26b\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_59f4e26b",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"event_status_check_59f4e26b\"",
+        "sql": "ALTER TABLE \"public\".\"event\" ADD CONSTRAINT \"event_status_check_59f4e26b\" CHECK (\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'VENUE_SELECTED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_status_check_59f4e26b\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_59f4e26b",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  }
+]

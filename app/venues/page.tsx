@@ -12,6 +12,7 @@ export default async function VenuesPage({
     city?: string;
     priceBand?: string;
     minCapacity?: string;
+    eventId?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -21,6 +22,9 @@ export default async function VenuesPage({
   const priceBand = typeof params.priceBand === "string" ? params.priceBand : undefined;
   const minCapacityRaw = typeof params.minCapacity === "string" ? params.minCapacity : undefined;
   const minCapacity = minCapacityRaw ? Number(minCapacityRaw) : undefined;
+  const rawEventId = typeof params.eventId === "string" ? params.eventId : undefined;
+  const parsedEventId = rawEventId ? Number(rawEventId) : undefined;
+  const eventId = parsedEventId && Number.isInteger(parsedEventId) && parsedEventId > 0 ? parsedEventId : undefined;
 
   const policy = await db.orm.public.Policy.where({ companyId: user.companyId }).first();
   const allowedCities = policy?.allowedCities ?? [];
@@ -39,7 +43,7 @@ export default async function VenuesPage({
 
       <VenueFilters allowedCities={allowedCities} />
 
-      <VenuesList venues={venues} hasActiveFilters={hasActiveFilters} />
+      <VenuesList venues={venues} hasActiveFilters={hasActiveFilters} eventId={eventId} />
     </div>
   );
 }

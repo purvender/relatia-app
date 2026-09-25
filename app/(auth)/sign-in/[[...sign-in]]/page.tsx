@@ -9,9 +9,5 @@ export default async function SignInPage() {
     redirect("/dashboard");
   }
 
-  return (
-    <div className="flex flex-1 items-center justify-center py-8">
-      <SignIn fallbackRedirectUrl="/dashboard" />
-    </div>
-  );
+  return <SignIn fallbackRedirectUrl="/dashboard" />;
 }

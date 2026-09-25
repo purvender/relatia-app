@@ -3,10 +3,13 @@ import { EventStatusBadge } from "@/components/events/event-status-badge";
 import { ApprovalStatusBadge } from "@/components/approvals/approval-status-badge";
 import { ApprovalActionButtons } from "@/components/approvals/approval-action-buttons";
 import { EventVenueDiscoveryCard } from "@/components/events/event-venue-discovery-card";
+import { EventBookingSummaryCard } from "@/components/events/event-booking-summary-card";
 import type { EventWithCreator } from "@/lib/events/get-event-by-id";
+import type { BookingSummary } from "@/lib/bookings/get-booking-by-event";
 
 type Props = {
   event: EventWithCreator;
+  booking?: BookingSummary | null;
   currentUserId?: number;
   currentUserRole?: string;
 };
@@ -29,6 +32,7 @@ function MetaRow({ label, value }: MetaRowProps) {
 
 export function EventDetailsCard({
   event,
+  booking,
   currentUserId,
   currentUserRole,
 }: Props) {
@@ -69,6 +73,9 @@ export function EventDetailsCard({
         </div>
       </div>
 
+      {/* Booking Summary Section if booking exists */}
+      {booking && <EventBookingSummaryCard booking={booking} />}
+
       {/* Details grid */}
       <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-2xs">
         <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-3">
@@ -107,8 +114,14 @@ export function EventDetailsCard({
         </dl>
       </div>
 
-      {/* Venue Discovery Entry Point */}
-      <EventVenueDiscoveryCard city={event.city} attendees={event.attendees} />
+      {/* Venue Discovery / Action Card */}
+      <EventVenueDiscoveryCard
+        eventId={event.id}
+        eventStatus={event.status}
+        city={event.city}
+        attendees={event.attendees}
+        booking={booking}
+      />
 
       {/* Approval Workflow section if approvals exist */}
       {event.approvals.length > 0 && (

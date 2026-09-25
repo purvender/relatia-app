@@ -5,9 +5,10 @@ import type { VenueItem } from "@/lib/venues/get-venues";
 type VenuesListProps = {
   venues: VenueItem[];
   hasActiveFilters?: boolean;
+  eventId?: number;
 };
 
-export function VenuesList({ venues, hasActiveFilters }: VenuesListProps) {
+export function VenuesList({ venues, hasActiveFilters, eventId }: VenuesListProps) {
   if (venues.length === 0) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-12 text-center shadow-2xs">
@@ -40,7 +41,7 @@ export function VenuesList({ venues, hasActiveFilters }: VenuesListProps) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {venues.map((venue) => (
-          <VenueCard key={venue.id} venue={venue} />
+          <VenueCard key={venue.id} venue={venue} eventId={eventId} />
         ))}
       </div>
     </div>

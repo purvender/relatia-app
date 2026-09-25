@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireAppUser } from "@/lib/auth";
 import { getEventById } from "@/lib/events/get-event-by-id";
+import { getBookingByEvent } from "@/lib/bookings/get-booking-by-event";
 import { EventDetailsCard } from "@/components/events/event-details-card";
 import { EventSubmitButton } from "@/components/events/event-submit-button";
 
@@ -27,6 +28,9 @@ export default async function EventDetailPage({
   if (!event) {
     notFound();
   }
+
+  // Fetch optional booking if venue has been selected for this event
+  const booking = await getBookingByEvent(eventId, user.companyId);
 
   return (
     <div className="space-y-6">
@@ -62,6 +66,7 @@ export default async function EventDetailPage({
       {/* Main detail card */}
       <EventDetailsCard
         event={event}
+        booking={booking}
         currentUserId={user.id}
         currentUserRole={user.role}
       />

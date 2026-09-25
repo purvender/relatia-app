@@ -4,6 +4,7 @@ import type { VenueItem } from "@/lib/venues/get-venues";
 
 type VenueCardProps = {
   venue: VenueItem;
+  eventId?: number;
 };
 
 function getPriceBandBadgeConfig(priceBand: string) {
@@ -19,12 +20,13 @@ function getPriceBandBadgeConfig(priceBand: string) {
   }
 }
 
-export function VenueCard({ venue }: VenueCardProps) {
+export function VenueCard({ venue, eventId }: VenueCardProps) {
   const priceBandStyle = getPriceBandBadgeConfig(venue.priceBand);
+  const detailUrl = eventId ? `/venues/${venue.id}?eventId=${eventId}` : `/venues/${venue.id}`;
 
   return (
     <Link
-      href={`/venues/${venue.id}`}
+      href={detailUrl}
       className="group flex flex-col justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-2xs transition-all hover:border-slate-300 hover:shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
     >
       <div className="space-y-3">

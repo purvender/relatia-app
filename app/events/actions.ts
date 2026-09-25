@@ -92,7 +92,7 @@ export async function createEventAction(formData: FormData) {
     throw new Error("Per-person budget exceeds company policy.");
   }
 
-  const event = await db.orm.public.Event.create({
+  await db.orm.public.Event.create({
     companyId: user.companyId,
     createdById: user.id,
     title,

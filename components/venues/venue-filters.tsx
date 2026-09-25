@@ -39,7 +39,12 @@ export function VenueFilters({ allowedCities }: VenueFiltersProps) {
   };
 
   const clearFilters = () => {
-    router.push(pathname);
+    const eventId = searchParams.get("eventId");
+    if (eventId) {
+      router.push(`${pathname}?eventId=${eventId}`);
+    } else {
+      router.push(pathname);
+    }
   };
 
   const hasActiveFilters = Boolean(currentCity || currentPriceBand || currentMinCapacity);

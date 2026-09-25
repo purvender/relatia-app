@@ -1,4 +1,4 @@
-import { MapPin, Users, Utensils, Star, Tag, Building2, ShieldCheck } from "lucide-react";
+import { MapPin, Star, Tag, ShieldCheck } from "lucide-react";
 import type { VenueItem } from "@/lib/venues/get-venues";
 
 type VenueDetailsCardProps = {

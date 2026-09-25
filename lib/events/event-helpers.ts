@@ -44,6 +44,11 @@ export function getEventStatusBadgeConfig(status: string): StatusBadgeConfig {
         label: "Approved",
         className: "bg-emerald-50 text-emerald-700 border-emerald-200",
       };
+    case "VENUE_SELECTED":
+      return {
+        label: "Venue Selected",
+        className: "bg-teal-50 text-teal-700 border-teal-200",
+      };
     case "REJECTED":
       return {
         label: "Rejected",

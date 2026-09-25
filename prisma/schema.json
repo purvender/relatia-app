@@ -74,6 +74,10 @@
                 "value": "APPROVED"
               },
               {
+                "name": "VENUE_SELECTED",
+                "value": "VENUE_SELECTED"
+              },
+              {
                 "name": "REJECTED",
                 "value": "REJECTED"
               },
@@ -1448,8 +1452,8 @@
             "event": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED')",
-                  "name": "event_status_check_3bca4d65",
+                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'VENUE_SELECTED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED')",
+                  "name": "event_status_check_59f4e26b",
                   "prefix": "event_status_check"
                 }
               ],
@@ -1969,6 +1973,7 @@
                 "DRAFT",
                 "REQUESTED",
                 "APPROVED",
+                "VENUE_SELECTED",
                 "REJECTED",
                 "BOOKED",
                 "COMPLETED",
@@ -1999,7 +2004,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "f3c89d651871e03f1e55de294d51716a1d020b12bb10d232a84063374ac128db"
+    "storageHash": "e631114033910891e449f2bb033bdde2c659fb4fac022701949e6c0c79de6dd1"
   },
   "capabilities": {
     "postgres": {
