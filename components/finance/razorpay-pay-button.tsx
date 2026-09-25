@@ -47,18 +47,40 @@ export function RazorpayPayButton({
     setIsPending(true);
 
     try {
-      // 1. Ensure Razorpay Checkout SDK is loaded
+      // 1. Call server action to create Razorpay Order securely
+      const order = await createPaymentOrderAction(eventId);
+
+      // 2. Detect if placeholder keys are being used in development mode
+      const isPlaceholder =
+        !order.keyId ||
+        order.keyId.includes("placeholder") ||
+        order.orderId.startsWith("order_dev_");
+
+      if (isPlaceholder) {
+        // Dev Mode Simulation: verify payment directly without sending bogus keys to api.razorpay.com
+        await new Promise((res) => setTimeout(res, 600));
+
+        const result = await verifyPaymentAction({
+          eventId,
+          razorpayOrderId: order.orderId,
+          razorpayPaymentId: `pay_dev_${Date.now()}`,
+          razorpaySignature: "mock_signature_dev",
+        });
+
+        if (result.success) {
+          setPaymentCompleted(true);
+        }
+        return;
+      }
+
+      // 3. Live/Test Mode with real Razorpay Keys: load Razorpay Checkout SDK
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         throw new Error(
-          "Failed to load Razorpay Checkout SDK. Please check your internet connection.",
+          "Failed to load Razorpay Checkout SDK. Please check your network connection.",
         );
       }
 
-      // 2. Call server action to create Razorpay Order securely
-      const order = await createPaymentOrderAction(eventId);
-
-      // 3. Open Razorpay Checkout Modal
       const options = {
         key: order.keyId,
         amount: order.amount,
@@ -76,7 +98,6 @@ export function RazorpayPayButton({
           razorpay_signature: string;
         }) {
           try {
-            // 4. Verify payment signature on server
             const result = await verifyPaymentAction({
               eventId,
               razorpayOrderId: response.razorpay_order_id,
@@ -111,9 +132,10 @@ export function RazorpayPayButton({
 
       razorpayInstance.open();
     } catch (err: unknown) {
-      setIsPending(false);
       const msg = err instanceof Error ? err.message : String(err);
       setErrorMessage(msg);
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -175,7 +197,7 @@ export function RazorpayPayButton({
         {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            <span>Opening Razorpay Checkout...</span>
+            <span>Processing Payment...</span>
           </>
         ) : (
           <>
