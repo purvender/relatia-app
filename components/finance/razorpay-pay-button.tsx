@@ -50,14 +50,14 @@ export function RazorpayPayButton({
       // 1. Call server action to create Razorpay Order securely
       const order = await createPaymentOrderAction(eventId);
 
-      // 2. Detect if placeholder keys are being used in development mode
+      // 2. Check if placeholder keys are active (unconfigured .env)
       const isPlaceholder =
         !order.keyId ||
         order.keyId.includes("placeholder") ||
         order.orderId.startsWith("order_dev_");
 
       if (isPlaceholder) {
-        // Dev Mode Simulation: verify payment directly without sending bogus keys to api.razorpay.com
+        // Dev Mode Simulation for unconfigured environments
         await new Promise((res) => setTimeout(res, 600));
 
         const result = await verifyPaymentAction({
@@ -73,7 +73,7 @@ export function RazorpayPayButton({
         return;
       }
 
-      // 3. Live/Test Mode with real Razorpay Keys: load Razorpay Checkout SDK
+      // 3. Real Razorpay Test/Live Keys Configured: Load Razorpay Checkout JS SDK
       const scriptLoaded = await loadRazorpayScript();
       if (!scriptLoaded) {
         throw new Error(

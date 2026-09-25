@@ -55,8 +55,8 @@ function extractErrorMessage(err: unknown): string {
  *     Client amount inputs are NEVER accepted or trusted.
  *   - Re-entrancy / Retry safety: reuse active razorpayOrderId if present, or create a
  *     new order if needed.
- *   - Dev mode fallback: if Razorpay API keys are placeholders or authentication fails
- *     during local development, falls back to generating a development mock order ID.
+ *   - Live / Dev mode switching: when real Razorpay keys (rzp_test_...) are supplied in .env,
+ *     creates real Razorpay API orders. If placeholder keys are present, generates mock order.
  */
 export async function createPaymentOrder(
   input: CreatePaymentOrderInput,
@@ -125,9 +125,12 @@ export async function createPaymentOrder(
   // 9. Reuse or Create Razorpay Order
   let razorpayOrderId = booking.razorpayOrderId;
 
-  if (!razorpayOrderId) {
+  // If no order ID exists, OR if stored order is an old dev mock order while real keys are configured:
+  const isMockOrder = razorpayOrderId?.startsWith("order_dev_") ?? false;
+  const needsNewOrder = !razorpayOrderId || (isMockOrder && !isPlaceholderKey());
+
+  if (needsNewOrder) {
     if (isPlaceholderKey()) {
-      // Dev mode fallback for testing without live API keys
       razorpayOrderId = `order_dev_${Date.now()}_${booking.id}`;
     } else {
       try {
@@ -146,12 +149,7 @@ export async function createPaymentOrder(
         razorpayOrderId = order.id;
       } catch (err: unknown) {
         const detail = extractErrorMessage(err);
-        // Fallback to dev mock order if authentication fails on invalid test keys
-        if (detail.includes("Authentication failed") || detail.includes("BAD_REQUEST_ERROR")) {
-          razorpayOrderId = `order_dev_${Date.now()}_${booking.id}`;
-        } else {
-          throw new Error(`Razorpay Order Creation Failed: ${detail}`);
-        }
+        throw new Error(`Razorpay Order Creation Failed: ${detail}`);
       }
     }
 
@@ -166,7 +164,7 @@ export async function createPaymentOrder(
 
   return {
     keyId,
-    orderId: razorpayOrderId,
+    orderId: razorpayOrderId!,
     amount: amountPaise,
     currency: "INR",
     companyName,
