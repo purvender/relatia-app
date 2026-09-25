@@ -6,6 +6,7 @@ import { getEventById } from "@/lib/events/get-event-by-id";
 import { getBookingByEvent } from "@/lib/bookings/get-booking-by-event";
 import { EventDetailsCard } from "@/components/events/event-details-card";
 import { EventSubmitButton } from "@/components/events/event-submit-button";
+import { RequestBookingButton } from "@/components/events/request-booking-button";
 
 export default async function EventDetailPage({
   params,
@@ -62,6 +63,13 @@ export default async function EventDetailPage({
           <EventSubmitButton eventId={event.id} />
         )}
       </div>
+
+      {/* Booking request CTA — shown when venue selected and user can act */}
+      {event.status === "VENUE_SELECTED" &&
+        booking &&
+        (user.role === "REQUESTER" || user.role === "ADMIN") && (
+          <RequestBookingButton eventId={event.id} />
+        )}
 
       {/* Main detail card */}
       <EventDetailsCard

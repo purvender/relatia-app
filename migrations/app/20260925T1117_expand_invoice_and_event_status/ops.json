@@ -1,0 +1,1070 @@
+[
+  {
+    "id": "dropCheckConstraint.event.event_status_check_59f4e26b",
+    "label": "Drop check constraint \"event_status_check_59f4e26b\" on \"event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_status_check_59f4e26b",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_status_check_59f4e26b\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_59f4e26b",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"event_status_check_59f4e26b\"",
+        "sql": "ALTER TABLE \"public\".\"event\" DROP CONSTRAINT \"event_status_check_59f4e26b\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_status_check_59f4e26b\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_59f4e26b",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropColumn.invoice.gstin",
+    "label": "Drop column \"gstin\" from \"invoice\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "gstin",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"gstin\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "gstin"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"gstin\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" DROP COLUMN \"gstin\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"gstin\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "gstin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.cgstAmount",
+    "label": "Add column \"cgstAmount\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "cgstAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"cgstAmount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "cgstAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"cgstAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"cgstAmount\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"cgstAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "cgstAmount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.igstAmount",
+    "label": "Add column \"igstAmount\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "igstAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"igstAmount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "igstAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"igstAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"igstAmount\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"igstAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "igstAmount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.issuedAt",
+    "label": "Add column \"issuedAt\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "issuedAt",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"issuedAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "issuedAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"issuedAt\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"issuedAt\" timestamptz DEFAULT (now()) NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"issuedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "issuedAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.sgstAmount",
+    "label": "Add column \"sgstAmount\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "sgstAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"sgstAmount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "sgstAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"sgstAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"sgstAmount\" int4 DEFAULT 0 NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"sgstAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "sgstAmount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.status",
+    "label": "Add column \"status\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "status"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"status\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"status\" text DEFAULT 'ISSUED' NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "status"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.baseAmount",
+    "label": "Add column \"baseAmount\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "baseAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"baseAmount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "baseAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"baseAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"baseAmount\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"baseAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "baseAmount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-invoice-baseAmount",
+    "label": "Data transform: backfill-invoice-baseAmount",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-invoice-baseAmount has work to do",
+        "sql": "SELECT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"baseAmount\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-invoice-baseAmount",
+        "sql": "UPDATE \"public\".\"invoice\" SET \"baseAmount\" = $1 WHERE \"baseAmount\" IS NULL",
+        "params": [
+          0
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-invoice-baseAmount resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"baseAmount\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.invoice.baseAmount",
+    "label": "Set NOT NULL on \"invoice\".\"baseAmount\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "baseAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"baseAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "baseAmount"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"baseAmount\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"invoice\" WHERE \"baseAmount\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"baseAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"baseAmount\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"baseAmount\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "baseAmount",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.invoiceNumber",
+    "label": "Add column \"invoiceNumber\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "invoiceNumber",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"invoiceNumber\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "invoiceNumber"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"invoiceNumber\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"invoiceNumber\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"invoiceNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "invoiceNumber"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-invoice-invoiceNumber",
+    "label": "Data transform: backfill-invoice-invoiceNumber",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-invoice-invoiceNumber has work to do",
+        "sql": "SELECT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"invoiceNumber\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-invoice-invoiceNumber",
+        "sql": "UPDATE \"public\".\"invoice\" SET \"invoiceNumber\" = $1 WHERE \"invoiceNumber\" IS NULL",
+        "params": [
+          "INV-LEGACY"
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-invoice-invoiceNumber resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"invoiceNumber\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.invoice.invoiceNumber",
+    "label": "Set NOT NULL on \"invoice\".\"invoiceNumber\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "invoiceNumber",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"invoiceNumber\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "invoiceNumber"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"invoiceNumber\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"invoice\" WHERE \"invoiceNumber\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"invoiceNumber\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"invoiceNumber\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"invoiceNumber\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "invoiceNumber",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.recipientGstin",
+    "label": "Add column \"recipientGstin\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "recipientGstin",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"recipientGstin\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "recipientGstin"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"recipientGstin\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"recipientGstin\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"recipientGstin\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "recipientGstin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-invoice-recipientGstin",
+    "label": "Data transform: backfill-invoice-recipientGstin",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-invoice-recipientGstin has work to do",
+        "sql": "SELECT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"recipientGstin\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-invoice-recipientGstin",
+        "sql": "UPDATE \"public\".\"invoice\" SET \"recipientGstin\" = $1 WHERE \"recipientGstin\" IS NULL",
+        "params": [
+          ""
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-invoice-recipientGstin resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"recipientGstin\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.invoice.recipientGstin",
+    "label": "Set NOT NULL on \"invoice\".\"recipientGstin\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "recipientGstin",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"recipientGstin\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "recipientGstin"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"recipientGstin\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"invoice\" WHERE \"recipientGstin\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"recipientGstin\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"recipientGstin\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"recipientGstin\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "recipientGstin",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.supplierGstin",
+    "label": "Add column \"supplierGstin\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "supplierGstin",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"supplierGstin\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "supplierGstin"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"supplierGstin\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"supplierGstin\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"supplierGstin\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "supplierGstin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-invoice-supplierGstin",
+    "label": "Data transform: backfill-invoice-supplierGstin",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-invoice-supplierGstin has work to do",
+        "sql": "SELECT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"supplierGstin\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-invoice-supplierGstin",
+        "sql": "UPDATE \"public\".\"invoice\" SET \"supplierGstin\" = $1 WHERE \"supplierGstin\" IS NULL",
+        "params": [
+          ""
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-invoice-supplierGstin resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"supplierGstin\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.invoice.supplierGstin",
+    "label": "Set NOT NULL on \"invoice\".\"supplierGstin\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "supplierGstin",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"supplierGstin\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "supplierGstin"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"supplierGstin\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"invoice\" WHERE \"supplierGstin\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"supplierGstin\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"supplierGstin\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"supplierGstin\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "supplierGstin",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.invoice.totalAmount",
+    "label": "Add column \"totalAmount\" to \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "totalAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"totalAmount\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "totalAmount"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"totalAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD COLUMN \"totalAmount\" int4"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"totalAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "totalAmount"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-invoice-totalAmount",
+    "label": "Data transform: backfill-invoice-totalAmount",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check backfill-invoice-totalAmount has work to do",
+        "sql": "SELECT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"totalAmount\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Run backfill-invoice-totalAmount",
+        "sql": "UPDATE \"public\".\"invoice\" SET \"totalAmount\" = $1 WHERE \"totalAmount\" IS NULL",
+        "params": [
+          0
+        ]
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify backfill-invoice-totalAmount resolved all violations",
+        "sql": "SELECT NOT EXISTS (SELECT \"id\" AS \"id\" FROM \"public\".\"invoice\" WHERE \"totalAmount\" IS NULL LIMIT 1) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.invoice.totalAmount",
+    "label": "Set NOT NULL on \"invoice\".\"totalAmount\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "totalAmount",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"totalAmount\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "totalAmount"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"totalAmount\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"invoice\" WHERE \"totalAmount\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"totalAmount\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"totalAmount\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"totalAmount\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "totalAmount",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.dropNotNull.invoice.pdfUrl",
+    "label": "Drop NOT NULL on \"invoice\".\"pdfUrl\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "pdfUrl",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"pdfUrl\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "pdfUrl"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop NOT NULL on \"pdfUrl\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ALTER COLUMN \"pdfUrl\" DROP NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"pdfUrl\" is nullable",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "invoice",
+          "pdfUrl",
+          "YES"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.event.event_status_check_23fde911",
+    "label": "Add check constraint \"event_status_check_23fde911\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_status_check_23fde911",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_status_check_23fde911\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_23fde911",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"event_status_check_23fde911\"",
+        "sql": "ALTER TABLE \"public\".\"event\" ADD CONSTRAINT \"event_status_check_23fde911\" CHECK (\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'VENUE_SELECTED', 'BOOKING_REQUESTED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_status_check_23fde911\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_status_check_23fde911",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.invoice.invoice_status_check_41b49830",
+    "label": "Add check constraint \"invoice_status_check_41b49830\" on \"invoice\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "invoice_status_check_41b49830",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"invoice_status_check_41b49830\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invoice_status_check_41b49830",
+          "public",
+          "\"public\".\"invoice\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"invoice_status_check_41b49830\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD CONSTRAINT \"invoice_status_check_41b49830\" CHECK (\"status\" IN ('ISSUED', 'PAID', 'CANCELLED'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"invoice_status_check_41b49830\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invoice_status_check_41b49830",
+          "public",
+          "\"public\".\"invoice\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.invoice.invoice_invoiceNumber_key",
+    "label": "Add unique constraint on \"invoice\" (invoiceNumber)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "invoice_invoiceNumber_key",
+        "table": "invoice"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"invoice_invoiceNumber_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invoice_invoiceNumber_key",
+          "public",
+          "\"public\".\"invoice\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"invoice_invoiceNumber_key\"",
+        "sql": "ALTER TABLE \"public\".\"invoice\" ADD CONSTRAINT \"invoice_invoiceNumber_key\" UNIQUE (\"invoiceNumber\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"invoice_invoiceNumber_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "invoice_invoiceNumber_key",
+          "public",
+          "\"public\".\"invoice\""
+        ]
+      }
+    ]
+  }
+]

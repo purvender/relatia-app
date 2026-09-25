@@ -78,6 +78,10 @@
                 "value": "VENUE_SELECTED"
               },
               {
+                "name": "BOOKING_REQUESTED",
+                "value": "BOOKING_REQUESTED"
+              },
+              {
                 "name": "REJECTED",
                 "value": "REJECTED"
               },
@@ -88,6 +92,23 @@
               {
                 "name": "COMPLETED",
                 "value": "COMPLETED"
+              },
+              {
+                "name": "CANCELLED",
+                "value": "CANCELLED"
+              }
+            ]
+          },
+          "InvoiceStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ISSUED",
+                "value": "ISSUED"
+              },
+              {
+                "name": "PAID",
+                "value": "PAID"
               },
               {
                 "name": "CANCELLED",
@@ -710,6 +731,13 @@
           },
           "Invoice": {
             "fields": {
+              "baseAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "bookingId": {
                 "nullable": false,
                 "type": {
@@ -717,10 +745,10 @@
                   "kind": "scalar"
                 }
               },
-              "gstin": {
+              "cgstAmount": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -731,10 +759,72 @@
                   "kind": "scalar"
                 }
               },
-              "pdfUrl": {
+              "igstAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "invoiceNumber": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "issuedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "pdfUrl": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "recipientGstin": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "sgstAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "InvoiceStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "supplierGstin": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "totalAmount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               }
@@ -759,17 +849,44 @@
             },
             "storage": {
               "fields": {
+                "baseAmount": {
+                  "column": "baseAmount"
+                },
                 "bookingId": {
                   "column": "bookingId"
                 },
-                "gstin": {
-                  "column": "gstin"
+                "cgstAmount": {
+                  "column": "cgstAmount"
                 },
                 "id": {
                   "column": "id"
                 },
+                "igstAmount": {
+                  "column": "igstAmount"
+                },
+                "invoiceNumber": {
+                  "column": "invoiceNumber"
+                },
+                "issuedAt": {
+                  "column": "issuedAt"
+                },
                 "pdfUrl": {
                   "column": "pdfUrl"
+                },
+                "recipientGstin": {
+                  "column": "recipientGstin"
+                },
+                "sgstAmount": {
+                  "column": "sgstAmount"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "supplierGstin": {
+                  "column": "supplierGstin"
+                },
+                "totalAmount": {
+                  "column": "totalAmount"
                 }
               },
               "namespaceId": "public",
@@ -1452,8 +1569,8 @@
             "event": {
               "checks": [
                 {
-                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'VENUE_SELECTED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED')",
-                  "name": "event_status_check_59f4e26b",
+                  "expression": "\"status\" IN ('DRAFT', 'REQUESTED', 'APPROVED', 'VENUE_SELECTED', 'BOOKING_REQUESTED', 'REJECTED', 'BOOKED', 'COMPLETED', 'CANCELLED')",
+                  "name": "event_status_check_23fde911",
                   "prefix": "event_status_check"
                 }
               ],
@@ -1606,15 +1723,31 @@
               "uniques": []
             },
             "invoice": {
+              "checks": [
+                {
+                  "expression": "\"status\" IN ('ISSUED', 'PAID', 'CANCELLED')",
+                  "name": "invoice_status_check_41b49830",
+                  "prefix": "invoice_status_check"
+                }
+              ],
               "columns": {
+                "baseAmount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": false
+                },
                 "bookingId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "gstin": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
+                "cgstAmount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
                   "nullable": false
                 },
                 "id": {
@@ -1626,9 +1759,71 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "igstAmount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "invoiceNumber": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "issuedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
                 "pdfUrl": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
+                  "nullable": true
+                },
+                "recipientGstin": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "sgstAmount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "status": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "ISSUED"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "InvoiceStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "supplierGstin": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "totalAmount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
                   "nullable": false
                 }
               },
@@ -1657,6 +1852,11 @@
                 ]
               },
               "uniques": [
+                {
+                  "columns": [
+                    "invoiceNumber"
+                  ]
+                },
                 {
                   "columns": [
                     "bookingId"
@@ -1974,9 +2174,18 @@
                 "REQUESTED",
                 "APPROVED",
                 "VENUE_SELECTED",
+                "BOOKING_REQUESTED",
                 "REJECTED",
                 "BOOKED",
                 "COMPLETED",
+                "CANCELLED"
+              ]
+            },
+            "InvoiceStatus": {
+              "kind": "valueSet",
+              "values": [
+                "ISSUED",
+                "PAID",
                 "CANCELLED"
               ]
             },
@@ -2004,7 +2213,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "e631114033910891e449f2bb033bdde2c659fb4fac022701949e6c0c79de6dd1"
+    "storageHash": "777475dbf011c7de0d7073a72aebbf85e8f9078ed49f28cc828ddbcf279cb728"
   },
   "capabilities": {
     "postgres": {

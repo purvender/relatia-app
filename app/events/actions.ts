@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { requireAppUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 import { submitEventForApproval } from "@/lib/events/submit-event-for-approval";
+import { requestBooking } from "@/lib/bookings/request-booking";
 
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -114,4 +115,34 @@ export async function submitEventForApprovalAction(eventId: number) {
     throw new Error("Invalid event ID.");
   }
   return await submitEventForApproval(eventId);
+}
+
+/**
+ * Server action: Requests booking confirmation for a VENUE_SELECTED event.
+ *
+ * Transitions event status VENUE_SELECTED → BOOKING_REQUESTED and
+ * creates the GST invoice atomically. After this action, the event enters
+ * the Finance/Admin queue for invoice review and final booking confirmation.
+ *
+ * Permission: REQUESTER or ADMIN only.
+ * Does NOT mark BOOKED. Does NOT mark paymentStatus as PAID.
+ * Does NOT call Razorpay.
+ */
+export async function requestBookingAction(eventId: number) {
+  if (!Number.isInteger(eventId) || eventId <= 0) {
+    throw new Error("Invalid event ID.");
+  }
+
+  const user = await requireAppUser();
+
+  await requestBooking({
+    eventId,
+    user: {
+      id: user.id,
+      companyId: user.companyId,
+      role: user.role,
+    },
+  });
+
+  redirect(`/events/${eventId}`);
 }

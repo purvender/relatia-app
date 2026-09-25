@@ -12,6 +12,7 @@ enum EventStatus {
   REQUESTED
   APPROVED
   VENUE_SELECTED
+  BOOKING_REQUESTED
   REJECTED
   BOOKED
   COMPLETED
@@ -146,10 +147,30 @@ model Booking {
   invoice         Invoice?
 }
 
+enum InvoiceStatus {
+  ISSUED
+  PAID
+  CANCELLED
+}
+
 model Invoice {
-  id        Int     @id @default(autoincrement())
-  bookingId Int     @unique
-  booking   Booking @relation(fields: [bookingId], references: [id])
-  pdfUrl    String
-  gstin     String
+  id             Int           @id @default(autoincrement())
+  invoiceNumber  String        @unique
+
+  bookingId      Int           @unique
+  booking        Booking       @relation(fields: [bookingId], references: [id])
+
+  // Store all monetary values in paise.
+  baseAmount     Int
+  cgstAmount     Int           @default(0)
+  sgstAmount     Int           @default(0)
+  igstAmount     Int           @default(0)
+  totalAmount    Int
+
+  supplierGstin  String
+  recipientGstin String
+
+  status         InvoiceStatus @default(ISSUED)
+  pdfUrl         String?
+  issuedAt       TimestamptzString @default(now())
 }
