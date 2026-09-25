@@ -1,0 +1,78 @@
+/* ================================================================
+   Relatia Marketing — Design Tokens & Custom Styles
+   ================================================================ */
+
+:root {
+  --m-bg: #FDFCFA;
+  --m-bg-alt: #F5F2EC;
+  --m-bg-dark: #1A1714;
+  --m-bg-dark-alt: #252118;
+  --m-text: #1A1714;
+  --m-text-secondary: #7A756D;
+  --m-text-muted: #A9A49C;
+  --m-text-on-dark: #F5F2EC;
+  --m-accent: #C17F3E;
+  --m-accent-hover: #A86A2B;
+  --m-accent-light: #F5E6D3;
+  --m-border: #E8E3DA;
+  --m-border-light: #F0ECE4;
+}
+
+/* Smooth scroll for marketing pages */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+.marketing-root ::selection {
+  background-color: #C17F3E33;
+  color: #1A1714;
+}
+
+/* Premium marquee animation for trust logos */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 40s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+/* Gradient shimmer for CTA emphasis */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.cta-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Subtle floating animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .cta-shimmer,
+  .float-slow {
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
