@@ -297,6 +297,13 @@
                   "kind": "scalar"
                 }
               },
+              "paidAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
               "paymentStatus": {
                 "nullable": false,
                 "type": {
@@ -311,6 +318,20 @@
                 }
               },
               "razorpayOrderId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "razorpayPaymentId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "razorpaySignature": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -399,11 +420,20 @@
                 "id": {
                   "column": "id"
                 },
+                "paidAt": {
+                  "column": "paidAt"
+                },
                 "paymentStatus": {
                   "column": "paymentStatus"
                 },
                 "razorpayOrderId": {
                   "column": "razorpayOrderId"
+                },
+                "razorpayPaymentId": {
+                  "column": "razorpayPaymentId"
+                },
+                "razorpaySignature": {
+                  "column": "razorpaySignature"
                 },
                 "taxAmount": {
                   "column": "taxAmount"
@@ -1436,6 +1466,11 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
+                "paidAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
                 "paymentStatus": {
                   "codecId": "pg/text@1",
                   "default": {
@@ -1452,6 +1487,16 @@
                   }
                 },
                 "razorpayOrderId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "razorpayPaymentId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "razorpaySignature": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -1525,6 +1570,11 @@
                 {
                   "columns": [
                     "razorpayOrderId"
+                  ]
+                },
+                {
+                  "columns": [
+                    "razorpayPaymentId"
                   ]
                 }
               ]
@@ -2213,7 +2263,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "777475dbf011c7de0d7073a72aebbf85e8f9078ed49f28cc828ddbcf279cb728"
+    "storageHash": "5e7a6fd6d87626c52b26186c7ca58d42931908a8fb0d59996606345cc0849b3b"
   },
   "capabilities": {
     "postgres": {

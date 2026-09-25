@@ -140,9 +140,12 @@ model Booking {
   taxAmount       Int
   currency        String        @default("INR")
 
-  paymentStatus   PaymentStatus @default(PENDING)
-  razorpayOrderId String?       @unique
-  createdAt       TimestamptzString @default(now())
+  paymentStatus     PaymentStatus @default(PENDING)
+  razorpayOrderId   String?       @unique
+  razorpayPaymentId String?       @unique
+  razorpaySignature String?
+  paidAt            TimestamptzString?
+  createdAt         TimestamptzString @default(now())
 
   invoice         Invoice?
 }

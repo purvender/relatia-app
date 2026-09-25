@@ -1,0 +1,170 @@
+[
+  {
+    "id": "column.public.booking.paidAt",
+    "label": "Add column \"paidAt\" to \"booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "paidAt",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"paidAt\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "paidAt"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"paidAt\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" ADD COLUMN \"paidAt\" timestamptz"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"paidAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "paidAt"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.booking.razorpayPaymentId",
+    "label": "Add column \"razorpayPaymentId\" to \"booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "razorpayPaymentId",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"razorpayPaymentId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "razorpayPaymentId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"razorpayPaymentId\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" ADD COLUMN \"razorpayPaymentId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"razorpayPaymentId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "razorpayPaymentId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.booking.razorpaySignature",
+    "label": "Add column \"razorpaySignature\" to \"booking\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "razorpaySignature",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"razorpaySignature\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "razorpaySignature"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"razorpaySignature\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" ADD COLUMN \"razorpaySignature\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"razorpaySignature\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "booking",
+          "razorpaySignature"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.booking.booking_razorpayPaymentId_key",
+    "label": "Add unique constraint on \"booking\" (razorpayPaymentId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "booking_razorpayPaymentId_key",
+        "table": "booking"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"booking_razorpayPaymentId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_razorpayPaymentId_key",
+          "public",
+          "\"public\".\"booking\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"booking_razorpayPaymentId_key\"",
+        "sql": "ALTER TABLE \"public\".\"booking\" ADD CONSTRAINT \"booking_razorpayPaymentId_key\" UNIQUE (\"razorpayPaymentId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"booking_razorpayPaymentId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "booking_razorpayPaymentId_key",
+          "public",
+          "\"public\".\"booking\""
+        ]
+      }
+    ]
+  }
+]
