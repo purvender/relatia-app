@@ -1,0 +1,83 @@
+[
+  {
+    "id": "table.webhookEventLog",
+    "label": "Create table \"webhookEventLog\"",
+    "summary": "Creates table \"webhookEventLog\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "webhookEventLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"webhookEventLog\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"webhookEventLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"webhookEventLog\"",
+        "sql": "CREATE TABLE \"public\".\"webhookEventLog\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"eventId\" text NOT NULL,\n  \"eventType\" text NOT NULL,\n  \"id\" SERIAL NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"webhookEventLog\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"webhookEventLog\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.webhookEventLog.webhookEventLog_eventId_key",
+    "label": "Add unique constraint on \"webhookEventLog\" (eventId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "webhookEventLog_eventId_key",
+        "table": "webhookEventLog"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"webhookEventLog_eventId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "webhookEventLog_eventId_key",
+          "public",
+          "\"public\".\"webhookEventLog\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"webhookEventLog_eventId_key\"",
+        "sql": "ALTER TABLE \"public\".\"webhookEventLog\" ADD CONSTRAINT \"webhookEventLog_eventId_key\" UNIQUE (\"eventId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"webhookEventLog_eventId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "webhookEventLog_eventId_key",
+          "public",
+          "\"public\".\"webhookEventLog\""
+        ]
+      }
+    ]
+  }
+]
