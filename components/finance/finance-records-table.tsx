@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { formatRupees, formatEventDateTime, getEventStatusBadgeConfig } from "@/lib/events/event-helpers";
 import type { FinanceRecord } from "@/lib/finance/get-finance-dashboard-data";
+import { RazorpayPayButton } from "@/components/finance/razorpay-pay-button";
 
 type FinanceRecordsTableProps = {
   records: FinanceRecord[];
@@ -341,7 +342,18 @@ export function FinanceRecordsTable({ records }: FinanceRecordsTableProps) {
                       </td>
 
                       {/* Row Actions */}
-                      <td className="px-4 py-3.5 text-right space-x-2">
+                      <td className="px-4 py-3.5 text-right flex items-center justify-end gap-2">
+                        {rec.eventStatus === "BOOKING_REQUESTED" &&
+                          rec.paymentStatus !== "PAID" &&
+                          rec.totalAmount != null && (
+                            <RazorpayPayButton
+                              eventId={rec.eventId}
+                              amountPaise={rec.totalAmount}
+                              invoiceNumber={rec.invoiceNumber ?? undefined}
+                              variant="compact"
+                            />
+                          )}
+
                         <Link
                           href={`/events/${rec.eventId}`}
                           className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition"

@@ -5,6 +5,7 @@ import { requireUserRole } from "@/lib/auth";
 import { getInvoiceById } from "@/lib/finance/get-invoice-by-id";
 import { InvoiceDetailCard } from "@/components/finance/invoice-detail-card";
 import { PrintInvoiceButton } from "@/components/finance/print-invoice-button";
+import { RazorpayPayButton } from "@/components/finance/razorpay-pay-button";
 
 export default async function InvoiceDetailPage({
   params,
@@ -54,7 +55,14 @@ export default async function InvoiceDetailPage({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {invoice.booking.paymentStatus !== "PAID" && (
+            <RazorpayPayButton
+              eventId={invoice.event.id}
+              amountPaise={invoice.totalAmount}
+              invoiceNumber={invoice.invoiceNumber}
+            />
+          )}
           <PrintInvoiceButton />
         </div>
       </div>

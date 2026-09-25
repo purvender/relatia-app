@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CreditCard } from "lucide-react";
 import { requireAppUser } from "@/lib/auth";
 import { getEventById } from "@/lib/events/get-event-by-id";
 import { getBookingByEvent } from "@/lib/bookings/get-booking-by-event";
 import { EventDetailsCard } from "@/components/events/event-details-card";
 import { EventSubmitButton } from "@/components/events/event-submit-button";
 import { RequestBookingButton } from "@/components/events/request-booking-button";
+import { RazorpayPayButton } from "@/components/finance/razorpay-pay-button";
 
 export default async function EventDetailPage({
   params,
@@ -69,6 +70,32 @@ export default async function EventDetailPage({
         booking &&
         (user.role === "REQUESTER" || user.role === "ADMIN") && (
           <RequestBookingButton eventId={event.id} />
+        )}
+
+      {/* Payment CTA — shown when booking requested, payment pending, and user is FINANCE or ADMIN */}
+      {event.status === "BOOKING_REQUESTED" &&
+        booking &&
+        booking.paymentStatus !== "PAID" &&
+        (user.role === "FINANCE" || user.role === "ADMIN") && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-purple-200 bg-purple-50/50 p-5 shadow-2xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4 text-purple-700 shrink-0" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-purple-800">
+                  Payment &amp; Final Confirmation Pending
+                </h3>
+              </div>
+              <p className="text-sm text-slate-600">
+                Complete online payment settlement via Razorpay to lock the venue and confirm this event.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <RazorpayPayButton
+                eventId={event.id}
+                amountPaise={booking.amount + booking.taxAmount}
+              />
+            </div>
+          </div>
         )}
 
       {/* Main detail card */}
