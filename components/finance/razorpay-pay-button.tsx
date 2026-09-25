@@ -15,13 +15,30 @@ type RazorpayPayButtonProps = {
   variant?: "primary" | "secondary" | "compact";
 };
 
+type RazorpayFailedResponse = {
+  error?: {
+    code?: string;
+    description?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+  };
+};
+
+type RazorpayInstance = {
+  open: () => void;
+  on: (event: string, handler: (response: RazorpayFailedResponse) => void) => void;
+};
+
+type RazorpayConstructor = new (options: Record<string, unknown>) => RazorpayInstance;
+
 /**
  * Helper to dynamically load the Razorpay Checkout JS SDK script.
  */
 function loadRazorpayScript(): Promise<boolean> {
   return new Promise((resolve) => {
     if (typeof window === "undefined") return resolve(false);
-    if ((window as any).Razorpay) return resolve(true);
+    if ((window as unknown as { Razorpay?: RazorpayConstructor }).Razorpay) return resolve(true);
 
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -122,8 +139,9 @@ export function RazorpayPayButton({
         },
       };
 
-      const razorpayInstance = new (window as any).Razorpay(options);
-      razorpayInstance.on("payment.failed", function (response: any) {
+      const RazorpayClass = (window as unknown as { Razorpay: RazorpayConstructor }).Razorpay;
+      const razorpayInstance = new RazorpayClass(options);
+      razorpayInstance.on("payment.failed", function (response: RazorpayFailedResponse) {
         setIsPending(false);
         const reason =
           response?.error?.description || "Payment was rejected or cancelled.";

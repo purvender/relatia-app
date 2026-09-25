@@ -46,7 +46,7 @@ export async function createCompanyAction(formData: FormData) {
 
   const slug = await uniqueCompanySlug(slugify(companyName));
 
-  const company = await db.transaction(async (tx) => {
+  await db.transaction(async (tx) => {
     const createdCompany = await tx.orm.public.Company.create({
       name: companyName,
       slug,

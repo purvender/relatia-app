@@ -1,4 +1,4 @@
-import { Building2, Calendar, MapPin, Users, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
+import { Calendar, MapPin, Users, CheckCircle2, Clock, ShieldCheck } from "lucide-react";
 import { formatRupees, formatEventDateTime } from "@/lib/events/event-helpers";
 import type { InvoiceDetail } from "@/lib/finance/get-invoice-by-id";
 

@@ -14,7 +14,7 @@ import {
   Building2,
   MapPin,
 } from "lucide-react";
-import { formatRupees, formatEventDateTime, getEventStatusBadgeConfig } from "@/lib/events/event-helpers";
+import { formatRupees, getEventStatusBadgeConfig } from "@/lib/events/event-helpers";
 import type { FinanceRecord } from "@/lib/finance/get-finance-dashboard-data";
 import { RazorpayPayButton } from "@/components/finance/razorpay-pay-button";
 
