@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { RelatiaLogo } from "./relatia-logo";
+import { AnnouncementBar } from "./hero-section";
 
 const links = [
   { href: "/", label: "Home" },
@@ -17,6 +18,7 @@ export function MarketingNav() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const isHome = pathname === "/";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -46,14 +48,16 @@ export function MarketingNav() {
   }
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-[var(--m-bg)]/95 backdrop-blur-xl border-b border-[var(--m-border)]"
-          : "bg-transparent"
-      }`}
-    >
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50">
+      {isHome && <AnnouncementBar />}
+      <div
+        className={`transition-all duration-500 ${
+          scrolled
+            ? "bg-[var(--m-bg)]/95 backdrop-blur-xl border-b border-[var(--m-border)] shadow-sm"
+            : "bg-[var(--m-bg)]/80 backdrop-blur-md lg:bg-transparent"
+        }`}
+      >
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
         {/* Logo */}
         <Link href="/" className="text-[var(--m-text)] hover:opacity-80 transition-opacity">
           <RelatiaLogo size="default" />
@@ -129,6 +133,7 @@ export function MarketingNav() {
           </div>
         </button>
       </nav>
+      </div>
 
       {/* Mobile menu overlay */}
       <AnimatePresence>

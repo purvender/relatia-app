@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { MarketingLayout } from "@/components/marketing/marketing-layout";
-import { AnnouncementBar, HeroSection } from "@/components/marketing/hero-section";
+import { HeroSection } from "@/components/marketing/hero-section";
 import {
   TrustSection,
   FinanceSection,
@@ -28,7 +28,6 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <MarketingLayout>
-      <AnnouncementBar />
       <HeroSection />
       <TrustSection />
       <WorkflowSection />

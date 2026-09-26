@@ -107,21 +107,31 @@ export function HeroSection() {
               </Link>
             </motion.div>
 
-            {/* Enterprise credibility indicator */}
+            {/* Social proof micro */}
             <motion.div
-              className="mt-12 flex flex-wrap items-center gap-3 pt-6 border-t border-[var(--m-border-light)]"
+              className="mt-12 flex items-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 1, delay: 0.6, ease }}
             >
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--m-border)] bg-white/80 px-3 py-1 shadow-sm">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                <span className="text-[11px] font-mono font-semibold text-[var(--m-text)] uppercase tracking-wider">
-                  Enterprise-Grade Governance
-                </span>
+              <div className="flex -space-x-2">
+                {[
+                  "bg-amber-600",
+                  "bg-emerald-600",
+                  "bg-blue-600",
+                  "bg-rose-600",
+                ].map((bg, i) => (
+                  <div
+                    key={i}
+                    className={`h-8 w-8 rounded-full ${bg} border-2 border-[var(--m-bg)] flex items-center justify-center text-[10px] font-bold text-white`}
+                  >
+                    {["TM", "IQ", "RK", "NS"][i]}
+                  </div>
+                ))}
               </div>
-              <p className="text-xs text-[var(--m-text-secondary)] font-light">
-                Tailored for BFSI, Global Tech GCCs, Management Consulting &amp; Private Equity
+              <p className="text-xs text-[var(--m-text-secondary)]">
+                <span className="font-semibold text-[var(--m-text)]">Trusted by finance teams</span>{" "}
+                at leading Indian enterprises
               </p>
             </motion.div>
           </div>

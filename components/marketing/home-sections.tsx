@@ -13,106 +13,45 @@ import {
 } from "./animations";
 
 /* ================================================================
-   Section 1 — Enterprise Verticals & Governance Standards
+   Section 1 — Trust Logos
    ================================================================ */
-const enterpriseSectors = [
-  {
-    num: "01",
-    title: "BFSI & Private Wealth",
-    subtitle: "Private wealth salons, investor dinners & board hospitality",
-    tag: "High Compliance",
-  },
-  {
-    num: "02",
-    title: "Technology & GCCs",
-    subtitle: "Leadership roundtables, executive offsites & team hosting",
-    tag: "Scale & Control",
-  },
-  {
-    num: "03",
-    title: "Consulting & Law",
-    subtitle: "Client entertainment, partner dining & confidential suites",
-    tag: "Discreet PDRs",
-  },
-  {
-    num: "04",
-    title: "Private Equity & VC",
-    subtitle: "Deal closing dinners, portfolio CEO mixers & founder summits",
-    tag: "Prestige Venues",
-  },
-  {
-    num: "05",
-    title: "Enterprise Sales",
-    subtitle: "CXO relationship dining, pipeline acceleration & quarterly QBRs",
-    tag: "ROI Visibility",
-  },
+const trustLogos = [
+  "Tata Group",
+  "Infosys",
+  "Reliance",
+  "Wipro",
+  "HCL Tech",
+  "Mahindra",
+  "Godrej",
+  "Aditya Birla",
 ];
 
 export function TrustSection() {
   return (
-    <section className="border-y border-[var(--m-border-light)] py-14 bg-[var(--m-bg-alt)]/50">
+    <section className="border-y border-[var(--m-border-light)] py-12 bg-[var(--m-bg)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeIn>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[var(--m-border)]">
-            <div>
-              <span className="text-[11px] font-mono font-semibold uppercase tracking-widest text-[var(--m-accent)]">
-                Enterprise Sector Alignment
-              </span>
-              <h3 className="mt-1 font-serif text-lg sm:text-xl font-bold text-[var(--m-text)]">
-                Engineered for high-governance relationship spend
-              </h3>
-            </div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--m-bg)] border border-[var(--m-border)] text-xs font-mono text-[var(--m-text-secondary)] shadow-sm">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span>Multi-Tenant Architecture</span>
-            </div>
-          </div>
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-[var(--m-text-muted)] mb-8">
+            Architected for the operational standards of leading Indian enterprises (Design Benchmark)
+          </p>
         </FadeIn>
-
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          {enterpriseSectors.map((sector) => (
-            <FadeInUp key={sector.num} delay={Number(sector.num) * 0.05}>
-              <div className="group h-full rounded-xl border border-[var(--m-border)] bg-[var(--m-bg)] p-5 hover:border-[var(--m-accent)]/50 transition-all shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between text-xs text-[var(--m-text-muted)]">
-                    <span className="font-mono font-semibold text-[var(--m-accent)]">{sector.num}</span>
-                    <span className="text-[10px] font-mono uppercase bg-[var(--m-bg-alt)] px-2 py-0.5 rounded text-[var(--m-text-secondary)]">
-                      {sector.tag}
-                    </span>
-                  </div>
-                  <h4 className="mt-3 text-sm font-bold text-[var(--m-text)] tracking-tight">
-                    {sector.title}
-                  </h4>
-                  <p className="mt-1.5 text-xs text-[var(--m-text-secondary)] leading-relaxed font-light">
-                    {sector.subtitle}
-                  </p>
-                </div>
+        <div className="relative overflow-hidden">
+          <div className="marquee-track flex items-center gap-16 whitespace-nowrap">
+            {[...trustLogos, ...trustLogos].map((name, i) => (
+              <div
+                key={`${name}-${i}`}
+                className="flex items-center justify-center px-4"
+              >
+                <span className="text-lg font-semibold tracking-tight text-[var(--m-text-muted)]/40 select-none">
+                  {name}
+                </span>
               </div>
-            </FadeInUp>
-          ))}
-        </div>
-
-        {/* Operational Guarantees Strip */}
-        <FadeIn delay={0.3}>
-          <div className="mt-8 pt-6 border-t border-[var(--m-border)]/70 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-            <div className="flex items-center gap-2 text-[var(--m-text)]">
-              <span className="text-emerald-600 font-bold">✓</span>
-              <span className="font-medium">100% B2B GST Invoicing</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--m-text)]">
-              <span className="text-emerald-600 font-bold">✓</span>
-              <span className="font-medium">Multi-Tier Approvals</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--m-text)]">
-              <span className="text-emerald-600 font-bold">✓</span>
-              <span className="font-medium">Per-Head Spend Limits</span>
-            </div>
-            <div className="flex items-center gap-2 text-[var(--m-text)]">
-              <span className="text-emerald-600 font-bold">✓</span>
-              <span className="font-medium">Immutable Audit Trail</span>
-            </div>
+            ))}
           </div>
-        </FadeIn>
+          {/* Fade edges */}
+          <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[var(--m-bg)] to-transparent pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[var(--m-bg)] to-transparent pointer-events-none" />
+        </div>
       </div>
     </section>
   );
