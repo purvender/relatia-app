@@ -112,4 +112,17 @@ npm run build
 
 ## 📁 Key Documentation References
 
+* **Enterprise Demo Narrative**: [`docs/demo-narrative.md`](file:///Users/purvenderhooda/Documents/hooda/relatia-app/docs/demo-narrative.md) — 5-act live customer demo script and FAQ response guide.
 * **Launch & Business Foundation**: [`docs/launch-and-business-foundation.md`](file:///Users/purvenderhooda/Documents/hooda/relatia-app/docs/launch-and-business-foundation.md) — Pitch decks, LinkedIn launch drafts, and category definition.
+* **MVP Implementation Status**: [`docs/relatia-mvp-status.md`](file:///Users/purvenderhooda/Documents/hooda/relatia-app/docs/relatia-mvp-status.md) — Technical lifecycle, security rules, and milestone log.
+
+---
+
+## 📸 Screenshots & Visual Assets Index
+
+| Asset | Path | Usage |
+| :--- | :--- | :--- |
+| **Product UI Mockup** | `public/images/marketing/hero-product.png` | Marketing Hero section previewing executive event bookings, approvals, and Razorpay payment status. |
+| **Hospitality Partner** | `public/images/marketing/partners-hospitality.png` | Partners Network section showcasing fine dining culinary plating and private dining standards. |
+| **Dining Atmosphere** | `public/images/marketing/venue-dining.png` | Homepage & Platform venue showcase highlighting private dining rooms and acoustics. |
+

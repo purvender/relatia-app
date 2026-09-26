@@ -95,4 +95,17 @@ npm run build
 - Brand integrity: Authentic claims, design partner feedback framing, and roadmap scoping for SOC 2 / ISO 27001.
 - Updated repository documentation in `README.md`.
 - Completed business positioning, category definition, and LinkedIn launch drafts in `docs/launch-and-business-foundation.md`.
+- Authored dedicated 5-act enterprise demo walkthrough in `docs/demo-narrative.md`.
+
+---
+
+## 📸 Screenshots & Visual Assets Index
+
+The repository maintains production visual assets under `public/images/marketing/`:
+
+| File Path | Description | Dimensions / Type | Usage |
+| :--- | :--- | :--- | :--- |
+| `public/images/marketing/hero-product.png` | Product UI Mockup (Executive dinner booking, live approvals, budget allocation, and Razorpay payment status) | High-res PNG (618 KB) | Marketing Hero (`components/marketing/hero-section.tsx`) |
+| `public/images/marketing/partners-hospitality.png` | Hospitality culinary visual (Artisanal fine dining plating, marble prep table) | High-res PNG (830 KB) | Partners Network (`components/marketing/partners-sections.tsx`) |
+| `public/images/marketing/venue-dining.png` | Corporate private dining room & architectural salon atmosphere | High-res PNG (821 KB) | Venue Showcase (`components/marketing/home-sections.tsx`) |
 
