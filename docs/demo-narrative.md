@@ -78,8 +78,8 @@
 
 2. **The In-Product Action**:
    * Navigate to `http://localhost:3000/venues`.
-   * Filter by city (**Mumbai — BKC / South Mumbai**) and private dining room availability.
-   * Select **"The Library Bar & Private Salon — The Leela Palace"**.
+   * Filter by city (**Delhi–NCR — Gurugram / Aerocity**) and private dining room availability.
+   * Select **"Private Dining Room — The Leela Ambience Gurugram"** (or equivalent Delhi–NCR pilot venue).
    * Note the pre-negotiated corporate terms:
      * Capacity: 12 pax private salon
      * Minimum Spend: ₹65,000 (Within our approved ₹72,000 budget)

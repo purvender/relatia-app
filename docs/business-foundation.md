@@ -1,8 +1,8 @@
 # Relatia — Business Foundation Document
 
-> **Document Classification:** Internal Single Source of Truth for Business Model & Strategy  
-> **Status:** Working Draft (Restart of Day 10, Step 1)  
-> **Repository Context:** Verified against codebase at commit `7326ec9` on branch `develop`  
+> **Document Classification:** Internal Single Source of Truth for Business Model & Strategy
+> **Status:** Working Draft — Updated: Delhi–NCR market hypothesis + category expansion (Day 10, Step 1 revision)
+> **Repository Context:** Verified against codebase at commit `7326ec9` on branch `develop`
 > **Note on Terminology:** Terms such as *proposed*, *pilot*, *subject to validation*, *test mode*, *roadmap*, *illustrative*, and *subject to legal, tax, and accounting review* reflect that while core operational workflows are implemented in code, business pricing, tax legalities, and commercial terms remain under active validation.
 
 ---
@@ -31,6 +31,7 @@
 20. [What Assumptions Still Need Customer Validation?](#20-what-assumptions-still-need-customer-validation)
 21. [What Would Make the Pilot Successful?](#21-what-would-make-the-pilot-successful)
 22. [What Decisions Remain Unresolved?](#22-what-decisions-remain-unresolved)
+23. [Deployment and Infrastructure Context](#23-deployment-and-infrastructure-context)
 
 ---
 
@@ -204,11 +205,27 @@ Key characteristics:
 
 ## 15. What is the First City?
 
-**Mumbai (specifically Bandra Kurla Complex [BKC], Lower Parel, South Mumbai, and Nariman Point).**
+> **This is a market hypothesis to validate, not an irreversible decision.** The Delhi–NCR choice is based on founder proximity, network access, and demand density. It will be confirmed or revised through actual pilot conversations.
+
+**Delhi–NCR (Gurugram, Aerocity, New Delhi, South Delhi, Noida, and selected Greater Noida corridors).**
+
+**Operational sub-zones:**
+| Zone | Corporate Density |
+|---|---|
+| **Gurugram (Golf Course Road, Cyber City, MG Road)** | Highest concentration of MNC headquarters, private equity, consulting, and fintech firms |
+| **Aerocity / IGI Corridor** | Luxury hotel belt; primary CXO transit and layover meeting zone |
+| **New Delhi (Connaught Place, Barakhamba Road)** | PSU-adjacent corporates, law firms, and government-linked enterprises |
+| **South Delhi (Vasant Vihar, Greater Kailash, Defence Colony)** | Senior leadership residential zones with high-end venue proximity |
+| **Noida / Greater Noida Corridor (Sector 62, Expressway)** | Emerging tech and IT-services enterprise campuses |
 
 **Rationale:**
-- Mumbai is India’s financial and corporate capital, housing headquarters for major investment banks, private equity firms, conglomerates, law firms, and tech leaders.
-- High concentration of luxury dining institutions and private dining rooms (The Leela, Taj, Oberoi, ITC, and premier standalone culinary groups) in close proximity to corporate hubs.
+- Delhi–NCR is India’s largest concentration of corporate headquarters for IT services, consulting, BFSI, FMCG, and government-linked enterprises.
+- Gurugram alone hosts hundreds of MNC India offices with dedicated business-development and CXO entertainment budgets.
+- Strong luxury dining and private dining room supply across the Aerocity hotel belt, Gurugram, and South Delhi.
+- Founder network and operational proximity enable hands-on, in-person pilot onboarding.
+
+**Why not Mumbai first?**
+Mumbai remains a high-priority second city. The initial hypothesis prioritizes Delhi–NCR for operational proximity and founder network access. Mumbai (BKC, Lower Parel, South Mumbai, Nariman Point) will be the natural expansion market once the Delhi–NCR pilot has been validated.
 
 ---
 
@@ -227,15 +244,21 @@ These firms frequently host high-stakes prospect and client dinners, have strict
 
 ## 17. What is the First Hospitality-Provider Segment?
 
-**Premier Private Dining Rooms (PDRs) and Luxury Business Dining Rooms (10–30 guest capacity):**
-1. **5-Star Luxury Hotel PDRs:** Flagship dining rooms within established luxury chains (e.g., Taj Mahal Palace, The Oberoi, The Leela).
-2. **Top-Tier Standalone Chef-Driven Fine Dining:** High-reputation contemporary Indian, Japanese omakase, and modern European restaurants in BKC and Lower Parel known for private corporate dining.
+**Phase 1 — Initial seeding (Delhi–NCR):**
+1. **5-Star Luxury Hotel PDRs:** Flagship private dining rooms within established luxury chains (e.g., The Leela Ambience Gurugram, ITC Maurya, The Oberoi New Delhi, JW Marriott Aerocity).
+2. **Top-Tier Standalone Chef-Driven Fine Dining:** High-reputation contemporary Indian, progressive tasting-menu, and modern European restaurants in Gurugram and South Delhi known for private corporate dining.
+
+**Phase 2 — Roadmap expansion (to be built):**
+3. **Catering Providers:** Corporate-grade catering companies serving on-campus or off-campus team events and client entertainment.
+4. **Experience Operators:** Curated activity and experience designers for corporate team and client engagements.
+5. **Live Entertainment & Sporting Event Providers:** Premium ticketing, corporate hospitality suites, and event-activation companies.
+6. **Gifting & Merchandise Providers:** Corporate gifting houses and branded merchandise vendors.
 
 ---
 
 ## 18. What is the Simplest Pilot Offer?
 
-**"The Zero-Friction Enterprise Hospitality Pilot"**
+**"Delhi–NCR Corporate Entertainment Pilot"**
 
 - **Duration:** 60-day pilot cohort.
 - **Scope:** 1–2 corporate departments (e.g., Strategic Accounts Sales or Executive Leadership).
@@ -295,7 +318,7 @@ The following structural decisions require founder resolution prior to full comm
 2. **Exact SaaS Pricing Tiers:**
    - Determination of fixed monthly pricing (e.g., ₹25,000/mo vs. ₹50,000/mo) versus percentage-of-spend pricing (e.g., 2.5% platform fee).
 3. **Hospitality Partner Onboarding Velocity:**
-   - Execution strategy for physically onboarding the first 25 luxury venues in Mumbai within the 35-day rollout plan.
+   - Execution strategy for physically onboarding the first 20–25 hospitality partners in Delhi–NCR (Gurugram, Aerocity, South Delhi) within the 35-day rollout plan. Mumbai onboarding to follow in the second phase.
 4. **Integration Roadmap Prioritization:**
    - Deciding whether Slack/Teams notification webhooks or automated Resend transactional emails take priority immediately following Day 10.
 5. **Legal Terms of Service & Data Privacy Policy:**
@@ -303,4 +326,23 @@ The following structural decisions require founder resolution prior to full comm
 
 ---
 
+## 23. Deployment and Infrastructure Context
+
+| Environment | Status | Details |
+|---|---|---|
+| **Local Development** | Live | `npm run dev` on `localhost:3000`; Prisma + Postgres via local or remote DB |
+| **Vercel Preview** | Active | Auto-deployed per pull request on `develop` branch via Vercel GitHub integration |
+| **Vercel Production** | Active | Deployed from `main` branch; current working production URL pending custom domain |
+| **Future Production Domain** | Planned | `relatia.in` or equivalent; DNS configuration pending domain registration |
+| **DNS / CDN** | Recommended | Cloudflare recommended for DNS, DDoS protection, and edge caching in front of Vercel |
+| **Payments** | Test Mode | Razorpay `rzp_test_*` credentials only; no live funds movement until production readiness sign-off |
+
+> **Note on Production Readiness:** Razorpay live-key activation requires: KYC / business entity verification, RBI-compliant escrow or settlement agreement, formal terms of service, and privacy policy publication.
+
+---
+
 *This document serves as the foundational business specification for Relatia and will guide all subsequent Day 10 steps, including persona definition, pricing formulation, and outreach strategy.*
+
+---
+
+*Category reference note: Ande and similar corporate entertainment platforms have been reviewed as category and business-model references only. No branding, customer claims, network claims, savings figures, or testimonials from Ande or any third-party platform have been copied, adapted, or incorporated into this document.*
