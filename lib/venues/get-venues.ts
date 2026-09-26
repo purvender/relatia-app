@@ -51,15 +51,10 @@ export async function getVenues(
 
   const accessibleVenues = allVenues.filter((v) => {
     if (!v.active) return false;
-    if (v.visibility === "PAUSED" || v.visibility === "ARCHIVED") return false;
-
-    // Tenant-owned venue
-    if (v.companyId === companyId) {
-      return true;
-    }
-
-    // Provider-managed venue discoverable across enterprise tenants
-    return v.isDiscoverable && v.visibility === "DISCOVERABLE";
+    // Any venue in DRAFT, INTERNAL_ONLY, PAUSED, or ARCHIVED is excluded from the discovery catalog
+    if (v.visibility !== "DISCOVERABLE") return false;
+    // Must also satisfy discovery readiness verification
+    return v.isDiscoverable;
   });
 
   let filtered: VenueItem[] = accessibleVenues.map((v) => ({

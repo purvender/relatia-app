@@ -22,8 +22,11 @@ import {
   Sliders,
   FileText,
   UserCheck,
+  Globe,
+  EyeOff,
 } from "lucide-react";
 import type { ProviderDetailHierarchy } from "@/lib/provider/service";
+import type { DiscoveryReadinessEvaluation } from "@/lib/provider/readiness";
 import type {
   ProviderOrganizationRecord,
   ProviderContactRecord,
@@ -54,8 +57,28 @@ import {
   updateVenueVisibilityAction,
 } from "@/lib/provider/actions";
 
-// Helpers for badges
+const STATUS_LABELS: Record<string, string> = {
+  VERIFIED: "Verified",
+  COMPLETE: "Complete",
+  READY_FOR_DISCOVERY: "Ready for Discovery",
+  DISCOVERABLE: "Live in Discovery",
+  ACTIVE: "Active",
+  PENDING_VERIFICATION: "Pending Verification",
+  PENDING_REVIEW: "Pending Review",
+  IN_PROGRESS: "In Progress",
+  REVIEW_REQUIRED: "Review Required",
+  DRAFT: "Draft",
+  NOT_STARTED: "Not Started",
+  INTERNAL_ONLY: "Internal Only",
+  UNVERIFIED: "Unverified",
+  BLOCKED: "Blocked",
+  REJECTED: "Rejected",
+  ARCHIVED: "Archived",
+  PAUSED: "Paused",
+};
+
 export function StatusBadge({ status }: { status: string }) {
+  const label = STATUS_LABELS[status] ?? status.replace(/_/g, " ");
   switch (status) {
     case "VERIFIED":
     case "COMPLETE":
@@ -65,7 +88,7 @@ export function StatusBadge({ status }: { status: string }) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
           <CheckCircle2 className="h-3 w-3" />
-          {status.replace(/_/g, " ")}
+          {label}
         </span>
       );
     case "PENDING_VERIFICATION":
@@ -75,7 +98,7 @@ export function StatusBadge({ status }: { status: string }) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
           <Clock className="h-3 w-3" />
-          {status.replace(/_/g, " ")}
+          {label}
         </span>
       );
     case "DRAFT":
@@ -85,7 +108,7 @@ export function StatusBadge({ status }: { status: string }) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700 border border-slate-200">
           <Info className="h-3 w-3 text-slate-400" />
-          {status.replace(/_/g, " ")}
+          {label}
         </span>
       );
     case "BLOCKED":
@@ -95,13 +118,13 @@ export function StatusBadge({ status }: { status: string }) {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200">
           <XCircle className="h-3 w-3" />
-          {status.replace(/_/g, " ")}
+          {label}
         </span>
       );
     default:
       return (
         <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-          {status}
+          {label}
         </span>
       );
   }
@@ -2752,26 +2775,29 @@ export function VenueVerificationPanel({
   );
 }
 
-// 11. Venue Visibility Control
-export function UpdateVenueVisibilityControl({
-  venueId,
+// 11. Venue Visibility & Publishing Control
+export function VenuePublishingControl({
+  venue,
   providerOrgId,
-  currentVisibility,
+  readiness,
 }: {
-  venueId: number;
+  venue: ProviderVenueRecord;
   providerOrgId: number;
-  currentVisibility: string;
+  readiness: DiscoveryReadinessEvaluation;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleChange = (newVisibility: string) => {
+  const isLive = venue.visibility === "DISCOVERABLE" && readiness.isEligible;
+  const isBlocked = venue.visibility === "DISCOVERABLE" && !readiness.isEligible;
+
+  const handleVisibilityChange = (newVisibility: string) => {
     setError(null);
     setSuccessMsg(null);
     const formData = new FormData();
-    formData.append("venueId", String(venueId));
+    formData.append("venueId", String(venue.id));
     formData.append("providerOrgId", String(providerOrgId));
     formData.append("visibility", newVisibility);
 
@@ -2790,22 +2816,132 @@ export function UpdateVenueVisibilityControl({
   };
 
   return (
-    <div className="flex items-center gap-1.5">
-      <select
-        value={currentVisibility}
-        disabled={isPending}
-        onChange={(e) => handleChange(e.target.value)}
-        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:opacity-50"
-      >
-        <option value="DRAFT">Draft</option>
-        <option value="INTERNAL_ONLY">Internal Only</option>
-        <option value="DISCOVERABLE">Discoverable</option>
-        <option value="PAUSED">Paused</option>
-        <option value="ARCHIVED">Archived</option>
-      </select>
-      {isPending && <span className="text-[11px] text-slate-400">Saving...</span>}
-      {successMsg && <span className="text-[11px] text-emerald-600 font-medium">{successMsg}</span>}
-      {error && <span className="text-[11px] text-rose-600 font-medium">{error}</span>}
+    <div
+      className={`rounded-xl border p-4.5 transition-all ${
+        isLive
+          ? "border-emerald-200 bg-emerald-50/50"
+          : isBlocked
+          ? "border-amber-200 bg-amber-50/50"
+          : venue.visibility === "INTERNAL_ONLY"
+          ? "border-sky-200 bg-sky-50/40"
+          : "border-slate-200 bg-slate-50/60"
+      }`}
+    >
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3.5">
+        <div className="flex items-start gap-3">
+          <div
+            className={`mt-0.5 rounded-lg p-2 shrink-0 ${
+              isLive
+                ? "bg-emerald-100 text-emerald-700"
+                : isBlocked
+                ? "bg-amber-100 text-amber-700"
+                : venue.visibility === "INTERNAL_ONLY"
+                ? "bg-sky-100 text-sky-700"
+                : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            {isLive ? (
+              <Globe className="h-5 w-5" />
+            ) : venue.visibility === "INTERNAL_ONLY" ? (
+              <Lock className="h-5 w-5" />
+            ) : (
+              <EyeOff className="h-5 w-5" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                Enterprise Discovery & Visibility
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                  isLive
+                    ? "bg-emerald-100 text-emerald-800"
+                    : isBlocked
+                    ? "bg-amber-100 text-amber-800"
+                    : venue.visibility === "INTERNAL_ONLY"
+                    ? "bg-sky-100 text-sky-800"
+                    : "bg-slate-200 text-slate-700"
+                }`}
+              >
+                {isLive
+                  ? "LIVE IN ENTERPRISE DISCOVERY"
+                  : isBlocked
+                  ? "DISCOVERABLE (WITHHELD PENDING SETUP)"
+                  : venue.visibility === "INTERNAL_ONLY"
+                  ? "INTERNAL ONLY (NOT DISCOVERABLE)"
+                  : venue.visibility === "PAUSED"
+                  ? "PAUSED (HIDDEN)"
+                  : venue.visibility === "ARCHIVED"
+                  ? "ARCHIVED"
+                  : "DRAFT (HIDDEN)"}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-slate-600 leading-relaxed max-w-2xl">
+              {isLive
+                ? "This venue is published and discoverable in the enterprise catalog (/venues). Corporate hosts can browse spaces, menus, and submit booking requests."
+                : isBlocked
+                ? "Visibility is set to Discoverable, but discovery is currently withheld because setup requirements below are not yet complete."
+                : venue.visibility === "INTERNAL_ONLY"
+                ? readiness.isEligible
+                  ? "Setup and verification are complete! Venue is ready for enterprise hosts. Click 'Publish to Discovery' to make it live."
+                  : "This venue is for internal operator review only. It is hidden from enterprise client discovery."
+                : venue.visibility === "PAUSED"
+                ? "This venue has been paused by operations and is hidden from enterprise search."
+                : venue.visibility === "ARCHIVED"
+                ? "This venue is archived and removed from platform discovery."
+                : "This venue is in draft setup. It is hidden from enterprise search."}
+            </p>
+          </div>
+        </div>
+
+        {/* Action Controls */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 shrink-0">
+          {readiness.isEligible && venue.visibility !== "DISCOVERABLE" && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => handleVisibilityChange("DISCOVERABLE")}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-emerald-500 disabled:opacity-50 cursor-pointer"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              Publish to Discovery
+            </button>
+          )}
+
+          {venue.visibility === "DISCOVERABLE" && (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => handleVisibilityChange("INTERNAL_ONLY")}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
+            >
+              <Lock className="h-3.5 w-3.5 text-slate-500" />
+              Make Internal Only
+            </button>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-semibold text-slate-500">Visibility:</span>
+            <select
+              value={venue.visibility}
+              disabled={isPending}
+              onChange={(e) => handleVisibilityChange(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-2xs hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-slate-900 disabled:opacity-50"
+            >
+              <option value="DRAFT">Draft</option>
+              <option value="INTERNAL_ONLY">Internal Only</option>
+              <option value="DISCOVERABLE">Discoverable</option>
+              <option value="PAUSED">Paused</option>
+              <option value="ARCHIVED">Archived</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {isPending && <p className="mt-2 text-xs text-slate-500">Updating visibility state...</p>}
+      {successMsg && <p className="mt-2 text-xs font-semibold text-emerald-700">{successMsg}</p>}
+      {error && <p className="mt-2 text-xs font-semibold text-rose-700">{error}</p>}
     </div>
   );
 }
@@ -2870,7 +3006,7 @@ export function ProviderDetailView({ data }: { data: ProviderDetailHierarchy }) 
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1">
                 <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                <strong className="text-slate-900">{eligibleVenuesCount}/{totalVenues}</strong> Discoverable
+                <strong className="text-slate-900">{eligibleVenuesCount}/{totalVenues}</strong> Ready for Discovery
               </span>
               {primaryContact && (
                 <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 border border-slate-200/80 px-2.5 py-1">
@@ -2979,11 +3115,6 @@ export function ProviderDetailView({ data }: { data: ProviderDetailHierarchy }) 
 
                   <div className="flex flex-wrap items-center gap-2">
                     <EditVenueDialog venue={venue} providerOrgId={provider.id} />
-                    <UpdateVenueVisibilityControl
-                      venueId={venue.id}
-                      providerOrgId={provider.id}
-                      currentVisibility={venue.visibility}
-                    />
                     <SyncReadinessButton venueId={venue.id} providerOrgId={provider.id} />
                     <AddBookableSpaceDialog venueId={venue.id} providerOrgId={provider.id} />
                     <AddOfferingDialog
@@ -2993,6 +3124,13 @@ export function ProviderDetailView({ data }: { data: ProviderDetailHierarchy }) 
                     />
                   </div>
                 </div>
+
+                {/* Prominent Venue Visibility & Publishing Control */}
+                <VenuePublishingControl
+                  venue={venue}
+                  providerOrgId={provider.id}
+                  readiness={readiness}
+                />
 
                 {/* Discovery Readiness Inspection Scorecard */}
                 <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">

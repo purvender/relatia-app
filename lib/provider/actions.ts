@@ -273,7 +273,7 @@ export async function createProviderVenueAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  const user = await requireUserRole(["ADMIN"]);
+  await requireUserRole(["ADMIN"]);
 
   const tagsString = formData.get("tags");
   const tags = typeof tagsString === "string" && tagsString.trim().length > 0
@@ -282,7 +282,7 @@ export async function createProviderVenueAction(
 
   const rawData = {
     providerOrgId: Number(formData.get("providerOrgId")),
-    companyId: formData.get("companyId") ? Number(formData.get("companyId")) : user.companyId,
+    companyId: formData.get("companyId") ? Number(formData.get("companyId")) : null,
     name: formData.get("name"),
     city: formData.get("city"),
     locality: formData.get("locality") || null,
@@ -845,15 +845,30 @@ export async function updateVenueVisibilityAction(
 
   try {
     await updateVenueVisibility(venueIdParsed, visibilityParsed.data);
-    await evaluateAndSyncVenueReadiness(venueIdParsed);
+    const evaluation = await evaluateAndSyncVenueReadiness(venueIdParsed);
     if (providerOrgId) {
       revalidatePath(`/dashboard/admin/providers/${providerOrgId}`);
     }
     revalidatePath("/venues");
+    revalidatePath(`/venues/${venueIdParsed}`);
+
+    const feedbackMsg =
+      visibilityParsed.data === "DISCOVERABLE"
+        ? evaluation.isEligible
+          ? "Venue is now Published & Live in Enterprise Discovery."
+          : "Visibility set to Discoverable, but discovery is blocked until setup steps are resolved."
+        : visibilityParsed.data === "INTERNAL_ONLY"
+        ? "Venue visibility set to Internal Only (hidden from discovery)."
+        : visibilityParsed.data === "PAUSED"
+        ? "Venue is now Paused (hidden from discovery)."
+        : visibilityParsed.data === "ARCHIVED"
+        ? "Venue is now Archived."
+        : "Venue visibility set to Draft.";
+
     return {
       success: true,
-      data: { venueId: venueIdParsed, visibility: visibilityParsed.data },
-      message: `Venue visibility updated to ${visibilityParsed.data}`,
+      data: { venueId: venueIdParsed, visibility: visibilityParsed.data, isEligible: evaluation.isEligible },
+      message: feedbackMsg,
     };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to update venue visibility";

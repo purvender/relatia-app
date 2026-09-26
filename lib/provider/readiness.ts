@@ -47,20 +47,19 @@ export function evaluateDiscoveryReadiness(
     provider != null &&
     (provider.status === "VERIFIED" || provider.status === "PENDING_VERIFICATION");
 
-
   checks.push({
     id: "provider_status",
-    name: "Provider Organization Status",
+    name: "Provider Organization Verification",
     passed: providerActive,
     critical: true,
     message: providerActive
-      ? `Provider "${provider?.name}" is ${provider?.status}`
+      ? `Provider organization "${provider?.name}" is active and verified.`
       : provider
-      ? `Provider status (${provider.status}) is not eligible for discovery`
-      : "No associated Provider Organization found",
+      ? `Provider account is currently ${provider.status.toLowerCase().replace(/_/g, " ")}. Verification required.`
+      : "No provider organization profile attached to this venue.",
   });
   if (!providerActive) {
-    blockers.push("Provider organization must be VERIFIED or PENDING_VERIFICATION (not PAUSED or ARCHIVED).");
+    blockers.push("Verify the provider organization profile before this venue can go live.");
   }
 
   // Check 2: Venue Base Status & Active Flag
@@ -71,15 +70,15 @@ export function evaluateDiscoveryReadiness(
 
   checks.push({
     id: "venue_active",
-    name: "Venue Active & Not Paused",
+    name: "Venue Operational Status",
     passed: venueActive,
     critical: true,
     message: venueActive
-      ? `Venue is active and visibility is ${venue.visibility}`
-      : "Venue is deactivated or paused/archived",
+      ? "Venue is active and available for booking operations."
+      : "Venue is currently paused, archived, or deactivated.",
   });
   if (!venueActive) {
-    blockers.push("Venue must be active and not paused or archived.");
+    blockers.push("Activate and unpause this venue to enable discovery.");
   }
 
   // Check 3: Identity & Location Completeness
@@ -90,15 +89,15 @@ export function evaluateDiscoveryReadiness(
 
   checks.push({
     id: "identity_fields",
-    name: "Core Identity & Location Fields",
+    name: "Core Venue Profile Details",
     passed: hasIdentity,
     critical: true,
     message: hasIdentity
-      ? `Verified name (${venue.name}), city (${venue.city}), and cuisine (${venue.cuisine})`
-      : "Missing venue name, city, or cuisine",
+      ? `Venue profile complete (${venue.name}, ${venue.city} · ${venue.cuisine})`
+      : "Missing essential profile details (name, city, or cuisine style).",
   });
   if (!hasIdentity) {
-    blockers.push("Venue identity fields (name, city, cuisine) must be populated.");
+    blockers.push("Complete all required venue profile fields (name, city, and cuisine).");
   }
 
   // Check 4: Address or Locality
@@ -108,15 +107,15 @@ export function evaluateDiscoveryReadiness(
   );
   checks.push({
     id: "address_info",
-    name: "Address or Micro-Locality",
+    name: "Micro-Locality & Address",
     passed: hasAddressInfo,
     critical: false,
     message: hasAddressInfo
-      ? `Location details recorded: ${venue.locality ?? venue.address}`
-      : "Neither address nor micro-locality is recorded",
+      ? `Location details saved: ${venue.locality ?? venue.address}`
+      : "No micro-locality or street address recorded.",
   });
   if (!hasAddressInfo) {
-    warnings.push("Adding a specific locality (e.g. DLF Cyber City, Golf Course Road) improves enterprise match quality.");
+    warnings.push("Add a specific business district or locality (e.g. DLF Cyber City, BKC, Indiranagar) to improve search discovery.");
   }
 
   // Check 5: Verification State
@@ -127,17 +126,17 @@ export function evaluateDiscoveryReadiness(
 
   checks.push({
     id: "verification_status",
-    name: "Hospitality Verification Status",
+    name: "Operational Quality & Compliance Audit",
     passed: isVerified,
     critical: true,
     message: isStrictlyVerified
-      ? "Venue is fully VERIFIED by internal operations"
+      ? "Venue has passed full operational verification and compliance audit."
       : venue.verificationStatus === "PENDING_REVIEW"
-      ? "Venue is PENDING_REVIEW (provisional discovery allowed with manual confirmation)"
-      : `Verification status is ${venue.verificationStatus}`,
+      ? "Venue is under provisional operations review."
+      : "Venue has not yet undergone operations review.",
   });
   if (!isVerified) {
-    blockers.push("Venue must be VERIFIED or in PENDING_REVIEW by operations.");
+    blockers.push("Record operational verification review before publishing this venue.");
   }
 
   // Check 6: Valid Bookable Spaces
@@ -148,15 +147,15 @@ export function evaluateDiscoveryReadiness(
 
   checks.push({
     id: "bookable_spaces",
-    name: "Valid Bookable Spaces Configured",
+    name: "Private Dining Rooms & Spaces",
     passed: hasValidSpaces,
     critical: true,
     message: hasValidSpaces
-      ? `Found ${activeSpaces.length} valid active bookable space(s) (e.g. ${activeSpaces[0].name})`
-      : "No active bookable spaces with valid min/max capacity configured",
+      ? `${activeSpaces.length} active bookable space(s) configured (e.g. ${activeSpaces[0].name})`
+      : "No active bookable spaces with guest capacity configured.",
   });
   if (!hasValidSpaces) {
-    blockers.push("At least one active BookableSpace with valid capacity (min > 0, max >= min) is required.");
+    blockers.push("Add at least one active bookable space (e.g. Private Dining Room or Boardroom) with guest capacity.");
   }
 
   // Check 7: Offerings and Pricing Integrity
@@ -167,20 +166,20 @@ export function evaluateDiscoveryReadiness(
 
   checks.push({
     id: "pricing_integrity",
-    name: "Offerings & Pricing Integrity",
+    name: "Menus & Dining Packages",
     passed: hasValidPricing && activeOfferings.length > 0,
     critical: false,
     message: activeOfferings.length > 0
       ? hasValidPricing
-        ? `Configured ${activeOfferings.length} active offering(s) with valid non-negative pricing`
-        : "Some active offerings have invalid negative pricing or unsupported currency"
-      : "No structured offerings attached (venue will use baseline capacity and custom quoting)",
+        ? `${activeOfferings.length} dining package(s) configured with verified INR pricing.`
+        : "Some active dining packages have invalid or negative pricing."
+      : "No fixed dining packages attached (inquiries will require custom quotes).",
   });
   if (!hasValidPricing) {
-    blockers.push("All active offerings must have non-negative baseAmount, non-negative minimumSpend, and INR currency.");
+    blockers.push("Correct package pricing to ensure all base amounts and minimum spends are positive INR values.");
   }
   if (activeOfferings.length === 0) {
-    warnings.push("Configuring at least one set menu or package accelerates enterprise booking conversion.");
+    warnings.push("Add at least one curated set menu or dining package to enable instant corporate booking estimates.");
   }
 
   // Check 8: Public-Safe Description
@@ -189,15 +188,15 @@ export function evaluateDiscoveryReadiness(
   );
   checks.push({
     id: "public_description",
-    name: "Public-Safe Description Quality",
+    name: "Enterprise Overview & Highlights",
     passed: hasDescription,
     critical: false,
     message: hasDescription
-      ? "Public-safe description is provided"
-      : "No public-safe description provided",
+      ? "Enterprise overview description is ready."
+      : "No overview description provided for event hosts.",
   });
   if (!hasDescription) {
-    warnings.push("Add a curated description to provide enterprise event hosts with context.");
+    warnings.push("Add an overview description highlighting atmosphere, AV capabilities, and hospitality features.");
   }
 
   // Calculation

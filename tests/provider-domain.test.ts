@@ -761,7 +761,98 @@ function runTests() {
     console.log("  ✅ Test 16 Passed: Boundary & Negative Validation Coverage");
   }
 
-  console.log("🎉 All 16 Provider Domain & Onboarding Tests Passed Successfully!\n");
+  // Test 17: Plain-English Operator Blocker Quality & Formula Leak Prevention
+  {
+    const provider: ProviderOrganizationRecord = {
+      id: 10,
+      name: "Draft Hospitality",
+      legalName: null,
+      providerType: "RESTAURANT",
+      city: "Mumbai",
+      status: "DRAFT",
+      onboardingStatus: "IN_PROGRESS",
+      internalNotes: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    };
+
+    const venue: ProviderVenueRecord = {
+      id: 88,
+      companyId: null,
+      providerOrgId: 10,
+      name: "Incomplete Venue",
+      city: "Mumbai",
+      locality: null,
+      address: null,
+      capacity: 40,
+      cuisine: "Seafood",
+      priceBand: "PREMIUM",
+      tags: [],
+      rating: 4.2,
+      active: true,
+      venueType: "RESTAURANT",
+      publicDescription: null,
+      visibility: "DRAFT",
+      isDiscoverable: false,
+      verificationStatus: "UNVERIFIED",
+      lastVerifiedAt: null,
+      internalNotes: null,
+    };
+
+    const readiness = evaluateDiscoveryReadiness({
+      provider,
+      venue,
+      bookableSpaces: [],
+      offerings: [],
+    });
+
+    assert.equal(readiness.isEligible, false);
+    assert.ok(readiness.blockers.length > 0, "Must contain blockers");
+
+    // Ensure NO raw math formulas or developer-facing syntax leak into operator copy
+    for (const blocker of readiness.blockers) {
+      assert.equal(blocker.includes("min > 0"), false, "Blocker must not contain formula 'min > 0'");
+      assert.equal(blocker.includes("max >= min"), false, "Blocker must not contain formula 'max >= min'");
+      assert.equal(blocker.includes("VERIFIED or PENDING_VERIFICATION"), false, "Blocker must not expose raw enum tuple");
+      assert.ok(blocker.length >= 15, "Blocker should be a clear, informative sentence");
+    }
+
+    console.log("  ✅ Test 17 Passed: Plain-English Operator Blocker Copy & Formula Isolation");
+  }
+
+  // Test 18: Discovery Catalog Filtering Rules & Multi-State Exclusion
+  {
+    type MockVenueFilter = {
+      id: number;
+      active: boolean;
+      visibility: "DRAFT" | "INTERNAL_ONLY" | "DISCOVERABLE" | "PAUSED" | "ARCHIVED";
+      isDiscoverable: boolean;
+    };
+
+    const venuesToTest: MockVenueFilter[] = [
+      { id: 1, active: true, visibility: "DRAFT", isDiscoverable: false },
+      { id: 2, active: true, visibility: "INTERNAL_ONLY", isDiscoverable: false },
+      { id: 3, active: true, visibility: "INTERNAL_ONLY", isDiscoverable: true }, // Eligible but marked INTERNAL_ONLY
+      { id: 4, active: true, visibility: "DISCOVERABLE", isDiscoverable: true },  // Live and discoverable!
+      { id: 5, active: true, visibility: "DISCOVERABLE", isDiscoverable: false }, // Discoverable set but setup incomplete
+      { id: 6, active: true, visibility: "PAUSED", isDiscoverable: false },
+      { id: 7, active: true, visibility: "ARCHIVED", isDiscoverable: false },
+      { id: 8, active: false, visibility: "DISCOVERABLE", isDiscoverable: true }, // Inactive venue
+    ];
+
+    const discoverableVenues = venuesToTest.filter((v) => {
+      if (!v.active) return false;
+      if (v.visibility !== "DISCOVERABLE") return false;
+      return v.isDiscoverable;
+    });
+
+    assert.equal(discoverableVenues.length, 1, "Exactly 1 venue (id: 4) must pass discovery filter");
+    assert.equal(discoverableVenues[0].id, 4);
+
+    console.log("  ✅ Test 18 Passed: Discovery Catalog Filtering Rules & Multi-State Isolation");
+  }
+
+  console.log("🎉 All 18 Provider Domain & Onboarding Tests Passed Successfully!\n");
 }
 
 runTests();

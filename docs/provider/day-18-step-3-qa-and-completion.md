@@ -118,6 +118,33 @@ The automated domain test suite ([tests/provider-domain.test.ts](file:///Users/p
 
 ---
 
-## 6. Known Limitations & Next Steps
-- **External Partner Portal:** Day 18 focused exclusively on internal admin/operator onboarding workflows. External hospitality provider login, self-service profile management, and direct booking request inboxes are scheduled for Day 19+.
-- **Live Inventory Sync:** Real-time PMS / table-management integrations are out of scope for MVP Phase 1.
+---
+
+## 7. Post-QA Correction Pass & Hardening Summary
+
+Following manual walkthrough QA, a post-QA refinement pass resolved four specific UX and logic friction points:
+
+### A. Root Causes & Fixes Applied
+
+1. **Readiness Blocker Copy Hardening:**
+   - **Before:** Readout displayed developer formulas and raw enums (e.g. `“At least one active BookableSpace with valid capacity (min > 0, max >= min) is required.”`, `“Provider organization must be VERIFIED or PENDING_VERIFICATION (not PAUSED or ARCHIVED).”`).
+   - **After:** Replaced with action-oriented plain business language (e.g. `“Add at least one active bookable space (e.g. Private Dining Room or Boardroom) with guest capacity.”`, `“Verify the provider organization profile before this venue can go live.”`).
+
+2. **Explicit Venue Visibility & Publishing Card:**
+   - **Before:** Visibility was controlled via a small, unlabeled dropdown hidden in the venue action bar, leaving operators uncertain how to publish a venue.
+   - **After:** Created a dedicated, full-width `VenuePublishingControl` panel on each venue card. It clearly highlights current visibility status (`LIVE IN ENTERPRISE DISCOVERY`, `INTERNAL ONLY`, `DRAFT`, `PAUSED`, `ARCHIVED`), explains the live state in plain language, provides a direct visibility selector, and surfaces a one-click `🚀 Publish to Discovery` / `🔒 Make Internal Only` quick action.
+
+3. **Discovery-State Multi-Tenant Scoping Fix:**
+   - **Before:** In `createProviderVenueAction`, `companyId` defaulted to `user.companyId` (e.g., Company 1), causing newly created draft provider venues to be returned to the logged-in operator via the tenant-owned branch of `getVenues`.
+   - **After:** Corrected `companyId` default to `null` for provider venues, and made `getVenues` strictly require `v.active === true && v.visibility === 'DISCOVERABLE' && v.isDiscoverable === true` for any venue to appear in discovery.
+
+4. **Status Badge Plain Labels:**
+   - **Before:** Status badges displayed raw enum values (`READY_FOR_DISCOVERY`, `INTERNAL_ONLY`, `PENDING_REVIEW`).
+   - **After:** Mapped to polished display labels (`Live in Discovery`, `Internal Only`, `Ready for Discovery`, `Pending Review`, `Draft`, etc.).
+
+### B. Updated Test Matrix
+Automated test suite expanded to 18 tests in [tests/provider-domain.test.ts](file:///Users/purvenderhooda/Documents/hooda/relatia-app/tests/provider-domain.test.ts):
+- Test 17: `Plain-English Operator Blocker Copy & Formula Isolation`
+- Test 18: `Discovery Catalog Filtering Rules & Multi-State Isolation`
+
+**Pass Rate:** 18/18 tests passing (100%).
