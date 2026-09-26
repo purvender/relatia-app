@@ -105,7 +105,7 @@ export function PartnersValue() {
     {
       metric: "0%",
       label: "No-Show & Forfeiture Rate",
-      desc: "All bookings are backed by pre-authorized corporate payment escrow or central corporate billing accounts.",
+      desc: "All bookings are backed by pre-authorized corporate payment workflows or central corporate billing accounts.",
     },
     {
       metric: "72%",
@@ -114,8 +114,8 @@ export function PartnersValue() {
     },
     {
       metric: "24h",
-      label: "Automated B2B Settlement",
-      desc: "Receive fast, direct settlements via Razorpay with automated GST invoice matching—no chasing delayed paper vouchers.",
+      label: "Structured B2B Settlement",
+      desc: "Receive structured payments via Razorpay (test-mode active) with automated GST invoice matching.",
     },
   ];
 
@@ -308,7 +308,7 @@ export function PartnersOperations() {
                     </span>
                   </div>
                   <span className="text-[11px] font-mono bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">
-                    DEPOSIT ESCROWED
+                    RESERVATION CONFIRMED
                   </span>
                 </div>
 
@@ -421,7 +421,7 @@ export function PartnersApplication() {
               Apply to the Relatia Collection
             </h2>
             <p className="mt-4 text-base text-[var(--m-text-secondary)] font-light">
-              Tell us about your establishment and private dining capacity. Our partner curation team will contact you within 48 hours for a physical walkthrough.
+              Tell us about your establishment and private dining capacity. Our partner curation team will contact you for a physical walkthrough.
             </p>
           </FadeIn>
         </div>
@@ -433,21 +433,46 @@ export function PartnersApplication() {
                 <div className="h-12 w-12 rounded-full bg-[var(--m-brand)]/10 text-[var(--m-brand)] flex items-center justify-center mx-auto text-xl font-bold">
                   ✓
                 </div>
-                <h3 className="font-serif text-2xl text-[var(--m-text)]">Application Received</h3>
-                <p className="text-sm text-[var(--m-text-secondary)] max-w-md mx-auto font-light">
-                  Thank you for applying. A member of our Hospitality Curation Committee will review your details and reach out to schedule an on-site tasting and inspection.
+                <h3 className="font-serif text-2xl text-[var(--m-text)]">Partner Application Demo Received</h3>
+                <p className="text-sm text-[var(--m-text-secondary)] max-w-md mx-auto font-light leading-relaxed">
+                  Thank you for exploring partnership with Relatia. This form is an interactive demonstration preview while our partner portal onboarding pipeline is deployed.
                 </p>
+                <div className="rounded-xl border border-[var(--m-border)] bg-[var(--m-card)] p-4 max-w-md mx-auto text-xs text-[var(--m-text-secondary)]">
+                  To schedule an immediate property inspection and fast-track your listing, please email{" "}
+                  <a href="mailto:partners@relatia.in" className="text-[var(--m-brand)] font-semibold underline">
+                    partners@relatia.in
+                  </a>
+                  .
+                </div>
                 <div className="pt-4">
                   <button
                     onClick={() => setSubmitted(false)}
                     className="text-xs text-[var(--m-brand)] hover:underline font-medium"
                   >
-                    Submit another venue profile
+                    Submit another venue profile preview
                   </button>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="font-serif text-xl sm:text-2xl text-[var(--m-text)]">
+                      Venue Partner Intake
+                    </h3>
+                    <span className="text-[11px] font-mono font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                      Demo Preview Form
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--m-text-secondary)] font-light mt-2">
+                    Submit your property details for network evaluation. For priority partner onboarding, email{" "}
+                    <a href="mailto:partners@relatia.in" className="text-[var(--m-brand)] underline font-medium">
+                      partners@relatia.in
+                    </a>
+                    .
+                  </p>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
@@ -547,7 +572,7 @@ export function PartnersApplication() {
                     type="submit"
                     className="w-full rounded-full bg-[var(--m-brand)] py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.01]"
                   >
-                    Submit Partner Application
+                    Preview Partner Application
                   </button>
                   <p className="mt-3 text-center text-xs text-[var(--m-text-muted)]">
                     Protected by NDA. Relatia never shares partner contract parameters publicly.

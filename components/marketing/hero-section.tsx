@@ -17,8 +17,8 @@ export function AnnouncementBar() {
           <path d="M6 3.25 11 8 6 12.75" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
         <p className="text-[var(--m-text-muted)]">
-          <span className="font-medium text-[var(--m-text-on-dark)]">India&apos;s first AI-native</span>{" "}
-          enterprise dining &amp; event operating system is here.
+          <span className="font-medium text-[var(--m-text-on-dark)]">The unified enterprise</span>{" "}
+          dining &amp; event operating system is here.
         </p>
         <Link
           href="/platform"
@@ -57,7 +57,7 @@ export function HeroSection() {
             >
               <span className="inline-flex items-center gap-2 rounded-full border border-[var(--m-border)] bg-white/60 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold text-[var(--m-text-secondary)] mb-6">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--m-accent)]" />
-                AI-Native Platform
+                Enterprise Operating System
               </span>
             </motion.div>
 
@@ -80,8 +80,8 @@ export function HeroSection() {
               transition={{ duration: 0.8, delay: 0.2, ease }}
             >
               Relatia helps enterprises discover venues, route approvals, control
-              spend, issue GST-ready invoices, manage payments, and coordinate
-              bookings — through one AI-powered workflow.
+              spend, issue GST-ready invoices, process payments via Razorpay, and coordinate
+              bookings — through one unified workflow.
             </motion.p>
 
             <motion.div
@@ -176,7 +176,7 @@ export function HeroSection() {
               </div>
             </motion.div>
 
-            {/* Floating AI card */}
+            {/* Floating criteria match card */}
             <motion.div
               className="absolute -top-4 -right-4 rounded-xl bg-white p-4 shadow-xl shadow-black/10 border border-[var(--m-border-light)] hidden md:block"
               initial={{ opacity: 0, x: 20 }}
@@ -190,7 +190,7 @@ export function HeroSection() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[var(--m-text)]">AI Recommendation</p>
+                  <p className="text-xs font-semibold text-[var(--m-text)]">Smart Filter Match</p>
                   <p className="text-[11px] text-[var(--m-text-secondary)]">3 venues match your criteria</p>
                 </div>
               </div>

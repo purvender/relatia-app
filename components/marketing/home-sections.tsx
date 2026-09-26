@@ -32,7 +32,7 @@ export function TrustSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeIn>
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-[var(--m-text-muted)] mb-8">
-            Architected for the operational standards of India&apos;s leading enterprises
+            Architected for the operational standards of leading Indian enterprises (Design Benchmark)
           </p>
         </FadeIn>
         <div className="relative overflow-hidden">
@@ -79,8 +79,8 @@ export function FinanceSection() {
                 Every invoice compliant.
               </h2>
               <p className="mt-6 text-base leading-relaxed text-[var(--m-text-secondary)]">
-                Relatia automates GST-ready invoice generation, routes payments
-                through Razorpay with full audit trails, and gives your finance
+                Relatia automates GST-ready invoice generation, processes digital payments
+                via Razorpay (test-mode active) with full audit trails, and gives your finance
                 team real-time visibility into corporate dining and event spend
                 — down to the last paise.
               </p>
@@ -88,7 +88,7 @@ export function FinanceSection() {
               <div className="mt-10 grid grid-cols-2 gap-8">
                 {[
                   { stat: "100%", label: "GST Compliant Invoices" },
-                  { stat: "3x", label: "Faster Reconciliation" },
+                  { stat: "3x", label: "Faster Reconciliation (Target)" },
                   { stat: "₹0", label: "Lost Receipts" },
                   { stat: "Real-time", label: "Spend Visibility" },
                 ].map((item) => (
@@ -185,7 +185,7 @@ const workflowSteps = [
   {
     num: "01",
     title: "Request",
-    desc: "Any team member creates an event request with date, city, headcount, and budget. Contextual suggestions appear instantly.",
+    desc: "Any team member creates an event request with date, city, headcount, and budget. Contextual validation happens instantly.",
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -205,7 +205,7 @@ const workflowSteps = [
   {
     num: "03",
     title: "Discover",
-    desc: "Browse curated venues matched to your event. AI recommends options based on cuisine, location, capacity, and past bookings.",
+    desc: "Browse curated venues matched to your event. Structured rule-based filters match options based on cuisine, location, capacity, and budget rules.",
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -215,7 +215,7 @@ const workflowSteps = [
   {
     num: "04",
     title: "Book",
-    desc: "Select your venue, confirm details, and generate a booking. Venue coordination happens inside Relatia — no separate emails.",
+    desc: "Select your venue, confirm details, and generate a booking. Venue coordination happens inside Relatia — with clear event tracking.",
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
@@ -225,7 +225,7 @@ const workflowSteps = [
   {
     num: "05",
     title: "Invoice & Pay",
-    desc: "A GST-compliant tax invoice is auto-generated. Pay securely via Razorpay with full audit trail and instant reconciliation.",
+    desc: "A GST-compliant tax invoice is auto-generated. Process digital payments via Razorpay (test-mode active) with full audit trail.",
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
@@ -303,7 +303,7 @@ const roles = [
     icon: "📋",
     benefits: [
       "Create event requests in under 60 seconds",
-      "Get AI venue suggestions matched to criteria",
+      "Get smart venue suggestions matched to criteria & policy",
       "Track booking status in real time",
     ],
   },
@@ -311,7 +311,7 @@ const roles = [
     title: "Approver",
     icon: "✅",
     benefits: [
-      "One-tap approvals on mobile",
+      "One-tap in-app approvals",
       "Policy-aware auto-routing",
       "Complete event and spend context before deciding",
     ],
@@ -321,7 +321,7 @@ const roles = [
     icon: "📊",
     benefits: [
       "GST-ready invoices auto-generated",
-      "Razorpay integration with full audit trails",
+      "Razorpay payment gateway integration (test mode active)",
       "Spend dashboards with department-level drill-down",
     ],
   },
@@ -329,8 +329,8 @@ const roles = [
     title: "Admin / Ops",
     icon: "⚙️",
     benefits: [
-      "Unified event calendar across the company",
-      "Venue partner management and coordination",
+      "Unified event overview across the company",
+      "Venue partner curation and coordination",
       "Compliance and policy configuration controls",
     ],
   },
@@ -387,7 +387,7 @@ export function RolesSection() {
 }
 
 /* ================================================================
-   Section 5 — AI Intelligence
+   Section 5 — Intelligence & Roadmap
    ================================================================ */
 export function AISection() {
   return (
@@ -397,6 +397,9 @@ export function AISection() {
           {/* Visual */}
           <FadeInLeft>
             <div className="relative rounded-2xl bg-[var(--m-bg-dark-alt)] border border-white/10 p-8 space-y-4">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--m-accent)] border-b border-white/10 pb-2">
+                Roadmap Concept — Conversational Assistant Preview
+              </div>
               {/* AI conversation mockup */}
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--m-accent)] text-white text-xs font-bold shrink-0">
@@ -439,26 +442,25 @@ export function AISection() {
           <FadeInRight>
             <div className="max-w-lg">
               <span className="text-xs font-semibold uppercase tracking-widest text-[var(--m-accent)]">
-                AI Intelligence
+                Intelligence &amp; Roadmap
               </span>
               <h2
                 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl text-white"
                 style={{ fontFamily: "var(--font-serif), serif" }}
               >
-                Your smartest team member for every booking
+                Rule-based precision today, AI spend intelligence on the roadmap
               </h2>
               <p className="mt-6 text-base leading-relaxed text-white/60">
-                Relatia&apos;s AI learns your company&apos;s preferences, policies, past bookings,
-                and budget rhythms. It recommends venues, drafts communications, flags compliance
-                issues, and summarizes spend — so your team spends less time coordinating and more
-                time building relationships.
+                Relatia combines deterministic venue matching, strict policy compliance checks,
+                and structured approval chains today — with predictive AI analytics, conversational
+                booking, and automated budget forecasting planned in upcoming roadmap releases.
               </p>
               <ul className="mt-8 space-y-3">
                 {[
-                  "Contextual venue recommendations based on history",
-                  "Automatic policy and budget compliance checks",
-                  "Smart routing of approvals to the right stakeholder",
-                  "Proactive spend insights and anomaly detection",
+                  "Deterministic venue matching based on headcount, budget, and location (Live)",
+                  "Automatic policy and budget compliance checks (Live)",
+                  "Smart routing of approvals to designated approver tiers (Live)",
+                  "Generative spend insights, conversational booking & anomaly detection (Roadmap)",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-white/70">
                     <svg className="h-4 w-4 text-[var(--m-accent)] shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
@@ -549,10 +551,10 @@ export function VenueSection() {
    ================================================================ */
 export function ReportingSection() {
   const stats = [
-    { value: "42%", label: "Average cost savings on corporate dining", desc: "through negotiated rates and policy enforcement" },
-    { value: "18 hrs", label: "Saved per event cycle", desc: "from request to reconciliation" },
-    { value: "100%", label: "Invoice compliance", desc: "with automated GST-ready invoicing" },
-    { value: "4.9/5", label: "Satisfaction rating", desc: "from enterprise finance teams" },
+    { value: "42%", label: "Modeled cost savings on corporate dining", desc: "projected through negotiated corporate terms and policy controls" },
+    { value: "18 hrs", label: "Estimated time saved per event cycle", desc: "from request creation to invoice reconciliation" },
+    { value: "100%", label: "Invoice compliance rate", desc: "with automated GST-ready tax invoicing" },
+    { value: "4.9/5", label: "Design partner feedback rating", desc: "from early enterprise pilot evaluations" },
   ];
 
   return (
@@ -560,15 +562,18 @@ export function ReportingSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeInUp className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-xs font-semibold uppercase tracking-widest text-[var(--m-accent)]">
-            Measurable Impact
+            Modeled Impact &amp; Benchmarks
           </span>
           <h2
             className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
             style={{ fontFamily: "var(--font-serif), serif" }}
           >
             Built to deliver{" "}
-            <span className="text-[var(--m-text-secondary)]">real ROI</span>
+            <span className="text-[var(--m-text-secondary)]">verifiable ROI</span>
           </h2>
+          <p className="mt-3 text-xs text-[var(--m-text-muted)]">
+            Metrics reflect modeled operational benchmarks and enterprise design partner targets.
+          </p>
         </FadeInUp>
 
         <StaggerContainer className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4" stagger={0.1}>
@@ -604,21 +609,21 @@ const testimonials = [
     quote:
       "Relatia transformed how our finance team handles corporate event spend. We went from spreadsheet chaos to real-time visibility — with every invoice GST-ready before we even ask.",
     name: "Priya Mehta",
-    role: "VP Finance, Fortune 500 Conglomerate",
+    role: "VP Finance, Enterprise Design Partner",
     initials: "PM",
   },
   {
     quote:
       "The approval workflow alone saved us weeks of back-and-forth emails. Now our team requests, approves, and books corporate dinners in under 10 minutes.",
     name: "Arjun Kapoor",
-    role: "Head of Operations, Leading Tech Company",
+    role: "Head of Operations, Pilot Cohort",
     initials: "AK",
   },
   {
     quote:
       "As a venue partner, Relatia brings us qualified corporate inquiries with clear requirements and guaranteed payments. It's the best channel for enterprise dining bookings.",
     name: "Chef Sandeep Rawat",
-    role: "Executive Chef & Partner, Premium Restaurant Group",
+    role: "Executive Chef & Partner, Hospitality Network",
     initials: "SR",
   },
 ];
@@ -628,8 +633,8 @@ export function TestimonialsSection() {
     <section className="py-24 lg:py-32 bg-[var(--m-bg)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <FadeInUp className="text-center max-w-2xl mx-auto mb-16">
-          <span className="text-xs font-semibold uppercase tracking-widest text-[var(--m-accent)]">
-            Design Partner Feedback
+          <span className="text-xs font-semibold uppercase tracking-wider text-[var(--m-accent)]">
+            Design Partner Feedback (Pilot Concept)
           </span>
           <h2
             className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl"

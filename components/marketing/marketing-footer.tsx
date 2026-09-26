@@ -9,7 +9,7 @@ const footerSections = [
       { label: "Venue Discovery", href: "/platform#venues" },
       { label: "Approvals", href: "/platform#approvals" },
       { label: "Finance & GST", href: "/platform#finance" },
-      { label: "AI Assistant", href: "/platform#ai" },
+      { label: "Intelligence Roadmap", href: "/platform#ai" },
     ],
   },
   {
@@ -50,7 +50,7 @@ export function MarketingFooter() {
           <div className="col-span-2 md:col-span-1">
             <RelatiaLogo className="text-[var(--m-text-on-dark)]" />
             <p className="mt-4 text-sm leading-relaxed text-[var(--m-text-muted)] max-w-xs">
-              The AI-native operating system for enterprise dining, events, and relationship spend.
+              The unified operating system for enterprise dining, events, and relationship spend.
             </p>
           </div>
 

@@ -85,7 +85,7 @@ export function PlatformHero() {
                 { step: "02", state: "REQUESTED", title: "Multi-Tier Approval", desc: "Manager & Finance policy clearance" },
                 { step: "03", state: "APPROVED", title: "Venue Lock", desc: "Curated availability & private dining reservation" },
                 { step: "04", state: "VENUE_SELECTED", title: "Contract Finalized", desc: "Set menu, dietary & AV coordination" },
-                { step: "05", state: "BOOKED", title: "Paid & Verified", desc: "Razorpay escrow / invoice reconciliation" },
+                { step: "05", state: "BOOKED", title: "Paid & Verified", desc: "Razorpay payment checkout & invoice generation (Escrow on roadmap)" },
                 { step: "06", state: "COMPLETED", title: "GST Settlement", desc: "Automated B2B GST tax credit capture" },
               ].map((item, idx) => (
                 <div
@@ -124,10 +124,10 @@ export function PlatformPillars() {
       id: "venues",
       number: "01",
       badge: "Hospitality Network",
-      title: "Intelligent Venue Discovery & Curated Enterprise Network",
+      title: "Structured Venue Discovery & Curated Enterprise Network",
       summary: "Curated access to India’s premier dining institutions, Michelin-pedigree chefs, and private corporate suites.",
       description:
-        "Unlike consumer booking platforms, Relatia maintains pre-negotiated corporate terms with top luxury hospitality groups (The Leela, Taj, Oberoi, ITC, premium standalone dining). Our discovery engine matches dining requests to guest tier, seating acoustics, AV requirements, dietary restrictions, and privacy protocols.",
+        "Unlike consumer booking platforms, Relatia maintains pre-negotiated corporate terms with top luxury hospitality groups (The Leela, Taj, Oberoi, ITC, premium standalone dining). Our discovery engine uses structured rule-based filters matching dining requests to guest tier, seating acoustics, AV requirements, dietary restrictions, and privacy protocols.",
       bullets: [
         "Private dining room (PDR) guaranteed minimum spends pre-negotiated",
         "Acoustic ratings and privacy certifications for confidential board dinners",
@@ -142,68 +142,68 @@ export function PlatformPillars() {
       number: "02",
       badge: "Governance & Compliance",
       title: "Dynamic Multi-Tier Approvals & Policy Engine",
-      summary: "Rule-based approval workflows directly in Slack, Microsoft Teams, and Email—no portal logins required.",
+      summary: "In-app rule-based approval workflows today, with Slack and Microsoft Teams connectors on our roadmap.",
       description:
-        "Define policy thresholds based on department, cost center, per-head budget caps, alcohol policy, or client tier. Relatia routes approval notifications with rich contextual summaries: client name, past relationship ROI, and line-item budget.",
+        "Define policy thresholds based on department, cost center, per-head budget caps, alcohol policy, or client tier. Relatia routes in-app approval notifications with rich contextual summaries: client name, past relationship context, and line-item budget.",
       bullets: [
-        "Contextual one-click approvals inside Slack & Microsoft Teams",
-        "Automatic escalation timers to avoid booking forfeiture",
-        "Strict per-head limit enforcement with exception approval paths",
-        "Audit-ready logs capturing timestamps, approver ID, and commentary",
+        "In-app one-click approvals with multi-tier role verification (Live)",
+        "Slack & Microsoft Teams approval connectors (Roadmap)",
+        "Strict per-head limit enforcement with exception approval paths (Live)",
+        "Audit-ready logs capturing timestamps, approver ID, and commentary (Live)",
       ],
       metric: "4.2 min",
-      metricLabel: "Average approval cycle time, down from 3.8 days via email",
+      metricLabel: "Average modeled approval cycle time, down from 3.8 days via email",
     },
     {
       id: "booking",
       number: "03",
       badge: "Concierge & Operations",
       title: "Full Booking Lifecycle & Guest Experience Concierge",
-      summary: "End-to-end reservation operations handled with zero friction.",
+      summary: "End-to-end reservation operations handled with structured event workflows.",
       description:
-        "From personalized digital invitations and RSVP dietary collection to customized table placements and wine pairing protocols, Relatia synchronizes corporate hosts with venue banquet directors in real time.",
+        "From digital event requests and RSVP dietary collection to customized table placements and wine pairing protocols, Relatia synchronizes corporate hosts with venue banquet directors in real time.",
       bullets: [
-        "Executive guest dietary profile memory (allergies, preferences)",
-        "Calendar synchronization (Google Workspace & Outlook 365)",
-        "Digital host check-in dashboard with real-time guest arrivals",
-        "Direct venue manager messaging channel for on-the-night adjustments",
+        "Structured guest dietary profile capture (allergies, preferences)",
+        "Calendar synchronization (Google Workspace & Outlook 365 — Roadmap)",
+        "Digital host coordination dashboard with real-time guest arrivals",
+        "Direct venue manager messaging channel (Designed for future integration)",
       ],
       metric: "99.8%",
-      metricLabel: "Event fulfillment success rate without scheduling conflict",
+      metricLabel: "Target event fulfillment success rate without scheduling conflict",
     },
     {
       id: "finance",
       number: "04",
       badge: "Finance & Reconciliation",
-      title: "Finance Automation, GST Invoicing & Razorpay Reconciliation",
-      summary: "Eliminate employee expense reports and maximize GST tax credit recoveries.",
+      title: "Finance Automation, GST Invoicing & Razorpay Integration",
+      summary: "Automate GST-compliant tax invoicing and streamline corporate payment flows.",
       description:
-        "Relatia eliminates messy corporate credit cards and lost paper receipts. Every booking generates a 100% compliant B2B tax invoice with matching GSTIN, SAC/HSN codes, and corporate entity breakdown. Automated Razorpay integration enables instant corporate virtual card payment or central billing terms.",
+        "Relatia eliminates messy corporate credit cards and lost paper receipts. Every booking generates a 100% compliant B2B tax invoice with matching GSTIN, SAC/HSN codes, and corporate entity breakdown. Razorpay payment integration enables test-mode digital payment verification today, with automated ledger syncing on our roadmap.",
       bullets: [
-        "100% compliant Indian GST invoices with automated 2B matching",
-        "Razorpay payment gateway & escrow protection for large deposits",
+        "100% compliant Indian GST invoices with automated CGST/SGST/IGST calculation (Live)",
+        "Razorpay payment gateway checkout (Test-mode active; Escrow in Roadmap)",
         "Multi-entity corporate billing with departmental cost allocation",
-        "Automated reconciliation against corporate ledger accounts",
+        "Automated reconciliation against corporate ledger accounts (Roadmap)",
       ],
       metric: "18%",
-      metricLabel: "Direct tax savings recovered through automated GST credit capture",
+      metricLabel: "Direct tax credit savings potential through compliant B2B GST capture",
     },
     {
       id: "ai",
       number: "05",
-      badge: "Predictive Analytics",
-      title: "AI Intelligence & Relationship Spend Analytics",
+      badge: "Intelligence & Roadmap",
+      title: "Rule-Based Matching Today & AI Spend Analytics Roadmap",
       summary: "Turn corporate hospitality from an unmeasured expense into a strategic growth asset.",
       description:
-        "Relatia's AI engine analyzes historical event outcomes, attendee engagement, and business pipeline progression. Discover which venues deliver the highest deal closing rates, forecast quarterly dining budgets, and benchmark spend across teams.",
+        "Relatia's current engine provides deterministic rule-based venue and budget filtering. Our upcoming AI intelligence layer will analyze historical event outcomes, attendee engagement, and business pipeline progression to deliver predictive spend forecasting.",
       bullets: [
-        "Client relationship velocity scoring linked to corporate CRM data",
-        "Spend leakage detection flagging unauthorized venue premiums",
-        "Automated quarterly budget forecasting for executive leadership",
-        "Benchmarking against industry spend standards across peer enterprises",
+        "Structured rule-based venue & budget policy filtering (Live)",
+        "Spend leakage detection flagging policy exceptions (Live)",
+        "Predictive deal velocity scoring linked to CRM data (Roadmap)",
+        "LLM-driven automated quarterly budget forecasting (Roadmap)",
       ],
       metric: "3.4x",
-      metricLabel: "Measured increase in enterprise client deal velocity",
+      metricLabel: "Projected increase in enterprise client engagement efficiency",
     },
   ];
 
@@ -326,7 +326,7 @@ export function PlatformArchitecture() {
     approver: {
       title: "For Approvers & Business Leaders",
       desc: "One-click authorization with total context. Review client relationship value, historic deal revenue, and policy compliance in seconds.",
-      mockupHeader: "Approval Request #REQ-8821 • Slack Notification",
+      mockupHeader: "Approval Request #REQ-8821 • In-App Notification",
       badge: "Action Required",
       items: [
         { label: "Host", val: "Ananya Sharma (VP Strategic Sales)" },
@@ -350,8 +350,8 @@ export function PlatformArchitecture() {
         { label: "Tax Component", val: "₹10,983 (CGST + SGST)" },
       ],
       resultTitle: "Payment Gateway",
-      resultName: "Razorpay Corporate Escrow Verified",
-      resultMeta: "Order ID: order_N9xK23L • Payment ID: pay_N9xM89K • Webhook 200 OK",
+      resultName: "Razorpay Test-Mode Verification Active",
+      resultMeta: "Order ID: order_N9xK23L • Payment ID: pay_N9xM89K • Webhook 200 OK (Escrow on Roadmap)",
     },
   };
 
@@ -465,12 +465,12 @@ export function PlatformArchitecture() {
    ================================================================ */
 export function PlatformIntegrations() {
   const integrations = [
-    { name: "SAP S/4HANA", category: "Enterprise ERP", desc: "Automated general ledger syncing & purchase order matching." },
-    { name: "Oracle NetSuite", category: "Cloud ERP", desc: "Two-way expense reconciliation & cost center validation." },
-    { name: "TallyPrime", category: "Indian Accounting", desc: "Automated voucher export formatted for Indian statutory books." },
-    { name: "Zoho Books", category: "Accounting Suite", desc: "Real-time GST bill ingestion and invoice archiving." },
-    { name: "Razorpay", category: "Payment Infrastructure", desc: "Virtual corporate cards, automated refunds, and webhook reconciliation." },
-    { name: "Okta & Azure AD", category: "Identity & SSO", desc: "SAML 2.0 and SCIM directory provisioning for enterprise access." },
+    { name: "SAP S/4HANA", category: "Enterprise ERP", desc: "Automated general ledger syncing & purchase order matching.", status: "Roadmap Integration" },
+    { name: "Oracle NetSuite", category: "Cloud ERP", desc: "Two-way expense reconciliation & cost center validation.", status: "Roadmap Integration" },
+    { name: "TallyPrime", category: "Indian Accounting", desc: "Automated voucher export formatted for Indian statutory books.", status: "Roadmap Integration" },
+    { name: "Zoho Books", category: "Accounting Suite", desc: "Real-time GST bill ingestion and invoice archiving.", status: "Roadmap Integration" },
+    { name: "Razorpay", category: "Payment Infrastructure", desc: "Digital payment checkout, test-mode verification, and webhook reconciliation.", status: "Active Connector (Test Mode)" },
+    { name: "Okta & Azure AD", category: "Identity & SSO", desc: "SAML 2.0 and SCIM directory provisioning for enterprise access.", status: "Roadmap Integration" },
   ];
 
   return (
@@ -485,7 +485,7 @@ export function PlatformIntegrations() {
               Plug into your existing enterprise stack
             </h2>
             <p className="mt-4 text-base text-[var(--m-text-secondary)] font-light">
-              Relatia does not require replacing your accounting software, identity provider, or HR systems. We connect natively to the tools you already rely on.
+              Relatia is designed to work alongside your accounting software, identity provider, and HR systems. Planned connectors are scheduled across upcoming roadmap phases.
             </p>
           </FadeIn>
         </div>
@@ -504,7 +504,7 @@ export function PlatformIntegrations() {
                   {item.desc}
                 </p>
                 <div className="mt-4 flex items-center gap-1.5 text-xs text-[var(--m-brand)] font-medium">
-                  <span>Native Connector</span>
+                  <span>{item.status}</span>
                   <span className="text-xs">→</span>
                 </div>
               </div>
@@ -522,20 +522,20 @@ export function PlatformIntegrations() {
 export function PlatformSecurity() {
   const securityFeatures = [
     {
-      title: "India Data Localization (DPDP Act)",
-      desc: "All financial data, guest identities, and transaction logs are stored exclusively in Tier-4 data centers within Indian geography.",
+      title: "Data Privacy & Localization Ready",
+      desc: "Architected around strict tenant isolation, encrypted storage, and data residency awareness aligned with DPDP Act standards.",
     },
     {
-      title: "SOC 2 Type II & ISO 27001 Alignment",
-      desc: "Architected around AICPA Trust Services Criteria with continuous automated security posture monitoring and third-party audit preparation.",
+      title: "SOC 2 Type II & ISO 27001 Roadmap Alignment",
+      desc: "Designed around AICPA Trust Services Criteria with continuous security controls engineered for future third-party compliance audits.",
     },
     {
-      title: "End-to-End Encryption",
-      desc: "Data encrypted in transit via TLS 1.3 and at rest with AES-256 customer-managed encryption keys (CMEK).",
+      title: "End-to-End Encryption Standards",
+      desc: "Data encrypted in transit via TLS 1.3 and at rest with cloud-managed AES-256 encryption safeguards.",
     },
     {
       title: "Granular Role-Based Access (RBAC)",
-      desc: "Strict compartmentalization ensuring finance, department heads, and external venue managers see only authorized information.",
+      desc: "Strict compartmentalization ensuring finance, approvers, hosts, and admins see only authorized organization data.",
     },
   ];
 

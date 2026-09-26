@@ -70,33 +70,49 @@ export function ContactFormSection() {
             <FadeInUp delay={0.1}>
               <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-card)] p-8 sm:p-10 shadow-sm">
                 {submitted ? (
-                  <div className="text-center py-16 space-y-4">
+                  <div className="text-center py-12 space-y-4">
                     <div className="h-14 w-14 rounded-full bg-[var(--m-brand)]/10 text-[var(--m-brand)] flex items-center justify-center mx-auto text-2xl font-bold">
                       ✓
                     </div>
                     <h3 className="font-serif text-2xl sm:text-3xl text-[var(--m-text)]">
-                      Consultation Request Confirmed
+                      Demo Inquiry Preview Received
                     </h3>
-                    <p className="text-base text-[var(--m-text-secondary)] max-w-md mx-auto font-light leading-relaxed">
-                      Thank you, {formData.firstName || "there"}. An enterprise solutions director will review your company profile and send a calendar invitation within 4 business hours.
+                    <p className="text-sm text-[var(--m-text-secondary)] max-w-md mx-auto font-light leading-relaxed">
+                      Thank you for exploring Relatia{formData.firstName ? `, ${formData.firstName}` : ""}. This interactive form is a demonstration preview while automated CRM routing is in deployment.
                     </p>
-                    <div className="pt-6">
+                    <div className="rounded-xl border border-[var(--m-border)] bg-[var(--m-bg)] p-4 max-w-md mx-auto text-xs text-[var(--m-text-secondary)]">
+                      For immediate enterprise scheduling or a live walkthrough, please contact us directly at{" "}
+                      <a href="mailto:sales@relatia.in" className="text-[var(--m-brand)] font-semibold underline">
+                        sales@relatia.in
+                      </a>
+                      .
+                    </div>
+                    <div className="pt-4">
                       <button
                         onClick={() => setSubmitted(false)}
                         className="rounded-full border border-[var(--m-border)] bg-[var(--m-bg)] px-6 py-2.5 text-xs font-medium text-[var(--m-text)] hover:bg-[var(--m-bg-alt)] transition-colors"
                       >
-                        Submit another inquiry
+                        Submit another demo inquiry
                       </button>
                     </div>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                      <h3 className="font-serif text-xl sm:text-2xl text-[var(--m-text)]">
-                        Request a Personalized Demo
-                      </h3>
-                      <p className="text-xs text-[var(--m-text-secondary)] font-light mt-1">
-                        Fill in your details below and we will customize the walkthrough to your organization.
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <h3 className="font-serif text-xl sm:text-2xl text-[var(--m-text)]">
+                          Request an Executive Demo
+                        </h3>
+                        <span className="text-[11px] font-mono font-semibold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full">
+                          Demo Preview Form
+                        </span>
+                      </div>
+                      <p className="text-xs text-[var(--m-text-secondary)] font-light mt-2">
+                        Explore our interactive request interface below. Production CRM ingestion is on our roadmap — for direct inquiries, email{" "}
+                        <a href="mailto:sales@relatia.in" className="text-[var(--m-brand)] underline font-medium">
+                          sales@relatia.in
+                        </a>
+                        .
                       </p>
                     </div>
 
@@ -150,7 +166,7 @@ export function ContactFormSection() {
                         <input
                           type="text"
                           required
-                          placeholder="e.g. Reliance, Infosys, CRED"
+                          placeholder="e.g. Enterprise Organization"
                           value={formData.companyName}
                           onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                           className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
@@ -211,10 +227,10 @@ export function ContactFormSection() {
                         type="submit"
                         className="w-full rounded-full bg-[var(--m-brand)] py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.01]"
                       >
-                        Schedule Executive Briefing
+                        Preview Executive Briefing Request
                       </button>
                       <p className="mt-3 text-center text-xs text-[var(--m-text-muted)]">
-                        No credit card required. Strictly confidential under standard enterprise NDA.
+                        Interactive demonstration preview. Strictly confidential under standard enterprise NDA.
                       </p>
                     </div>
                   </form>
@@ -287,11 +303,11 @@ export function ContactFaq() {
   const faqs = [
     {
       q: "How fast can our organization roll out Relatia?",
-      a: "Standard rollout takes under 48 hours. Enterprise SSO (Okta, Google Workspace, Azure AD) and ERP integration connectors are typically fully configured within 3 to 5 business days.",
+      a: "Standard deployment takes under 48 hours for core modules. Enterprise SSO and custom accounting integrations are deployed according to customer technical rollout plans.",
     },
     {
       q: "How does Relatia handle Indian GST compliance?",
-      a: "Every booking through Relatia generates a 100% compliant B2B tax invoice with matching GSTIN, legal vendor entity, and SAC code 996331. This ensures your finance team can seamlessly claim 18% input tax credit without chasing paper receipts.",
+      a: "Every booking through Relatia generates a 100% compliant B2B tax invoice with matching GSTIN, legal vendor entity, and SAC code 996331. This ensures your finance team can seamlessly claim input tax credit without chasing paper receipts.",
     },
     {
       q: "Can we configure different spend limits for different tiers of executives?",
@@ -299,7 +315,7 @@ export function ContactFaq() {
     },
     {
       q: "Does Relatia replace our existing corporate credit cards?",
-      a: "Relatia is flexible. You can centralize billing through Razorpay corporate invoicing / escrow, or allow employees to use corporate cards while Relatia captures the invoice, approves the line-items, and reconciles the transaction.",
+      a: "Relatia offers flexible payment support. You can process digital payments through our integrated Razorpay payment flow (test-mode active today; automated escrow and corporate credit terms on roadmap) or reconcile corporate cards directly against invoices.",
     },
   ];
 

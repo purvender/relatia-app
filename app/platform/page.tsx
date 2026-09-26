@@ -5,7 +5,7 @@ import { PlatformHero, PlatformPillars, PlatformArchitecture, PlatformIntegratio
 export const metadata: Metadata = {
   title: "Platform Architecture — Relatia | The Enterprise Dining Operating System",
   description:
-    "Explore the Relatia platform architecture: Intelligent venue discovery, dynamic approval routing, GST-compliant invoicing, Razorpay corporate settlement, and AI spend intelligence.",
+    "Explore the Relatia platform architecture: Curated venue discovery, dynamic approval routing, GST-compliant invoicing, Razorpay integration, and spend intelligence roadmap.",
   openGraph: {
     title: "Relatia Platform — Enterprise Dining & Relationship Spend Architecture",
     description:
