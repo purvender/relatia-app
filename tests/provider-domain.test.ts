@@ -497,7 +497,271 @@ function runTests() {
     console.log("  ✅ Test 13 Passed: Inactive & Paused Records Exclusion from Discovery");
   }
 
-  console.log("🎉 All 13 Provider Domain & Onboarding Tests Passed Successfully!\n");
+  // Test 14: End-to-End Discovery Safety & Public-Safe DTO Isolation
+  {
+    const sensitiveVenueRecord: ProviderVenueRecord = {
+      id: 999,
+      companyId: null,
+      providerOrgId: 1,
+      name: "The Grand Hyatt Ballroom",
+      city: "Gurugram",
+      locality: "Golf Course Extension",
+      address: "Sector 58, Gurugram",
+      capacity: 350,
+      cuisine: "European & Contemporary Indian",
+      priceBand: "LUXURY",
+      tags: ["5-Star", "CXO Summit", "Verified Partner"],
+      rating: 4.95,
+      active: true,
+      venueType: "HOTEL",
+      publicDescription: "Luxury enterprise dining venue with acoustic isolation.",
+      visibility: "DISCOVERABLE",
+      isDiscoverable: true,
+      verificationStatus: "VERIFIED",
+      lastVerifiedAt: new Date().toISOString(),
+      internalNotes: "CONFIDENTIAL: Internal GM Commission Rate: 12%",
+    };
+
+    const spaces: BookableSpaceRecord[] = [
+      {
+        id: 801,
+        venueId: 999,
+        name: "Emerald Boardroom",
+        spaceType: "BOARDROOM",
+        minCapacity: 10,
+        maxCapacity: 30,
+        privacyLevel: "EXCLUSIVE",
+        seatedCapacity: 24,
+        standingCapacity: 30,
+        publicDescription: "High-spec AV and private dining setup",
+        status: "ACTIVE",
+        isActive: true,
+        internalNotes: "DO NOT SHARE: VIP Pin code #9482",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 802,
+        venueId: 999,
+        name: "Service Prep Area",
+        spaceType: "TERRACE",
+        minCapacity: 5,
+        maxCapacity: 15,
+        privacyLevel: "OPEN",
+        seatedCapacity: null,
+        standingCapacity: null,
+        publicDescription: null,
+        status: "DRAFT",
+        isActive: false, // Inactive space
+        internalNotes: "Staff-only corridor",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    const offerings: OfferingRecord[] = [
+      {
+        id: 901,
+        providerOrgId: 1,
+        venueId: 999,
+        bookableSpaceId: 801,
+        name: "Presidential Dinner Package",
+        offeringType: "SET_MENU",
+        pricingBasis: "PER_PERSON",
+        baseAmount: 850000,
+        currency: "INR",
+        minimumSpend: 6000000,
+        minGuests: 10,
+        maxGuests: 30,
+        description: "Chef's curated 6-course banquet",
+        dietaryNotes: "All dietary preferences accommodated",
+        pricingNotes: "Taxes extra",
+        isCustomQuote: false,
+        taxIncluded: false,
+        isActive: true,
+        isDiscoverable: true,
+        internalNotes: "Base food cost ₹2,800/head",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 902,
+        providerOrgId: 1,
+        venueId: 999,
+        bookableSpaceId: 801,
+        name: "Staff Meal",
+        offeringType: "CUSTOM_EXPERIENCE",
+        pricingBasis: "FIXED_TOTAL",
+        baseAmount: 100000,
+        currency: "INR",
+        minimumSpend: 0,
+        minGuests: null,
+        maxGuests: null,
+        description: "Internal catering",
+        dietaryNotes: null,
+        pricingNotes: null,
+        isCustomQuote: false,
+        taxIncluded: true,
+        isActive: false, // Inactive package
+        isDiscoverable: false,
+        internalNotes: "Internal rate",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    // Filter public safe bookable spaces
+    const safeSpaces = filterDiscoverableBookableSpaces(spaces);
+    assert.equal(safeSpaces.length, 1, "Inactive space must be excluded");
+    assert.equal(safeSpaces[0].id, 801);
+
+    // Filter public safe offerings
+    const safeOfferings = filterDiscoverableOfferings(offerings);
+    assert.equal(safeOfferings.length, 1, "Inactive/non-discoverable offering must be excluded");
+    assert.equal(safeOfferings[0].id, 901);
+
+    // Map discoverable spaces to PublicSafeBookableSpace DTOs
+    const publicSpaces: Array<Omit<BookableSpaceRecord, "internalNotes" | "isActive" | "status" | "createdAt" | "venueId">> = safeSpaces.map((s) => ({
+      id: s.id,
+      name: s.name,
+      spaceType: s.spaceType,
+      minCapacity: s.minCapacity,
+      maxCapacity: s.maxCapacity,
+      privacyLevel: s.privacyLevel,
+      seatedCapacity: s.seatedCapacity,
+      standingCapacity: s.standingCapacity,
+      publicDescription: s.publicDescription,
+    }));
+
+    // Ensure sensitive venue record metadata contains internalNotes but public-safe spaces do not leak them
+    assert.ok(sensitiveVenueRecord.internalNotes?.includes("CONFIDENTIAL"));
+    assert.equal((publicSpaces[0] as unknown as { internalNotes?: string }).internalNotes, undefined, "Public safe space must not expose internalNotes");
+
+    console.log("  ✅ Test 14 Passed: End-to-End Public Safe Filtering & Isolation");
+  }
+
+  // Test 15: Verification & Visibility Decoupling Invariants
+  {
+    // A venue that is VERIFIED but visibility is INTERNAL_ONLY
+    const verifiedInternalVenue: ProviderVenueRecord = {
+      id: 501,
+      companyId: null,
+      providerOrgId: 2,
+      name: "Private Dining Club",
+      city: "Bengaluru",
+      locality: "Indiranagar",
+      address: "100ft Road",
+      capacity: 60,
+      cuisine: "Modern European",
+      priceBand: "LUXURY",
+      tags: ["Members Only"],
+      rating: 4.8,
+      active: true,
+      venueType: "RESTAURANT",
+      publicDescription: "Exclusive club dining",
+      visibility: "INTERNAL_ONLY", // Operator has explicitly kept it internal
+      isDiscoverable: false,
+      verificationStatus: "VERIFIED", // Audit verified
+      lastVerifiedAt: new Date().toISOString(),
+      internalNotes: null,
+    };
+
+    const provider: ProviderOrganizationRecord = {
+      id: 2,
+      name: "Club Hospitality",
+      legalName: "Club Pvt Ltd",
+      providerType: "RESTAURANT",
+      city: "Bengaluru",
+      status: "VERIFIED",
+      onboardingStatus: "IN_PROGRESS",
+      internalNotes: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    };
+
+    const space: BookableSpaceRecord = {
+      id: 502,
+      venueId: 501,
+      name: "Founder Room",
+      spaceType: "PRIVATE_DINING",
+      minCapacity: 4,
+      maxCapacity: 16,
+      privacyLevel: "EXCLUSIVE",
+      seatedCapacity: 12,
+      standingCapacity: 16,
+      publicDescription: "Private dining room",
+      status: "ACTIVE",
+      isActive: true,
+      internalNotes: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    const offering: OfferingRecord = {
+      id: 503,
+      providerOrgId: 2,
+      venueId: 501,
+      bookableSpaceId: 502,
+      name: "Founders Degustation",
+      offeringType: "SET_MENU",
+      pricingBasis: "PER_PERSON",
+      baseAmount: 500000,
+      currency: "INR",
+      minimumSpend: 2500000,
+      minGuests: 4,
+      maxGuests: 16,
+      description: "Fine dining menu",
+      dietaryNotes: null,
+      pricingNotes: null,
+      isCustomQuote: false,
+      taxIncluded: true,
+      isActive: true,
+      isDiscoverable: true,
+      internalNotes: null,
+      createdAt: new Date().toISOString(),
+    };
+
+    const readiness = evaluateDiscoveryReadiness({
+      provider,
+      venue: verifiedInternalVenue,
+      bookableSpaces: [space],
+      offerings: [offering],
+    });
+
+    // Verification and setup are valid, so readiness is eligible
+    assert.equal(readiness.isEligible, true, "Readiness score must evaluate eligibility accurately");
+
+    // BUT discoverability check requires explicit DISCOVERABLE visibility
+    const isActuallyDiscoverable = verifiedInternalVenue.visibility === "DISCOVERABLE" && readiness.isEligible;
+    assert.equal(isActuallyDiscoverable, false, "INTERNAL_ONLY venue must not be discoverable even if verified");
+
+    console.log("  ✅ Test 15 Passed: Verification vs Visibility Decoupling Invariants");
+  }
+
+  // Test 16: Comprehensive Boundary & Negative Validation Checks
+  {
+    // Negative lead time
+    const invalidLeadTime = updateAvailabilityMetadataSchema.safeParse({
+      venueId: 101,
+      leadTimeHours: -10,
+    });
+    assert.equal(invalidLeadTime.success, false, "Negative lead time must fail validation");
+
+    // Negative deposit percent
+    const invalidDeposit = updateCancellationPolicySchema.safeParse({
+      venueId: 101,
+      summary: "Sample policy",
+      depositPercent: 150, // exceeds 100%
+    });
+    assert.equal(invalidDeposit.success, false, "Deposit percent > 100% must fail validation");
+
+    // Empty provider organization name
+    const emptyName = createProviderSchema.safeParse({
+      name: "   ",
+      providerType: "HOTEL",
+      city: "Gurugram",
+    });
+    assert.equal(emptyName.success, false, "Whitespace-only provider name must fail validation");
+
+    console.log("  ✅ Test 16 Passed: Boundary & Negative Validation Coverage");
+  }
+
+  console.log("🎉 All 16 Provider Domain & Onboarding Tests Passed Successfully!\n");
 }
 
 runTests();

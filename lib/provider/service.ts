@@ -874,17 +874,15 @@ export async function evaluateAndSyncVenueReadiness(
     offerings,
   });
 
-  const shouldBeDiscoverable = evaluation.isEligible;
-  const newVisibility = shouldBeDiscoverable ? "DISCOVERABLE" : "INTERNAL_ONLY";
+  const isDiscoverable = venue.visibility === "DISCOVERABLE" && evaluation.isEligible;
 
   await db.orm.public.Venue.where({ id: venueId }).update({
-    isDiscoverable: shouldBeDiscoverable,
-    visibility: newVisibility,
+    isDiscoverable,
   });
 
   if (venue.providerOrgId) {
     const allOrgVenues = await db.orm.public.Venue.where({ providerOrgId: venue.providerOrgId }).all();
-    const anyDiscoverable = allOrgVenues.some((v) => v.id === venueId ? shouldBeDiscoverable : v.isDiscoverable);
+    const anyDiscoverable = allOrgVenues.some((v) => v.id === venueId ? isDiscoverable : v.isDiscoverable);
     const orgOnboardingStatus = anyDiscoverable ? "READY_FOR_DISCOVERY" : "IN_PROGRESS";
 
     await db.orm.public.ProviderOrganization.where({ id: venue.providerOrgId }).update({

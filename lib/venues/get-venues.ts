@@ -37,7 +37,7 @@ export type VenueFilterOptions = {
 };
 
 /**
- * Fetches active venues scoped strictly to the given company ID, with optional filters.
+ * Fetches active venues scoped to the given company ID, or cross-tenant discoverable provider venues.
  * Filters supported:
  * - city: string (exact case-insensitive match)
  * - priceBand: string (MODERATE, PREMIUM, LUXURY)
@@ -47,15 +47,27 @@ export async function getVenues(
   companyId: number,
   filters?: VenueFilterOptions,
 ): Promise<VenueItem[]> {
-  const rawVenues = await db.orm.public.Venue.where({ companyId })
-    .where({ active: true })
-    .all();
+  const allVenues = await db.orm.public.Venue.where({ active: true }).all();
 
-  let filtered = rawVenues.map((v) => ({
+  const accessibleVenues = allVenues.filter((v) => {
+    if (!v.active) return false;
+    if (v.visibility === "PAUSED" || v.visibility === "ARCHIVED") return false;
+
+    // Tenant-owned venue
+    if (v.companyId === companyId) {
+      return true;
+    }
+
+    // Provider-managed venue discoverable across enterprise tenants
+    return v.isDiscoverable && v.visibility === "DISCOVERABLE";
+  });
+
+  let filtered: VenueItem[] = accessibleVenues.map((v) => ({
     id: v.id,
     companyId: v.companyId,
     name: v.name,
     city: v.city,
+    locality: v.locality ?? null,
     address: v.address ?? null,
     capacity: v.capacity,
     cuisine: v.cuisine,
@@ -63,6 +75,7 @@ export async function getVenues(
     tags: [...v.tags],
     rating: v.rating,
     active: v.active,
+    publicDescription: v.publicDescription ?? null,
   }));
 
   if (filters?.city && filters.city.trim() !== "") {

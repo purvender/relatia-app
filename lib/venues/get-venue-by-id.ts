@@ -18,9 +18,11 @@ export async function getVenueById(
     return null;
   }
 
-  // Tenant access rule: venue must either belong to the company OR be discoverable
-  if (venue.companyId !== null && venue.companyId !== companyId && !venue.isDiscoverable) {
-    return null;
+  // Tenant access rule: venue must either belong to the company OR be discoverable with DISCOVERABLE visibility
+  if (venue.companyId !== companyId) {
+    if (!venue.isDiscoverable || venue.visibility !== "DISCOVERABLE") {
+      return null;
+    }
   }
 
   // Load public-safe detail hierarchy
