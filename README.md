@@ -12,12 +12,14 @@ Relatia is an India-first enterprise platform engineered to streamline corporate
 * **Day 7**: End-to-end Razorpay Checkout integration, client verification callback, and idempotent webhook reconciliation (`/api/webhooks/razorpay`). — **COMPLETE**
 * **Day 8**: Public-facing marketing website inspired by editorial luxury and enterprise craft (Home, Platform, Partners, Contact). — **COMPLETE**
 * **Day 9**: Website verification, full audit, responsive QA, zero-error linting/build, repository documentation, and LinkedIn launch foundation. — **COMPLETE**
-* **Day 10–35 (Upcoming Roadmap)**:
-  * Slack & Microsoft Teams interactive approval bots
-  * Live reservation management POS integrations (SevenRooms / TableCheck)
-  * Automated GSTR-2B API matching and TallyPrime / SAP ERP ledger export
-  * AI-powered venue recommendation engine & CRM deal velocity analytics
-  * SOC 2 Type II compliance audit preparation
+* **Day 10–13**: Customer discovery playbooks, persona registers, and commercial pilot package specifications. — **COMPLETE**
+* **Day 18 (Step 1 & 2)**: Core provider data foundation, hierarchy (`ProviderOrganization` → `Venue` → `BookableSpace` → `Offering`), availability/cancellation governance, live discovery readiness engine, and complete internal operator onboarding workflow. — **COMPLETE**
+* **Day 19–35 (Upcoming Roadmap)**:
+  * Hospitality Partner Portal (Day 19)
+  * Provider Booking-Request Inbox & Accept/Decline Workflows (Day 20)
+  * Availability Calendar Synchronization (Day 21)
+  * Provider Economics & Settlement Reconciliation (Day 22)
+  * Automated GSTR-2B API matching and ERP exports
 
 ---
 
@@ -60,7 +62,9 @@ Relatia is an India-first enterprise platform engineered to streamline corporate
 | **`/events/new`** | `app/events/new/page.tsx` | Event creation wizard (headcount, tier, budget) | EVENT_PLANNER, ADMIN |
 | **`/events/[id]`** | `app/events/[id]/page.tsx` | Event detail, venue lock, and booking lifecycle tracker | Authenticated |
 | **`/venues`** | `app/venues/page.tsx` | Curated venue directory with capacity & cuisine filters | Authenticated |
-| **`/venues/[id]`** | `app/venues/[id]/page.tsx` | Venue profile, private room specs, and minimum spends | Authenticated |
+| **`/venues/[id]`** | `app/venues/[id]/page.tsx` | Venue profile, bookable spaces, offerings, and minimum spends | Authenticated |
+| **`/dashboard/admin/providers`** | `app/dashboard/admin/providers/page.tsx` | Provider organizations directory & onboarding portal | ADMIN |
+| **`/dashboard/admin/providers/[id]`** | `app/dashboard/admin/providers/[id]/page.tsx` | Provider detail, bookable spaces hierarchy, and verification audit | ADMIN |
 | **`/api/webhooks/razorpay`** | `app/api/webhooks/razorpay/route.ts` | Razorpay webhook route handler (HMAC-SHA256 verified) | Webhook Service |
 
 ---

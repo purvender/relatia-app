@@ -57,9 +57,30 @@ The application is structured into two complementary domains within the Next.js 
    * Invoice Detail: `app/dashboard/finance/invoices/[id]`
    * Corporate Events: `app/events`, `app/events/new`, `app/events/[id]`
    * Venue Discovery: `app/venues`, `app/venues/[id]`
+   * Provider Management & Onboarding: `app/dashboard/admin/providers`, `app/dashboard/admin/providers/[id]`
    * Webhook API: `app/api/webhooks/razorpay/route.ts`
 
 ---
+
+## 2.1 Provider Domain & Bookable Space Architecture
+
+Relatia's supply side is structured as an enterprise-grade multi-space hierarchy:
+
+```
+ProviderOrganization (Hospitality brand / holding company)
+ └── Venue (Physical establishment, location, cuisine, pricing tier)
+      └── BookableSpace (Private dining room, terrace, boardroom, ballroom)
+           └── Offering / Package (Set menus, per-person rates, min spend in paise)
+```
+
+### Key Provider Architectural Principles:
+1. **`BookableSpace` Primitive**: Avoids ambiguous "room" terminology (preventing confusion with hotel guest rooms) and precisely models executive private dining suites, semi-private areas, terraces, rooftops, ballrooms, and boardrooms with discrete capacity boundaries and privacy tiers (`EXCLUSIVE`, `SEMI_PRIVATE`, `OPEN`).
+2. **Deterministic Discovery Readiness Engine (`lib/provider/readiness.ts`)**: Evaluates verification status, capacity validity, active spaces, and pricing before promoting a venue to `DISCOVERABLE` status.
+3. **Public-Safe vs. Internal Boundary**: Sensitive provider documents, internal operator notes, and contact phone numbers are filtered server-side; enterprise clients consume only sanitized `PublicSafeVenueDetail` DTOs.
+4. **Manual Availability Governance**: Availability is represented honestly via manual confirmation protocols and operational lead times, avoiding false live-inventory claims.
+
+---
+
 
 ## 3. Authentication & Tenant Isolation Model
 

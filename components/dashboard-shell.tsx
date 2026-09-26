@@ -14,6 +14,7 @@ import {
   X,
   Building2,
   ShieldCheck,
+  Layers,
 } from "lucide-react";
 import type { AppUserWithCompany } from "@/lib/auth";
 
@@ -53,12 +54,19 @@ const NAV_ITEMS: NavItem[] = [
     allowedRoles: ["FINANCE", "ADMIN"],
   },
   {
+    label: "Providers",
+    href: "/dashboard/admin/providers",
+    icon: Layers,
+    allowedRoles: ["ADMIN"],
+  },
+  {
     label: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
     allowedRoles: ["ADMIN"],
   },
 ];
+
 
 export function DashboardShell({
   user,

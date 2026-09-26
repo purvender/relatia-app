@@ -32,6 +32,111 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum ProviderType {
+  RESTAURANT
+  HOTEL
+  CLUB
+  CATERING_COMPANY
+  EXPERIENCE_PROVIDER
+  ACTIVITY_PROVIDER
+  LIVE_ENTERTAINMENT
+  GIFTING_PROVIDER
+  MERCHANDISE_PROVIDER
+}
+
+enum ProviderStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  VERIFIED
+  PAUSED
+  ARCHIVED
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  REVIEW_REQUIRED
+  READY_FOR_DISCOVERY
+  BLOCKED
+  COMPLETE
+}
+
+enum VenueVisibility {
+  DRAFT
+  INTERNAL_ONLY
+  DISCOVERABLE
+  PAUSED
+  ARCHIVED
+}
+
+enum BookableSpaceType {
+  PRIVATE_DINING
+  SEMI_PRIVATE_DINING
+  LOUNGE
+  TERRACE
+  ROOFTOP
+  BALLROOM
+  BOARDROOM
+  MAIN_DINING_SECTION
+  CLUB_EVENT_SPACE
+}
+
+enum BookableSpaceStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  ARCHIVED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum OfferingType {
+  SET_MENU
+  PER_PERSON_PACKAGE
+  FIXED_EVENT_PACKAGE
+  CUSTOM_EXPERIENCE
+  A_LA_CARTE_MIN_SPEND
+  BEVERAGE_PACKAGE
+}
+
+enum PricingBasis {
+  PER_PERSON
+  FIXED_TOTAL
+  MINIMUM_SPEND_ONLY
+  CUSTOM_QUOTE
+}
+
+enum DocumentType {
+  FSSAI_LICENSE
+  GSTIN_CERTIFICATE
+  LIQUOR_LICENSE
+  BANK_MANDATE
+  PAN_CARD
+  RATE_CARD
+  VENUE_FLOOR_PLAN
+  OTHER
+}
+
+enum DocumentReviewStatus {
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum ContactRoleCategory {
+  OPERATIONS
+  SALES
+  FINANCE
+  MANAGEMENT
+  GENERAL
+}
+
 model Company {
   id       Int      @id @default(autoincrement())
   name     String
@@ -82,22 +187,199 @@ model Event {
   booking     Booking?
 }
 
+model ProviderOrganization {
+  id               Int              @id @default(autoincrement())
+  name             String
+  legalName        String?
+  providerType     ProviderType     @default(RESTAURANT)
+  city             String
+  status           ProviderStatus   @default(DRAFT)
+  onboardingStatus OnboardingStatus @default(NOT_STARTED)
+  internalNotes    String?
+  createdAt        TimestamptzString @default(now())
+  updatedAt        TimestamptzString?
+
+  venues           Venue[]
+  contacts         ProviderContact[]
+  documents        ProviderDocument[]
+  verificationRecords VerificationRecord[]
+  offerings        Offering[]
+}
+
+model ProviderContact {
+  id                     Int                 @id @default(autoincrement())
+  providerOrgId          Int
+  providerOrg            ProviderOrganization @relation(fields: [providerOrgId], references: [id])
+
+  name                   String
+  role                   String
+  email                  String
+  phone                  String?
+  preferredContactMethod String              @default("EMAIL")
+  category               ContactRoleCategory @default(GENERAL)
+  isActive               Boolean             @default(true)
+  internalNotes          String?
+  createdAt              TimestamptzString   @default(now())
+}
+
+model ProviderDocument {
+  id             Int                  @id @default(autoincrement())
+  providerOrgId  Int
+  providerOrg    ProviderOrganization  @relation(fields: [providerOrgId], references: [id])
+
+  docType        DocumentType
+  title          String
+  fileReference  String
+  reviewStatus   DocumentReviewStatus @default(PENDING_REVIEW)
+  isInternalOnly Boolean              @default(true)
+  internalNotes  String?
+  createdAt      TimestamptzString    @default(now())
+}
+
+model VerificationRecord {
+  id                 Int                @id @default(autoincrement())
+  providerOrgId      Int?
+  providerOrg        ProviderOrganization? @relation(fields: [providerOrgId], references: [id])
+
+  venueId            Int?
+  venue              Venue?             @relation(fields: [venueId], references: [id])
+
+  status             VerificationStatus @default(UNVERIFIED)
+  verifiedAt         TimestamptzString?
+  verifiedBy         String?
+  verificationSource String?
+  notes              String?
+  createdAt          TimestamptzString  @default(now())
+}
+
 model Venue {
-  id        Int      @id @default(autoincrement())
-  companyId Int
-  company   Company  @relation(fields: [companyId], references: [id])
+  id                 Int                @id @default(autoincrement())
+  companyId          Int?
+  company            Company?           @relation(fields: [companyId], references: [id])
 
-  name      String
-  city      String
-  address   String?
-  capacity  Int
-  cuisine   String
-  priceBand String
-  tags      String[]
-  rating    Float
-  active    Boolean  @default(true)
+  providerOrgId      Int?
+  providerOrg        ProviderOrganization? @relation(fields: [providerOrgId], references: [id])
 
-  bookings  Booking[]
+  name               String
+  city               String
+  address            String?
+  capacity           Int
+  cuisine            String
+  priceBand          String
+  tags               String[]
+  rating             Float
+  active             Boolean            @default(true)
+
+  venueType          String?            @default("RESTAURANT")
+  locality           String?
+  publicDescription  String?
+  visibility         VenueVisibility    @default(DRAFT)
+  isDiscoverable     Boolean            @default(false)
+  verificationStatus VerificationStatus @default(UNVERIFIED)
+  lastVerifiedAt     TimestamptzString?
+  internalNotes      String?
+
+  bookings           Booking[]
+  bookableSpaces     BookableSpace[]
+  offerings          Offering[]
+  verificationRecords VerificationRecord[]
+  availabilityMetadata AvailabilityMetadata?
+  cancellationPolicy CancellationPolicy?
+}
+
+model BookableSpace {
+  id                Int                 @id @default(autoincrement())
+  venueId           Int
+  venue             Venue               @relation(fields: [venueId], references: [id])
+
+  name              String
+  spaceType         BookableSpaceType   @default(PRIVATE_DINING)
+  minCapacity       Int
+  maxCapacity       Int
+  privacyLevel      String?             @default("EXCLUSIVE")
+  seatedCapacity    Int?
+  standingCapacity  Int?
+  publicDescription String?
+  status            BookableSpaceStatus @default(DRAFT)
+  isActive          Boolean             @default(true)
+  internalNotes     String?
+  createdAt         TimestamptzString   @default(now())
+
+  offerings         Offering[]
+  blackoutDates     BlackoutDateRange[]
+}
+
+model Offering {
+  id              Int          @id @default(autoincrement())
+  providerOrgId   Int?
+  providerOrg     ProviderOrganization? @relation(fields: [providerOrgId], references: [id])
+
+  venueId         Int?
+  venue           Venue?       @relation(fields: [venueId], references: [id])
+
+  bookableSpaceId Int?
+  bookableSpace   BookableSpace? @relation(fields: [bookableSpaceId], references: [id])
+
+  name            String
+  offeringType    OfferingType @default(SET_MENU)
+  pricingBasis    PricingBasis @default(PER_PERSON)
+
+  // Monetary values stored in paise
+  baseAmount      Int
+  currency        String       @default("INR")
+  minimumSpend    Int          @default(0)
+
+  minGuests       Int?
+  maxGuests       Int?
+  description     String?
+  dietaryNotes    String?
+  pricingNotes    String?
+  isCustomQuote   Boolean      @default(false)
+  taxIncluded     Boolean      @default(false)
+  isActive        Boolean      @default(true)
+  isDiscoverable  Boolean      @default(false)
+  internalNotes   String?
+  createdAt       TimestamptzString @default(now())
+}
+
+model AvailabilityMetadata {
+  id                         Int      @id @default(autoincrement())
+  venueId                    Int      @unique
+  venue                      Venue    @relation(fields: [venueId], references: [id])
+
+  requiresManualConfirmation Boolean  @default(true)
+  lastVerifiedAt             TimestamptzString?
+  operatingDaysNotes         String?
+  leadTimeHours              Int      @default(24)
+  availabilityNotes          String?
+  internalNotes              String?
+  createdAt                  TimestamptzString @default(now())
+}
+
+model BlackoutDateRange {
+  id              Int           @id @default(autoincrement())
+  bookableSpaceId Int
+  bookableSpace   BookableSpace @relation(fields: [bookableSpaceId], references: [id])
+
+  startDate       TimestamptzString
+  endDate         TimestamptzString
+  reason          String?
+  internalNotes   String?
+  createdAt       TimestamptzString @default(now())
+}
+
+model CancellationPolicy {
+  id              Int      @id @default(autoincrement())
+  venueId         Int      @unique
+  venue           Venue    @relation(fields: [venueId], references: [id])
+
+  summary         String
+  cutoffHours     Int      @default(48)
+  cutoffNotes     String?
+  depositRequired Boolean  @default(false)
+  depositPercent  Int      @default(0)
+  internalNotes   String?
+  createdAt       TimestamptzString @default(now())
 }
 
 model Policy {

@@ -2,11 +2,19 @@ import "server-only";
 
 import { db } from "@/prisma/db";
 
+import type {
+  PublicSafeBookableSpace,
+  PublicSafeOffering,
+  PublicSafeAvailabilitySummary,
+  PublicSafeCancellationSummary,
+} from "@/lib/provider/types";
+
 export type VenueItem = {
   id: number;
-  companyId: number;
+  companyId: number | null;
   name: string;
   city: string;
+  locality?: string | null;
   address: string | null;
   capacity: number;
   cuisine: string;
@@ -14,7 +22,13 @@ export type VenueItem = {
   tags: string[];
   rating: number;
   active: boolean;
+  publicDescription?: string | null;
+  bookableSpaces?: PublicSafeBookableSpace[];
+  offerings?: PublicSafeOffering[];
+  availability?: PublicSafeAvailabilitySummary | null;
+  cancellation?: PublicSafeCancellationSummary | null;
 };
+
 
 export type VenueFilterOptions = {
   city?: string;
