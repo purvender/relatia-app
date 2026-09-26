@@ -14,8 +14,9 @@ Relatia is an India-first enterprise platform engineered to streamline corporate
 * **Day 9**: Website verification, full audit, responsive QA, zero-error linting/build, repository documentation, and LinkedIn launch foundation. — **COMPLETE**
 * **Day 10–13**: Customer discovery playbooks, persona registers, and commercial pilot package specifications. — **COMPLETE**
 * **Day 18 (Provider Data Foundation, Internal Onboarding & Completion Pass)**: Core provider hierarchy (`ProviderOrganization` → `Venue` → `BookableSpace` → `Offering`), availability & cancellation governance, discovery readiness engine, operator onboarding workflow, and end-to-end multi-tenant QA pass. — **COMPLETE**
+* **Day 19 Step 1 (Public Website Audit, Partner Entry Point & Hospitality Funnel)**: Elevated public website with dual-audience pathways (Enterprises vs Partners), rich 8-section `/partners` landing page, 4-step onboarding journey, space taxonomy, and scaffolded partner auth routes (`/partners/login`, `/partners/sign-up`). — **COMPLETE**
 * **Day 19–35 (Upcoming Roadmap)**:
-  * Hospitality Partner Portal (Day 19)
+  * External Hospitality Partner Portal (Day 19 Steps 2–4)
   * Provider Booking-Request Inbox & Accept/Decline Workflows (Day 20)
   * Availability Calendar Synchronization (Day 21)
   * Provider Economics & Settlement Reconciliation (Day 22)
@@ -27,25 +28,27 @@ Relatia is an India-first enterprise platform engineered to streamline corporate
 
 | Domain | Live Now (In Repository) | Live in Test Mode | Planned Roadmap (Days 10–35) |
 | :--- | :--- | :--- | :--- |
-| **Authentication** | Multi-tenant Clerk auth, company isolation | — | Enterprise SAML 2.0 / Okta SSO direct sync |
+| **Authentication** | Multi-tenant Clerk auth, company isolation, partner portal auth scaffolding | — | Enterprise SAML 2.0 / Okta SSO direct sync |
 | **Event Lifecycle** | 6-stage atomic state machine in PostgreSQL | — | Recurring events & multi-city roadshow batches |
 | **Approvals** | In-app approvals queue with budget context | — | Native Slack & Microsoft Teams interactive bot cards |
 | **Venues** | Curated catalog with PDR capacity & minimums | — | 2-way live calendar sync with SevenRooms/TableCheck |
 | **Payments** | Webhook verification (`/api/webhooks/razorpay`) | Dynamic Razorpay Checkout (`rzp_test_`) | Corporate credit lines & multi-party escrow splits |
 | **Finance & Tax** | B2B GST calculation (SAC 996331, CGST, SGST) | — | Direct GSTR-2B portal API filing & SAP/Tally export |
-| **Public Site** | Full 4-page responsive luxury marketing website | — | Interactive ROI savings calculator |
+| **Public Site** | Dual-audience marketplace website (For Enterprises, For Partners, Platform, Contact, Partner Auth) | — | Interactive ROI savings calculator |
 | **AI Intelligence** | Analytics UI representations & deal velocity specs | — | Real-time GenAI venue recommendation inference |
 
 ---
 
 ## 🗺️ Route Map
 
-### Public Marketing Website
+### Public Marketing Website & Partner Entry Points
 | Route | Page File Path | Description | Access Level |
 | :--- | :--- | :--- | :--- |
-| **`/`** | `app/page.tsx` | Editorial homepage (Hero, floating cards, workflow map, finance narrative, roles bento, CTA) | Public |
-| **`/platform`** | `app/platform/page.tsx` | Platform Architecture (5 Core Pillars, Interactive persona switcher, ERP connectors) | Public |
-| **`/partners`** | `app/partners/page.tsx` | Hospitality Partner Network (Partner economics, room curation standards, application form) | Public |
+| **`/`** | `app/page.tsx` | Enterprise homepage (Hero with partner callout, 6-step workflow, finance narrative, partner ecosystem, dual CTA) | Public |
+| **`/platform`** | `app/platform/page.tsx` | Platform Architecture (5 Core Pillars, State Engine lifecycle, ERP connectors, Security & GST) | Public |
+| **`/partners`** | `app/partners/page.tsx` | Hospitality Partner Network (Space taxonomy, 4-step onboarding journey, management toolkit, economics, intake form) | Public |
+| **`/partners/login`** | `app/partners/login/page.tsx` | Hospitality Partner Portal Sign In (Branded partner gateway, space & menu management overview) | Public |
+| **`/partners/sign-up`** | `app/partners/sign-up/page.tsx` | Hospitality Partner Account Registration (Vetting & publishing notice, partner intake routing) | Public |
 | **`/contact`** | `app/contact/page.tsx` | Executive Consultation & Demo (Tailored consultation request form, 30-min audit, FAQ) | Public |
 
 ### Core Application & Protected Routes

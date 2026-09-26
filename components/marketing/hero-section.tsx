@@ -94,7 +94,7 @@ export function HeroSection() {
                 href="/contact"
                 className="inline-flex items-center gap-2 rounded-full bg-[var(--m-text)] px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-black/10 hover:bg-[var(--m-bg-dark-alt)] transition-all hover:shadow-xl"
               >
-                Book a Demo
+                Book an Enterprise Demo
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -103,7 +103,23 @@ export function HeroSection() {
                 href="/platform"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--m-border)] bg-white/60 px-7 py-3.5 text-sm font-semibold text-[var(--m-text)] hover:bg-white hover:border-[var(--m-text-muted)] transition-all"
               >
-                See Platform
+                Explore Platform
+              </Link>
+            </motion.div>
+
+            {/* Partner Entry Callout */}
+            <motion.div
+              className="mt-6 flex items-center gap-2 text-xs text-[var(--m-text-secondary)]"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.45, ease }}
+            >
+              <span className="font-medium text-[var(--m-text)]">Hospitality venue or restaurant operator?</span>
+              <Link
+                href="/partners"
+                className="font-semibold text-[var(--m-accent)] hover:underline inline-flex items-center gap-1"
+              >
+                Join our partner network →
               </Link>
             </motion.div>
 

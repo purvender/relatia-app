@@ -479,47 +479,62 @@ export function AISection() {
 }
 
 /* ================================================================
-   Section 6 — Venue Network
+   Section 6 — Venue Network & Hospitality Partner Entry
    ================================================================ */
 export function VenueSection() {
   return (
-    <section className="py-24 lg:py-32 bg-[var(--m-bg)]">
+    <section id="venues" className="py-24 lg:py-32 bg-[var(--m-bg)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-2 lg:items-center">
           {/* Copy */}
           <FadeInUp>
             <div className="max-w-lg">
               <span className="text-xs font-semibold uppercase tracking-widest text-[var(--m-accent)]">
-                Partner Network
+                Hospitality Partner Ecosystem
               </span>
               <h2
                 className="mt-4 font-serif text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
                 style={{ fontFamily: "var(--font-serif), serif" }}
               >
                 India&apos;s finest venues,{" "}
-                <span className="text-[var(--m-text-secondary)]">connected</span>
+                <span className="text-[var(--m-text-secondary)]">physically vetted &amp; curated</span>
               </h2>
               <p className="mt-6 text-base leading-relaxed text-[var(--m-text-secondary)]">
-                From five-star hotel restaurants to curated private dining spaces,
-                Relatia connects your team with premium venues across Mumbai, Delhi,
-                Bangalore, Chennai, and beyond — all pre-vetted for corporate dining
-                and event excellence.
+                From five-star hotel dining rooms and progressive culinary institutions to discreet private members&apos; clubs and executive boardrooms,
+                Relatia connects corporate hosts with curated spaces across Mumbai, Delhi NCR,
+                Bengaluru, Chennai, Hyderabad, and Goa.
               </p>
-              <Link
-                href="/partners"
-                className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[var(--m-accent)] hover:text-[var(--m-accent-hover)] transition-colors"
-              >
-                Explore our partner network
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </Link>
+
+              <div className="mt-6 rounded-xl border border-[var(--m-border)] bg-[var(--m-bg-alt)] p-4 text-xs text-[var(--m-text-secondary)] space-y-1.5">
+                <div className="font-semibold text-[var(--m-text)] flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                  Operator Quality &amp; Approval Gate
+                </div>
+                <p>
+                  Every venue, bookable space, and set package undergoes internal operational verification before being published to enterprise discovery.
+                </p>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-4">
+                <Link
+                  href="/partners"
+                  className="inline-flex items-center gap-2 rounded-full bg-[var(--m-brand)] px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.02]"
+                >
+                  For Hospitality Partners →
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--m-text)] hover:text-[var(--m-accent)] transition-colors"
+                >
+                  Request Venue Catalog
+                </Link>
+              </div>
             </div>
           </FadeInUp>
 
           {/* Visual */}
           <FadeInScale>
-            <div className="relative rounded-2xl overflow-hidden shadow-xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-xl border border-[var(--m-border-light)]">
               <Image
                 src="/images/marketing/venue-dining.png"
                 alt="Premium corporate dining venue interior with elegant table settings"
@@ -528,14 +543,15 @@ export function VenueSection() {
                 className="w-full h-auto object-cover"
               />
               {/* Overlay badge */}
-              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl bg-white/95 backdrop-blur-sm px-5 py-3 shadow-lg">
+              <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl bg-white/95 backdrop-blur-sm px-5 py-3 shadow-lg border border-[var(--m-border-light)]">
                 <div>
-                  <p className="text-sm font-bold text-[var(--m-text)]">Curated Network</p>
-                  <p className="text-xs text-[var(--m-text-secondary)]">Mumbai · Delhi · Bangalore · Chennai</p>
+                  <p className="text-sm font-bold text-[var(--m-text)]">Curated Partner Collection</p>
+                  <p className="text-xs text-[var(--m-text-secondary)]">PDRs · Boardrooms · Lounges · Banquets</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-[var(--m-accent)]">500+</p>
-                  <p className="text-[10px] text-[var(--m-text-secondary)]">Partner Venues</p>
+                  <span className="inline-block rounded-full bg-emerald-50 text-emerald-700 font-mono text-[11px] font-semibold px-2.5 py-0.5">
+                    Verified Network
+                  </span>
                 </div>
               </div>
             </div>
@@ -685,38 +701,37 @@ export function TestimonialsSection() {
 }
 
 /* ================================================================
-   Section 9 — Final CTA
+   Section 9 — Final CTA (Dual Pathway)
    ================================================================ */
 export function CtaSection() {
   return (
     <section className="py-24 lg:py-32 bg-[var(--m-bg-dark)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <FadeInUp className="text-center max-w-2xl mx-auto">
+        <FadeInUp className="text-center max-w-3xl mx-auto">
           <h2
             className="font-serif text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl"
             style={{ fontFamily: "var(--font-serif), serif" }}
           >
-            Ready to transform how your enterprise handles dining &amp; events?
+            Built for enterprise hosts. Curated for premier hospitality partners.
           </h2>
           <p className="mt-6 text-base leading-relaxed text-white/60 max-w-xl mx-auto">
-            Join the enterprises already using Relatia to save time, control spend,
-            and build stronger relationships — one perfectly coordinated event at a time.
+            Whether you are streamlining corporate event approvals or looking to fill private dining rooms with pre-budgeted corporate clientele, Relatia provides the dedicated operating system.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 rounded-full bg-[var(--m-accent)] px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-[var(--m-accent)]/25 hover:bg-[var(--m-accent-hover)] transition-all hover:shadow-xl"
             >
-              Book a Demo
+              Book Enterprise Demo
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
             <Link
-              href="/platform"
+              href="/partners"
               className="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-4 text-sm font-semibold text-white hover:bg-white/10 transition-all"
             >
-              Explore Platform
+              For Hospitality Partners →
             </Link>
           </div>
         </FadeInUp>

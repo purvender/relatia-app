@@ -5,37 +5,40 @@ const footerSections = [
   {
     title: "Platform",
     links: [
-      { label: "How It Works", href: "/platform" },
-      { label: "Venue Discovery", href: "/platform#venues" },
-      { label: "Approvals", href: "/platform#approvals" },
-      { label: "Finance & GST", href: "/platform#finance" },
-      { label: "Intelligence Roadmap", href: "/platform#ai" },
+      { label: "Overview & Pillars", href: "/platform" },
+      { label: "Lifecycle Architecture", href: "/platform#lifecycle" },
+      { label: "Approval Governance", href: "/platform#pillars" },
+      { label: "GST & Tax Invoicing", href: "/platform#pillars" },
+      { label: "Security & Controls", href: "/platform#security" },
     ],
   },
   {
-    title: "Company",
+    title: "For Enterprises",
     links: [
-      { label: "About", href: "/contact" },
-      { label: "Partners", href: "/partners" },
-      { label: "Careers", href: "/contact" },
-      { label: "Blog", href: "/contact" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
+      { label: "Corporate Event Ops", href: "/" },
+      { label: "Financial Workflows", href: "/#finance" },
+      { label: "Curated Venues", href: "/#venues" },
       { label: "Book a Demo", href: "/contact" },
-      { label: "Documentation", href: "/contact" },
-      { label: "Help Center", href: "/contact" },
-      { label: "API", href: "/contact" },
+      { label: "Enterprise Sign In", href: "/sign-in" },
     ],
   },
   {
-    title: "Legal",
+    title: "For Partners",
     links: [
+      { label: "Hospitality Network", href: "/partners" },
+      { label: "Partner Economics", href: "/partners#value" },
+      { label: "Curation Standards", href: "/partners#standards" },
+      { label: "Apply to Join", href: "/partners#apply" },
+      { label: "Partner Portal Login", href: "/partners/login" },
+    ],
+  },
+  {
+    title: "Trust & Legal",
+    links: [
+      { label: "GST SAC 996331", href: "/platform#security" },
+      { label: "Security Policy", href: "/contact" },
       { label: "Privacy Policy", href: "/contact" },
       { label: "Terms of Service", href: "/contact" },
-      { label: "Security", href: "/contact" },
     ],
   },
 ];

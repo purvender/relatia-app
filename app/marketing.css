@@ -14,6 +14,11 @@
   --m-accent: #C17F3E;
   --m-accent-hover: #A86A2B;
   --m-accent-light: #F5E6D3;
+  --m-accent-warm: #E8A86B;
+  --m-brand: #C17F3E;
+  --m-brand-dark: #A86A2B;
+  --m-brand-light: #F5E6D3;
+  --m-card: #FFFFFF;
   --m-border: #E8E3DA;
   --m-border-light: #F0ECE4;
 }
