@@ -68,7 +68,7 @@ export async function createCompanyAction(formData: FormData) {
 
     await tx.orm.public.User.where({ id: user.id }).update({
       companyId: createdCompany.id,
-      role: "ADMIN",
+      role: "COMPANY_ADMIN",
     });
 
     return createdCompany;

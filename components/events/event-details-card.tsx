@@ -4,12 +4,16 @@ import { ApprovalStatusBadge } from "@/components/approvals/approval-status-badg
 import { ApprovalActionButtons } from "@/components/approvals/approval-action-buttons";
 import { EventVenueDiscoveryCard } from "@/components/events/event-venue-discovery-card";
 import { EventBookingSummaryCard } from "@/components/events/event-booking-summary-card";
+import { ConfirmProviderRequestButton } from "@/components/events/confirm-provider-request-button";
 import type { EventWithCreator } from "@/lib/events/get-event-by-id";
 import type { BookingSummary } from "@/lib/bookings/get-booking-by-event";
+import type { ProviderBookingRequestDetail } from "@/lib/provider/types";
+import { Building2, Clock, CheckCircle2, XCircle, Ban } from "lucide-react";
 
 type Props = {
   event: EventWithCreator;
   booking?: BookingSummary | null;
+  providerBookingRequests?: ProviderBookingRequestDetail[];
   currentUserId?: number;
   currentUserRole?: string;
 };
@@ -30,9 +34,49 @@ function MetaRow({ label, value }: MetaRowProps) {
   );
 }
 
+function ProviderRequestStatusPill({ status }: { status: string }) {
+  switch (status) {
+    case "PENDING_PROVIDER_REVIEW":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-medium text-amber-800 border border-amber-200">
+          <Clock className="h-3 w-3 text-amber-600" />
+          Waiting for provider response
+        </span>
+      );
+    case "ACCEPTED":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-800 border border-emerald-200">
+          <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+          Provider accepted the request
+        </span>
+      );
+    case "REJECTED":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-800 border border-rose-200">
+          <XCircle className="h-3 w-3 text-rose-600" />
+          Provider declined the request
+        </span>
+      );
+    case "CANCELLED":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-2.5 py-0.5 text-xs font-medium text-slate-700 border border-slate-200">
+          <Ban className="h-3 w-3 text-slate-500" />
+          Request cancelled
+        </span>
+      );
+    default:
+      return (
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+          {status}
+        </span>
+      );
+  }
+}
+
 export function EventDetailsCard({
   event,
   booking,
+  providerBookingRequests = [],
   currentUserId,
   currentUserRole,
 }: Props) {
@@ -75,6 +119,101 @@ export function EventDetailsCard({
 
       {/* Booking Summary Section if booking exists */}
       {booking && <EventBookingSummaryCard booking={booking} />}
+
+      {/* Provider Booking Requests if any exist */}
+      {providerBookingRequests.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-2xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-slate-500" />
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-700">
+                Hospitality Partner Booking Requests
+              </h3>
+            </div>
+            <span className="text-xs text-slate-500">
+              {providerBookingRequests.length} request{providerBookingRequests.length === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            {providerBookingRequests.map((req) => (
+              <div key={req.id} className="py-3.5 first:pt-0 last:pb-0 space-y-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">
+                      {req.venueName}
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      {req.providerOrgName} · {req.venueCity}
+                      {req.spaceName && ` · Space: ${req.spaceName}`}
+                      {req.offeringName && ` · Package: ${req.offeringName}`}
+                    </p>
+                  </div>
+                  <ProviderRequestStatusPill status={req.status} />
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                  <div>
+                    <span className="text-slate-400 block">Requested Date</span>
+                    <span className="font-medium text-slate-800">
+                      {formatEventDateTime(req.requestedDateTime)}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Guests</span>
+                    <span className="font-medium text-slate-800">
+                      {req.attendees.toLocaleString("en-IN")} attendees
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block">Estimated Budget</span>
+                    <span className="font-medium text-slate-800">
+                      {req.estimatedAmountPaise
+                        ? formatRupees(req.estimatedAmountPaise)
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+
+                {req.providerResponseNote && (
+                  <div className="text-xs bg-emerald-50/50 border border-emerald-100 text-emerald-900 p-2.5 rounded-md">
+                    <span className="font-semibold block">Partner Response Note:</span>
+                    {req.providerResponseNote}
+                  </div>
+                )}
+
+                {req.rejectionReason && (
+                  <div className="text-xs bg-rose-50/50 border border-rose-100 text-rose-900 p-2.5 rounded-md">
+                    <span className="font-semibold block">Decline Reason:</span>
+                    {req.rejectionReason}
+                  </div>
+                )}
+
+                {/* Confirm & Generate Invoice CTA — shown to REQUESTER/COMPANY_ADMIN/ADMIN when provider has ACCEPTED and no booking confirmed yet */}
+                {req.status === "ACCEPTED" &&
+                  !booking &&
+                  (currentUserRole === "REQUESTER" || currentUserRole === "COMPANY_ADMIN" || currentUserRole === "ADMIN") && (
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-semibold text-emerald-800">
+                          Provider has confirmed availability
+                        </p>
+                        <p className="text-[11px] text-slate-600">
+                          Confirm your commercial booking to generate the invoice and proceed to payment.
+                        </p>
+                      </div>
+                      <ConfirmProviderRequestButton
+                        requestId={req.id}
+                        eventId={event.id}
+                        venueName={req.venueName}
+                      />
+                    </div>
+                  )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Details grid */}
       <div className="rounded-xl border border-slate-200 bg-white px-6 py-5 shadow-2xs">
@@ -133,7 +272,8 @@ export function EventDetailsCard({
             {event.approvals.map((appr) => {
               const canUserActOnThis =
                 appr.status === "PENDING" &&
-                (currentUserRole === "ADMIN" ||
+                (currentUserRole === "COMPANY_ADMIN" ||
+                  currentUserRole === "ADMIN" ||
                   (currentUserRole === "APPROVER" &&
                     appr.approverId === currentUserId));
 
@@ -208,3 +348,4 @@ export function EventDetailsCard({
     </div>
   );
 }
+

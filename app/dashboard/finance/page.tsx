@@ -4,8 +4,8 @@ import { FinanceKpiCards } from "@/components/finance/finance-kpi-cards";
 import { FinanceRecordsTable } from "@/components/finance/finance-records-table";
 
 export default async function FinancePage() {
-  // 1. Authorize: FINANCE and ADMIN roles only
-  const user = await requireUserRole(["FINANCE", "ADMIN"]);
+  // 1. Authorize: FINANCE, COMPANY_ADMIN, and ADMIN roles
+  const user = await requireUserRole(["FINANCE", "COMPANY_ADMIN", "ADMIN"]);
 
   // 2. Fetch tenant-isolated finance data & metrics
   const { metrics, records } = await getFinanceDashboardData(user.companyId);

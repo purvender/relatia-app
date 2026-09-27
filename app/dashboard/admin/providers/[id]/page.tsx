@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { requireUserRole } from "@/lib/auth";
+import { requirePlatformAdmin } from "@/lib/auth";
 import { getProviderOrganizationById } from "@/lib/provider/service";
 import { ProviderDetailView } from "@/components/provider/provider-components";
 
@@ -17,8 +17,8 @@ export default async function ProviderDetailPage({
     notFound();
   }
 
-  // Strictly protected for internal admins
-  await requireUserRole(["ADMIN"]);
+  // Strictly protected for internal platform admins
+  await requirePlatformAdmin();
 
   const providerData = await getProviderOrganizationById(providerId);
   if (!providerData) {

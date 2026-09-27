@@ -20,8 +20,8 @@ export default async function InvoiceDetailPage({
     notFound();
   }
 
-  // 2. Authorize: FINANCE and ADMIN roles only
-  const user = await requireUserRole(["FINANCE", "ADMIN"]);
+  // 2. Authorize: FINANCE, COMPANY_ADMIN, ADMIN, and REQUESTER (to view their company's invoices)
+  const user = await requireUserRole(["FINANCE", "COMPANY_ADMIN", "ADMIN", "REQUESTER"]);
 
   // 3. Fetch invoice safely within company scope (tenant isolation)
   const invoice = await getInvoiceById(invoiceId, user.companyId);
@@ -57,11 +57,17 @@ export default async function InvoiceDetailPage({
 
         <div className="flex flex-wrap items-center gap-3">
           {invoice.booking.paymentStatus !== "PAID" && (
-            <RazorpayPayButton
-              eventId={invoice.event.id}
-              amountPaise={invoice.totalAmount}
-              invoiceNumber={invoice.invoiceNumber}
-            />
+            user.role === "FINANCE" ? (
+              <RazorpayPayButton
+                eventId={invoice.event.id}
+                amountPaise={invoice.totalAmount}
+                invoiceNumber={invoice.invoiceNumber}
+              />
+            ) : (
+              <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 shadow-2xs">
+                Awaiting Finance Payment
+              </span>
+            )
           )}
           <PrintInvoiceButton />
         </div>

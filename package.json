@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx -y tsx tests/provider-domain.test.ts",
+    "test": "npx -y tsx tests/provider-domain.test.ts && npx -y tsx tests/commercial-flow.test.ts && npx -y tsx tests/admin-roles.test.ts",
     "db:seed": "npx -y tsx prisma/seed.ts",
     "postinstall": "prisma skills sync || exit 0"
   },

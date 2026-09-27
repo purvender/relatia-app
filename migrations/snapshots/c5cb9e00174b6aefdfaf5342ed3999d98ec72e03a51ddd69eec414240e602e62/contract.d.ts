@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'74bbbdd12d25749507d671110a5d11eb42a0bec5e3d7af652880f032c64db1f6'>;
+  StorageHashBase<'c5cb9e00174b6aefdfaf5342ed3999d98ec72e03a51ddd69eec414240e602e62'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -416,8 +416,7 @@ export type FieldOutputTypes = {
       readonly maxBudget: CodecTypes['pg/int4@1']['output'];
       readonly perPersonCap: CodecTypes['pg/int4@1']['output'];
       readonly allowedCities: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
-      readonly approverRole:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly approverRole: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     };
     readonly ProviderBookingRequest: {
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -505,8 +504,7 @@ export type FieldOutputTypes = {
       readonly clerkId: CodecTypes['pg/text@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly role:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly role: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
       readonly companyId: CodecTypes['pg/int4@1']['output'] | null;
     };
     readonly Venue: {
@@ -727,8 +725,7 @@ export type FieldInputTypes = {
       readonly maxBudget: CodecTypes['pg/int4@1']['input'];
       readonly perPersonCap: CodecTypes['pg/int4@1']['input'];
       readonly allowedCities: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
-      readonly approverRole:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly approverRole: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     };
     readonly ProviderBookingRequest: {
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -816,8 +813,7 @@ export type FieldInputTypes = {
       readonly clerkId: CodecTypes['pg/text@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly role:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly role: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
       readonly companyId: CodecTypes['pg/int4@1']['input'] | null;
     };
     readonly Venue: {
@@ -1034,8 +1030,7 @@ export type StorageColumnTypes = {
     };
     readonly policy: {
       readonly allowedCities: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
-      readonly approverRole:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly approverRole: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
       readonly companyId: CodecTypes['pg/int4@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly maxBudget: CodecTypes['pg/int4@1']['output'];
@@ -1128,8 +1123,7 @@ export type StorageColumnTypes = {
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
-      readonly role:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly role: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     };
     readonly venue: {
       readonly active: CodecTypes['pg/bool@1']['output'];
@@ -1345,8 +1339,7 @@ export type StorageColumnInputTypes = {
     };
     readonly policy: {
       readonly allowedCities: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
-      readonly approverRole:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly approverRole: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
       readonly companyId: CodecTypes['pg/int4@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly maxBudget: CodecTypes['pg/int4@1']['input'];
@@ -1439,8 +1432,7 @@ export type StorageColumnInputTypes = {
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
-      readonly role:
-        'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+      readonly role: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     };
     readonly venue: {
       readonly active: CodecTypes['pg/bool@1']['input'];
@@ -1502,7 +1494,7 @@ export namespace Models {
     clerkId: CodecTypes['pg/text@1']['output'];
     email: CodecTypes['pg/text@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
-    role: 'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+    role: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     companyId: CodecTypes['pg/int4@1']['output'] | null;
     approvals: public_Approval[];
     company: public_Company | null;
@@ -1803,8 +1795,7 @@ export namespace Models {
     maxBudget: CodecTypes['pg/int4@1']['output'];
     perPersonCap: CodecTypes['pg/int4@1']['output'];
     allowedCities: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
-    approverRole:
-      'PLATFORM_ADMIN' | 'COMPANY_ADMIN' | 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
+    approverRole: 'ADMIN' | 'REQUESTER' | 'APPROVER' | 'FINANCE';
     company: public_Company;
     readonly [RelationKeys]?: 'company';
   };
@@ -4138,14 +4129,7 @@ type ContractBase = Omit<
             };
             readonly Role: {
               readonly kind: 'valueSet';
-              readonly values: readonly [
-                'PLATFORM_ADMIN',
-                'COMPANY_ADMIN',
-                'ADMIN',
-                'REQUESTER',
-                'APPROVER',
-                'FINANCE',
-              ];
+              readonly values: readonly ['ADMIN', 'REQUESTER', 'APPROVER', 'FINANCE'];
             };
             readonly VenueVisibility: {
               readonly kind: 'valueSet';
@@ -6325,8 +6309,6 @@ type ContractBase = Omit<
           readonly Role: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
-              { readonly name: 'PLATFORM_ADMIN'; readonly value: 'PLATFORM_ADMIN' },
-              { readonly name: 'COMPANY_ADMIN'; readonly value: 'COMPANY_ADMIN' },
               { readonly name: 'ADMIN'; readonly value: 'ADMIN' },
               { readonly name: 'REQUESTER'; readonly value: 'REQUESTER' },
               { readonly name: 'APPROVER'; readonly value: 'APPROVER' },

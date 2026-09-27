@@ -42,7 +42,7 @@ export async function listPendingApprovals(
 ): Promise<PendingApprovalWithDetails[]> {
   // Fetch pending approvals
   const rawApprovals =
-    user.role === "ADMIN"
+    user.role === "COMPANY_ADMIN" || user.role === "ADMIN"
       ? await db.orm.public.Approval.where({ status: "PENDING" }).all()
       : await db.orm.public.Approval.where({
           approverId: user.id,

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireUserRole } from "@/lib/auth";
+import { requirePlatformAdmin, requireAppUser } from "@/lib/auth";
 import {
   createProviderSchema,
   updateProviderSchema,
@@ -18,6 +18,8 @@ import {
   updateCancellationPolicySchema,
   recordVerificationSchema,
   venueVisibilityEnum,
+  createProviderBookingRequestSchema,
+  cancelProviderBookingRequestSchema,
 } from "./validation";
 import {
   createProviderOrganization,
@@ -39,6 +41,8 @@ import {
   recordVerification,
   evaluateAndSyncVenueReadiness,
   updateVenueVisibility,
+  createProviderBookingRequestRecord,
+  cancelProviderBookingRequestRecord,
 } from "./service";
 
 export type ActionResult<T = unknown> =
@@ -49,7 +53,7 @@ export async function createProviderAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const rawData = {
     name: formData.get("name"),
@@ -86,7 +90,7 @@ export async function updateProviderAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const rawData = {
     id: Number(formData.get("id")),
@@ -127,7 +131,7 @@ export async function createProviderContactAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const rawData = {
     providerOrgId: Number(formData.get("providerOrgId")),
@@ -167,7 +171,7 @@ export async function updateProviderContactAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : undefined;
   const rawData = {
@@ -213,7 +217,7 @@ export async function toggleProviderContactAction(
   isActive: boolean,
   providerOrgId?: number,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   try {
     const updated = await toggleProviderContact(contactId, isActive);
@@ -235,7 +239,7 @@ export async function createProviderDocumentAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const rawData = {
     providerOrgId: Number(formData.get("providerOrgId")),
@@ -273,7 +277,7 @@ export async function createProviderVenueAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const tagsString = formData.get("tags");
   const tags = typeof tagsString === "string" && tagsString.trim().length > 0
@@ -325,7 +329,7 @@ export async function updateProviderVenueAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : undefined;
   const tagsString = formData.get("tags");
@@ -384,7 +388,7 @@ export async function createBookableSpaceAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
 
@@ -434,7 +438,7 @@ export async function updateBookableSpaceAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const venueId = Number(formData.get("venueId"));
@@ -489,7 +493,7 @@ export async function toggleBookableSpaceAction(
   venueId: number,
   providerOrgId?: number,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   try {
     const updated = await toggleBookableSpace(spaceId, isActive);
@@ -515,7 +519,7 @@ export async function createOfferingAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const baseRupees = Number(formData.get("baseAmountRupees") || 0);
@@ -576,7 +580,7 @@ export async function updateOfferingAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const venueId = formData.get("venueId") ? Number(formData.get("venueId")) : null;
@@ -640,7 +644,7 @@ export async function toggleOfferingAction(
   venueId?: number,
   providerOrgId?: number,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   try {
     const updated = await toggleOffering(offeringId, isActive);
@@ -666,7 +670,7 @@ export async function updateAvailabilityAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const rawData = {
@@ -708,7 +712,7 @@ export async function updateCancellationPolicyAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const rawData = {
@@ -750,7 +754,7 @@ export async function recordVerificationAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  const user = await requireUserRole(["ADMIN"]);
+  const user = await requirePlatformAdmin();
 
   const providerOrgId = formData.get("providerOrgId") ? Number(formData.get("providerOrgId")) : null;
   const venueId = formData.get("venueId") ? Number(formData.get("venueId")) : null;
@@ -797,7 +801,7 @@ export async function syncVenueReadinessAction(
   venueId: number,
   providerOrgId?: number,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   try {
     const evaluation = await evaluateAndSyncVenueReadiness(venueId);
@@ -822,7 +826,7 @@ export async function updateVenueVisibilityAction(
   prevState: unknown,
   formData: FormData,
 ): Promise<ActionResult> {
-  await requireUserRole(["ADMIN"]);
+  await requirePlatformAdmin();
 
   const rawVenueId = Number(formData.get("venueId"));
   const rawVisibility = formData.get("visibility");
@@ -875,3 +879,103 @@ export async function updateVenueVisibilityAction(
     return { success: false, error: message };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Enterprise Provider Booking Request Actions (Day 20 Step 1)
+// ---------------------------------------------------------------------------
+
+export async function createProviderBookingRequestAction(
+  prevState: unknown,
+  formData: FormData,
+): Promise<ActionResult<{ requestId: number }>> {
+  const user = await requireAppUser();
+
+  const rawData = {
+    eventId: Number(formData.get("eventId")),
+    venueId: Number(formData.get("venueId")),
+    bookableSpaceId: formData.get("bookableSpaceId")
+      ? Number(formData.get("bookableSpaceId"))
+      : null,
+    offeringId: formData.get("offeringId")
+      ? Number(formData.get("offeringId"))
+      : null,
+    requestedDateTime: String(formData.get("requestedDateTime") || "").trim(),
+    attendees: Number(formData.get("attendees")),
+    estimatedAmountPaise: formData.get("estimatedAmountPaise")
+      ? Number(formData.get("estimatedAmountPaise"))
+      : null,
+    dietaryNotes: formData.get("dietaryNotes")
+      ? String(formData.get("dietaryNotes")).trim()
+      : null,
+    operationalNotes: formData.get("operationalNotes")
+      ? String(formData.get("operationalNotes")).trim()
+      : null,
+  };
+
+  const parsed = createProviderBookingRequestSchema.safeParse(rawData);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please check the booking request details.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const record = await createProviderBookingRequestRecord(parsed.data, {
+      id: user.id,
+      companyId: user.companyId,
+      role: user.role,
+    });
+
+    revalidatePath(`/events/${parsed.data.eventId}`);
+    revalidatePath("/events");
+    revalidatePath("/partners/portal");
+
+    return {
+      success: true,
+      data: { requestId: record.id },
+      message: "Your booking request has been submitted to the partner.",
+    };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to submit booking request.";
+    return { success: false, error: message };
+  }
+}
+
+export async function cancelProviderBookingRequestAction(
+  requestId: number,
+): Promise<ActionResult<{ requestId: number }>> {
+  const user = await requireAppUser();
+
+  const parsed = cancelProviderBookingRequestSchema.safeParse({ requestId });
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid request ID.",
+    };
+  }
+
+  try {
+    const record = await cancelProviderBookingRequestRecord(parsed.data.requestId, {
+      id: user.id,
+      companyId: user.companyId,
+    });
+
+    revalidatePath(`/events/${record.eventId}`);
+    revalidatePath("/events");
+    revalidatePath("/partners/portal");
+
+    return {
+      success: true,
+      data: { requestId: record.id },
+      message: "The booking request has been cancelled.",
+    };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to cancel booking request.";
+    return { success: false, error: message };
+  }
+}
+

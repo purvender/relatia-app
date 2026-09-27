@@ -175,17 +175,23 @@ export function SelectVenueForEventCard({
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Selecting...</span>
+                    <span>Processing...</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>Select for Event</span>
+                    <span>
+                      {!venue.companyId || venue.companyId !== event.companyId
+                        ? "Select Venue for Event"
+                        : "Select for Event"}
+                    </span>
                   </>
                 )}
               </button>
               <span className="text-[11px] text-slate-500">
-                Will mark status as VENUE_SELECTED
+                {!venue.companyId || venue.companyId !== event.companyId
+                  ? "Submits request to partner inbox"
+                  : "Will mark status as VENUE_SELECTED"}
               </span>
             </div>
           </div>

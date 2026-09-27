@@ -16,6 +16,8 @@ import {
   createOfferingSchema,
   updateAvailabilityMetadataSchema,
   updateCancellationPolicySchema,
+  acceptProviderBookingRequestSchema,
+  rejectProviderBookingRequestSchema,
 } from "./validation";
 import {
   createProviderOrganization,
@@ -27,6 +29,8 @@ import {
   saveAvailabilityMetadata,
   saveCancellationPolicy,
   evaluateAndSyncVenueReadiness,
+  acceptProviderBookingRequestRecord,
+  rejectProviderBookingRequestRecord,
 } from "./service";
 
 export type ActionResult<T = unknown> =
@@ -486,3 +490,119 @@ export async function partnerSubmitForReviewAction(): Promise<ActionResult> {
     return { success: false, error: message };
   }
 }
+
+// ---------------------------------------------------------------------------
+// Partner Booking Request Actions (Day 20 Step 1)
+// ---------------------------------------------------------------------------
+
+export async function partnerAcceptBookingRequestAction(
+  prevState: unknown,
+  formData: FormData,
+): Promise<ActionResult<{ requestId: number }>> {
+  const partner = await requirePartnerUser();
+
+  if (!partner.providerOrgId) {
+    return {
+      success: false,
+      error: "You must be linked to a verified provider organization to accept booking requests.",
+    };
+  }
+
+  const rawData = {
+    requestId: Number(formData.get("requestId")),
+    providerResponseNote: formData.get("providerResponseNote")
+      ? String(formData.get("providerResponseNote")).trim()
+      : null,
+  };
+
+  const parsed = acceptProviderBookingRequestSchema.safeParse(rawData);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Invalid request parameters.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const record = await acceptProviderBookingRequestRecord(
+      parsed.data.requestId,
+      {
+        id: partner.id,
+        providerOrgId: partner.providerOrgId,
+      },
+      parsed.data.providerResponseNote,
+    );
+
+    revalidatePath("/partners/portal");
+    revalidatePath("/partners/portal/inbox");
+    revalidatePath(`/partners/portal/inbox/${record.id}`);
+    revalidatePath(`/events/${record.eventId}`);
+
+    return {
+      success: true,
+      data: { requestId: record.id },
+      message: "Booking request accepted successfully.",
+    };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to accept booking request.";
+    return { success: false, error: message };
+  }
+}
+
+export async function partnerRejectBookingRequestAction(
+  prevState: unknown,
+  formData: FormData,
+): Promise<ActionResult<{ requestId: number }>> {
+  const partner = await requirePartnerUser();
+
+  if (!partner.providerOrgId) {
+    return {
+      success: false,
+      error: "You must be linked to a verified provider organization to decline booking requests.",
+    };
+  }
+
+  const rawData = {
+    requestId: Number(formData.get("requestId")),
+    rejectionReason: String(formData.get("rejectionReason") || "").trim(),
+  };
+
+  const parsed = rejectProviderBookingRequestSchema.safeParse(rawData);
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: "Please provide a reason for declining this request.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const record = await rejectProviderBookingRequestRecord(
+      parsed.data.requestId,
+      {
+        id: partner.id,
+        providerOrgId: partner.providerOrgId,
+      },
+      parsed.data.rejectionReason,
+    );
+
+    revalidatePath("/partners/portal");
+    revalidatePath("/partners/portal/inbox");
+    revalidatePath(`/partners/portal/inbox/${record.id}`);
+    revalidatePath(`/events/${record.eventId}`);
+
+    return {
+      success: true,
+      data: { requestId: record.id },
+      message: "Booking request declined.",
+    };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : "Failed to decline booking request.";
+    return { success: false, error: message };
+  }
+}
+
+

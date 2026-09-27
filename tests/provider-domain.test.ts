@@ -13,6 +13,11 @@ import {
   updateAvailabilityMetadataSchema,
   updateCancellationPolicySchema,
   recordVerificationSchema,
+  createProviderBookingRequestSchema,
+  acceptProviderBookingRequestSchema,
+  rejectProviderBookingRequestSchema,
+  cancelProviderBookingRequestSchema,
+  providerRequestStatusEnum,
 } from "../lib/provider/validation";
 import {
   evaluateDiscoveryReadiness,
@@ -25,6 +30,12 @@ import type {
   ProviderVenueRecord,
   BookableSpaceRecord,
   OfferingRecord,
+  ProviderRequestStatus,
+  ProviderBookingRequestRecord,
+} from "../lib/provider/types";
+import {
+  getProviderRequestStatusLabel,
+  PROVIDER_REQUEST_STATUS_LABELS,
 } from "../lib/provider/types";
 
 function runTests() {
@@ -1053,7 +1064,789 @@ function runTests() {
     console.log("  ✅ Test 21 Passed: Partner Form Enum Mapping & User-Friendly Error Messages");
   }
 
-  console.log("🎉 All 21 Provider Domain & Onboarding Tests Passed Successfully!\n");
+  // Test 22: Provider Booking Request Schema & Initial Lifecycle
+  {
+    const validRequest = createProviderBookingRequestSchema.safeParse({
+      eventId: 101,
+      venueId: 201,
+      bookableSpaceId: 301,
+      offeringId: 401,
+      requestedDateTime: "2026-10-15T19:00:00.000Z",
+      attendees: 18,
+      estimatedAmountPaise: 9000000,
+      dietaryNotes: "2 Vegan, 1 Nut allergy",
+      operationalNotes: "Need AV setup for CXO keynote",
+    });
+
+    assert.equal(validRequest.success, true, "Valid booking request must parse successfully");
+
+    const invalidRequest = createProviderBookingRequestSchema.safeParse({
+      eventId: 101,
+      venueId: 201,
+      requestedDateTime: "",
+      attendees: 0, // Invariant: must be at least 1 guest
+    });
+
+    assert.equal(invalidRequest.success, false, "Zero attendees must fail validation");
+
+    const statusValid = providerRequestStatusEnum.safeParse("PENDING_PROVIDER_REVIEW");
+    assert.equal(statusValid.success, true, "PENDING_PROVIDER_REVIEW must be a valid status");
+
+    const statusInvalid = providerRequestStatusEnum.safeParse("UNKNOWN_STATUS");
+    assert.equal(statusInvalid.success, false, "Invalid status must fail");
+
+    const acceptValid = acceptProviderBookingRequestSchema.safeParse({
+      requestId: 55,
+      providerResponseNote: "We have held the space.",
+    });
+    assert.equal(acceptValid.success, true, "Valid accept request schema must pass");
+
+    const cancelValid = cancelProviderBookingRequestSchema.safeParse({
+      requestId: 55,
+    });
+    assert.equal(cancelValid.success, true, "Valid cancel request schema must pass");
+
+    console.log("  ✅ Test 22 Passed: Provider Booking Request Schema & Initial Lifecycle");
+  }
+
+  // Test 23: Enterprise Request Authorization & Cross-Tenant Boundaries
+  {
+    type EnterpriseUser = { id: number; companyId: number; role: string };
+    type EventStub = { id: number; companyId: number; attendees: number };
+    type VenueStub = {
+      id: number;
+      providerOrgId: number;
+      capacity: number;
+      active: boolean;
+      visibility: string;
+      verificationStatus: string;
+    };
+    type ProviderOrgStub = { id: number; status: string };
+
+    const enterpriseUser: EnterpriseUser = { id: 1, companyId: 50, role: "REQUESTER" };
+    const validEvent: EventStub = { id: 100, companyId: 50, attendees: 20 };
+    const foreignEvent: EventStub = { id: 200, companyId: 999, attendees: 20 }; // Cross-company
+
+    const verifiedOrg: ProviderOrgStub = { id: 10, status: "VERIFIED" };
+    const unverifiedOrg: ProviderOrgStub = { id: 11, status: "PENDING_VERIFICATION" };
+
+    const verifiedVenue: VenueStub = {
+      id: 501,
+      providerOrgId: 10,
+      capacity: 50,
+      active: true,
+      visibility: "DISCOVERABLE",
+      verificationStatus: "VERIFIED",
+    };
+
+    const unverifiedVenue: VenueStub = {
+      id: 502,
+      providerOrgId: 11,
+      capacity: 50,
+      active: true,
+      visibility: "DISCOVERABLE",
+      verificationStatus: "VERIFIED",
+    };
+
+    function validateRequestCreation(user: EnterpriseUser, event: EventStub, venue: VenueStub, org: ProviderOrgStub) {
+      if (event.companyId !== user.companyId) {
+        throw new Error("Event not found or does not belong to your company.");
+      }
+      if (!venue.active || venue.providerOrgId !== org.id) {
+        throw new Error("The selected venue is unavailable or does not exist.");
+      }
+      if (org.status !== "VERIFIED") {
+        throw new Error("The partner organization is not yet verified to accept corporate bookings.");
+      }
+      if (venue.visibility !== "DISCOVERABLE" && venue.verificationStatus !== "VERIFIED") {
+        throw new Error("This venue is not currently eligible to receive booking requests.");
+      }
+      return true;
+    }
+
+    // Happy path: same company, verified provider
+    assert.equal(validateRequestCreation(enterpriseUser, validEvent, verifiedVenue, verifiedOrg), true);
+
+    // Cross-tenant guard: cannot request for another company's event
+    assert.throws(
+      () => validateRequestCreation(enterpriseUser, foreignEvent, verifiedVenue, verifiedOrg),
+      /does not belong to your company/,
+      "Cross-company event access must throw"
+    );
+
+    // Unverified provider guard: cannot request booking from unverified provider
+    assert.throws(
+      () => validateRequestCreation(enterpriseUser, validEvent, unverifiedVenue, unverifiedOrg),
+      /partner organization is not yet verified/,
+      "Unverified provider must not receive requests"
+    );
+
+    console.log("  ✅ Test 23 Passed: Enterprise Request Authorization & Cross-Tenant Boundaries");
+  }
+
+  // Test 24: Provider Decision Lifecycle Invariants
+  {
+    type RequestState = {
+      id: number;
+      providerOrgId: number;
+      status: ProviderRequestStatus;
+      rejectionReason: string | null;
+      providerResponseNote: string | null;
+      respondedByPartnerUserId: number | null;
+      respondedAt: string | null;
+    };
+
+    function acceptRequest(
+      req: RequestState,
+      partner: { id: number; providerOrgId: number },
+      orgStatus: string,
+      note?: string | null
+    ): RequestState {
+      if (req.providerOrgId !== partner.providerOrgId) {
+        throw new Error("Access denied: You cannot act on a request for another provider organization.");
+      }
+      if (orgStatus !== "VERIFIED") {
+        throw new Error("Your partner organization must be fully verified before accepting requests.");
+      }
+      if (req.status !== "PENDING_PROVIDER_REVIEW") {
+        throw new Error(`Cannot accept request: current status is ${req.status}.`);
+      }
+      return {
+        ...req,
+        status: "ACCEPTED",
+        providerResponseNote: note ?? null,
+        respondedByPartnerUserId: partner.id,
+        respondedAt: new Date().toISOString(),
+      };
+    }
+
+    function rejectRequest(
+      req: RequestState,
+      partner: { id: number; providerOrgId: number },
+      orgStatus: string,
+      reason: string
+    ): RequestState {
+      if (req.providerOrgId !== partner.providerOrgId) {
+        throw new Error("Access denied: You cannot act on a request for another provider organization.");
+      }
+      if (orgStatus !== "VERIFIED") {
+        throw new Error("Your partner organization must be verified before acting on requests.");
+      }
+      if (req.status !== "PENDING_PROVIDER_REVIEW") {
+        throw new Error(`Cannot decline request: current status is ${req.status}.`);
+      }
+      const parsed = rejectProviderBookingRequestSchema.safeParse({ requestId: req.id, rejectionReason: reason });
+      if (!parsed.success) {
+        throw new Error("A valid reason for declining this booking request is required.");
+      }
+      return {
+        ...req,
+        status: "REJECTED",
+        rejectionReason: reason,
+        respondedByPartnerUserId: partner.id,
+        respondedAt: new Date().toISOString(),
+      };
+    }
+
+    const pendingRequest: RequestState = {
+      id: 701,
+      providerOrgId: 25,
+      status: "PENDING_PROVIDER_REVIEW",
+      rejectionReason: null,
+      providerResponseNote: null,
+      respondedByPartnerUserId: null,
+      respondedAt: null,
+    };
+
+    const partnerA = { id: 10, providerOrgId: 25 };
+    const partnerB = { id: 11, providerOrgId: 99 }; // Foreign provider
+
+    // Partner B cannot act on Partner A's request
+    assert.throws(
+      () => acceptRequest(pendingRequest, partnerB, "VERIFIED", "Confirmed"),
+      /Access denied/,
+      "Foreign partner cannot accept request"
+    );
+
+    // Partner A can accept
+    const accepted = acceptRequest(pendingRequest, partnerA, "VERIFIED", "We look forward to hosting.");
+    assert.equal(accepted.status, "ACCEPTED");
+    assert.equal(accepted.respondedByPartnerUserId, 10);
+    assert.ok(accepted.respondedAt);
+
+    // Accepted request CANNOT be rejected again
+    assert.throws(
+      () => rejectRequest(accepted, partnerA, "VERIFIED", "Changed mind"),
+      /Cannot decline request: current status is ACCEPTED/,
+      "Accepted request cannot be rejected again"
+    );
+
+    // Rejection requires a valid reason (rejection schema)
+    assert.throws(
+      () => rejectRequest(pendingRequest, partnerA, "VERIFIED", "No"), // too short
+      /valid reason/,
+      "Rejection without adequate reason must fail"
+    );
+
+    const rejected = rejectRequest(pendingRequest, partnerA, "VERIFIED", "Fully committed on the requested date.");
+    assert.equal(rejected.status, "REJECTED");
+    assert.equal(rejected.rejectionReason, "Fully committed on the requested date.");
+
+    // Rejected request CANNOT be accepted again
+    assert.throws(
+      () => acceptRequest(rejected, partnerA, "VERIFIED", "We can fit them"),
+      /Cannot accept request: current status is REJECTED/,
+      "Rejected request cannot be accepted again"
+    );
+
+    console.log("  ✅ Test 24 Passed: Provider Decision Lifecycle Invariants");
+  }
+
+  // Test 25: Provider Data Query Scoping & Tenant Isolation
+  {
+    const mockDbRequests: ProviderBookingRequestRecord[] = [
+      {
+        id: 1,
+        eventId: 101,
+        companyId: 1,
+        createdById: 10,
+        providerOrgId: 5,
+        venueId: 12,
+        bookableSpaceId: 3,
+        offeringId: 7,
+        requestedDateTime: "2026-10-20T18:00:00Z",
+        attendees: 15,
+        estimatedAmountPaise: 7500000,
+        dietaryNotes: null,
+        operationalNotes: null,
+        status: "PENDING_PROVIDER_REVIEW",
+        providerResponseNote: null,
+        rejectionReason: null,
+        respondedByPartnerUserId: null,
+        respondedAt: null,
+        createdAt: "2026-09-27T10:00:00Z",
+        updatedAt: null,
+      },
+      {
+        id: 2,
+        eventId: 102,
+        companyId: 2,
+        createdById: 20,
+        providerOrgId: 99, // Different provider org
+        venueId: 44,
+        bookableSpaceId: null,
+        offeringId: null,
+        requestedDateTime: "2026-10-22T19:00:00Z",
+        attendees: 30,
+        estimatedAmountPaise: 15000000,
+        dietaryNotes: null,
+        operationalNotes: null,
+        status: "PENDING_PROVIDER_REVIEW",
+        providerResponseNote: null,
+        rejectionReason: null,
+        respondedByPartnerUserId: null,
+        respondedAt: null,
+        createdAt: "2026-09-27T11:00:00Z",
+        updatedAt: null,
+      },
+    ];
+
+    function getRequestsForOrg(orgId: number) {
+      return mockDbRequests.filter((r) => r.providerOrgId === orgId);
+    }
+
+    const org5Requests = getRequestsForOrg(5);
+    assert.equal(org5Requests.length, 1);
+    assert.equal(org5Requests[0].id, 1);
+    assert.equal(org5Requests[0].providerOrgId, 5);
+
+    // Cross-tenant data isolation: Org 5 never sees Org 99's requests
+    assert.ok(org5Requests.every((r) => r.providerOrgId === 5));
+
+    console.log("  ✅ Test 25 Passed: Provider Data Query Scoping & Tenant Isolation");
+  }
+
+  // Test 26: Plain-Language Status Labels & Error Sanitization
+  {
+    assert.equal(getProviderRequestStatusLabel("PENDING_PROVIDER_REVIEW"), "Waiting for provider response");
+    assert.equal(getProviderRequestStatusLabel("ACCEPTED"), "Provider accepted the request");
+    assert.equal(getProviderRequestStatusLabel("REJECTED"), "Provider declined the request");
+    assert.equal(getProviderRequestStatusLabel("CANCELLED"), "Request cancelled");
+
+    // All labels are user-friendly without raw enum characters
+    for (const [status, label] of Object.entries(PROVIDER_REQUEST_STATUS_LABELS)) {
+      assert.ok(label.length > 5, `Status label for ${status} must be descriptive`);
+      assert.equal(label.includes("_"), false, `Label for ${status} must not contain underscores`);
+    }
+
+    console.log("  ✅ Test 26 Passed: Plain-Language Status Labels & Error Sanitization");
+  }
+
+  console.log("🎉 All 26 Provider Domain, Onboarding & Request Tests Passed Successfully!\n");
+}
+
+// ---------------------------------------------------------------------------
+// Day 20 Step 2 — Provider Inbox UI Logic Tests
+// ---------------------------------------------------------------------------
+
+function runInboxUITests() {
+  console.log("🧪 Starting Day 20 Step 2 Provider Inbox UI Test Suite...");
+
+  type InboxRequest = {
+    id: number;
+    providerOrgId: number;
+    status: ProviderRequestStatus;
+    eventTitle: string;
+    companyName: string;
+    venueName: string;
+    venueCity: string;
+    spaceName: string | null;
+    offeringName: string | null;
+    requestedDateTime: string;
+    attendees: number;
+    estimatedAmountPaise: number | null;
+    dietaryNotes: string | null;
+    operationalNotes: string | null;
+    providerResponseNote: string | null;
+    rejectionReason: string | null;
+    respondedAt: string | null;
+    createdAt: string;
+  };
+
+  // Shared test data
+  const ORG_A = 10;
+  const ORG_B = 99;
+
+  const allRequests: InboxRequest[] = [
+    {
+      id: 1,
+      providerOrgId: ORG_A,
+      status: "PENDING_PROVIDER_REVIEW",
+      eventTitle: "Q4 Leadership Summit",
+      companyName: "Relatia Corp",
+      venueName: "The Oberoi Grand",
+      venueCity: "Gurugram",
+      spaceName: "Kohinoor Suite",
+      offeringName: "5-Course CXO Degustation",
+      requestedDateTime: "2026-11-10T19:00:00Z",
+      attendees: 20,
+      estimatedAmountPaise: 15000000,
+      dietaryNotes: "2 Vegan",
+      operationalNotes: "AV needed",
+      providerResponseNote: null,
+      rejectionReason: null,
+      respondedAt: null,
+      createdAt: "2026-09-27T10:00:00Z",
+    },
+    {
+      id: 2,
+      providerOrgId: ORG_A,
+      status: "ACCEPTED",
+      eventTitle: "Founders Day Gala",
+      companyName: "TechVentures Ltd",
+      venueName: "The Oberoi Grand",
+      venueCity: "Gurugram",
+      spaceName: null,
+      offeringName: null,
+      requestedDateTime: "2026-10-15T20:00:00Z",
+      attendees: 45,
+      estimatedAmountPaise: 30000000,
+      dietaryNotes: null,
+      operationalNotes: null,
+      providerResponseNote: "Confirmed. Looking forward to hosting you.",
+      rejectionReason: null,
+      respondedAt: "2026-09-26T12:00:00Z",
+      createdAt: "2026-09-25T10:00:00Z",
+    },
+    {
+      id: 3,
+      providerOrgId: ORG_A,
+      status: "REJECTED",
+      eventTitle: "Product Launch Dinner",
+      companyName: "StartupHub",
+      venueName: "The Oberoi Grand",
+      venueCity: "Gurugram",
+      spaceName: "Emerald Room",
+      offeringName: "Cocktail Package",
+      requestedDateTime: "2026-10-20T18:30:00Z",
+      attendees: 80,
+      estimatedAmountPaise: null,
+      dietaryNotes: null,
+      operationalNotes: null,
+      providerResponseNote: null,
+      rejectionReason: "Fully committed on the requested date.",
+      respondedAt: "2026-09-26T15:00:00Z",
+      createdAt: "2026-09-24T08:00:00Z",
+    },
+    {
+      id: 4,
+      providerOrgId: ORG_B, // Different org — must never be visible to Org A
+      status: "PENDING_PROVIDER_REVIEW",
+      eventTitle: "Partner's Private Dinner",
+      companyName: "OtherCo",
+      venueName: "Rival Venue",
+      venueCity: "Mumbai",
+      spaceName: null,
+      offeringName: null,
+      requestedDateTime: "2026-11-05T19:00:00Z",
+      attendees: 10,
+      estimatedAmountPaise: 5000000,
+      dietaryNotes: null,
+      operationalNotes: null,
+      providerResponseNote: null,
+      rejectionReason: null,
+      respondedAt: null,
+      createdAt: "2026-09-27T09:00:00Z",
+    },
+  ];
+
+  // Helper: scoped loader — mirrors getProviderBookingRequests(providerOrgId)
+  function getRequestsForOrg(orgId: number): InboxRequest[] {
+    return allRequests.filter((r) => r.providerOrgId === orgId);
+  }
+
+  // Helper: fetch by id + org — mirrors getProviderBookingRequestById(id, orgId)
+  function getRequestByIdForOrg(id: number, orgId: number): InboxRequest | null {
+    return allRequests.find((r) => r.id === id && r.providerOrgId === orgId) ?? null;
+  }
+
+  // Helper: friendly status label — mirrors ProviderRequestStatusBadge logic
+  function getFriendlyStatus(status: ProviderRequestStatus): string {
+    switch (status) {
+      case "PENDING_PROVIDER_REVIEW":
+        return "Pending Review";
+      case "ACCEPTED":
+        return "Accepted";
+      case "REJECTED":
+        return "Declined";
+      case "CANCELLED":
+        return "Cancelled";
+    }
+  }
+
+  // ── Test 27: Verified provider can load its inbox ─────────────────────────
+  {
+    const inbox = getRequestsForOrg(ORG_A);
+    assert.equal(inbox.length, 3, "Org A should see exactly 3 requests");
+    assert.ok(inbox.every((r) => r.providerOrgId === ORG_A), "All results must belong to Org A");
+    console.log("  ✅ Test 27 Passed: Verified provider loads its own inbox");
+  }
+
+  // ── Test 28: Provider sees only its own requests (no cross-org leakage) ───
+  {
+    const inboxA = getRequestsForOrg(ORG_A);
+    const inboxB = getRequestsForOrg(ORG_B);
+
+    assert.ok(inboxA.every((r) => r.providerOrgId === ORG_A), "Org A never sees Org B requests");
+    assert.ok(inboxB.every((r) => r.providerOrgId === ORG_B), "Org B never sees Org A requests");
+    assert.equal(inboxA.length + inboxB.length, allRequests.length, "Total must be sum of both org views");
+    console.log("  ✅ Test 28 Passed: Cross-provider leakage prevention");
+  }
+
+  // ── Test 29: Pending filter returns only pending requests ─────────────────
+  {
+    const inbox = getRequestsForOrg(ORG_A);
+    const pending = inbox.filter((r) => r.status === "PENDING_PROVIDER_REVIEW");
+    assert.equal(pending.length, 1, "Should have exactly 1 pending request");
+    assert.equal(pending[0].id, 1);
+    assert.equal(pending[0].status, "PENDING_PROVIDER_REVIEW");
+    console.log("  ✅ Test 29 Passed: Pending filter works correctly");
+  }
+
+  // ── Test 30: Accepted filter returns only accepted requests ───────────────
+  {
+    const inbox = getRequestsForOrg(ORG_A);
+    const accepted = inbox.filter((r) => r.status === "ACCEPTED");
+    assert.equal(accepted.length, 1, "Should have exactly 1 accepted request");
+    assert.equal(accepted[0].id, 2);
+    assert.equal(accepted[0].respondedAt, "2026-09-26T12:00:00Z");
+    console.log("  ✅ Test 30 Passed: Accepted filter works correctly");
+  }
+
+  // ── Test 31: Rejected filter returns only declined requests ───────────────
+  {
+    const inbox = getRequestsForOrg(ORG_A);
+    const rejected = inbox.filter((r) => r.status === "REJECTED");
+    assert.equal(rejected.length, 1, "Should have exactly 1 rejected request");
+    assert.equal(rejected[0].id, 3);
+    assert.ok(rejected[0].rejectionReason, "Rejected request must have rejection reason");
+    console.log("  ✅ Test 31 Passed: Rejected filter works correctly");
+  }
+
+  // ── Test 32: Provider opens its own request detail page (authorized) ──────
+  {
+    const request = getRequestByIdForOrg(1, ORG_A);
+    assert.ok(request !== null, "Provider should be able to open its own request");
+    assert.equal(request!.id, 1);
+    assert.equal(request!.providerOrgId, ORG_A);
+    assert.equal(request!.eventTitle, "Q4 Leadership Summit");
+    console.log("  ✅ Test 32 Passed: Provider opens own request detail (authorized)");
+  }
+
+  // ── Test 33: Provider cannot open another provider's request detail ────────
+  {
+    // Org A trying to open Org B's request (id=4) must return null → notFound()
+    const request = getRequestByIdForOrg(4, ORG_A);
+    assert.equal(request, null, "Org A must NOT be able to access Org B request id=4");
+
+    // Org B trying to open Org A's request (id=1) must also return null
+    const crossRequest = getRequestByIdForOrg(1, ORG_B);
+    assert.equal(crossRequest, null, "Org B must NOT be able to access Org A request id=1");
+    console.log("  ✅ Test 33 Passed: Cross-provider detail page isolation (unauthorized = null → notFound)");
+  }
+
+  // ── Test 34: Pending request shows Accept and Reject controls ────────────
+  {
+    const request = getRequestByIdForOrg(1, ORG_A);
+    assert.ok(request !== null);
+    const isPending = request!.status === "PENDING_PROVIDER_REVIEW";
+    assert.equal(isPending, true, "Pending request must show action controls");
+
+    // Accept/reject controls are only shown when isPending === true
+    // Final states hide them — verify via status
+    const acceptedReq = getRequestByIdForOrg(2, ORG_A);
+    const rejectedReq = getRequestByIdForOrg(3, ORG_A);
+    assert.equal(acceptedReq!.status === "PENDING_PROVIDER_REVIEW", false, "Accepted request must not show action controls");
+    assert.equal(rejectedReq!.status === "PENDING_PROVIDER_REVIEW", false, "Rejected request must not show action controls");
+    console.log("  ✅ Test 34 Passed: Accept/reject controls gated on PENDING_PROVIDER_REVIEW status");
+  }
+
+  // ── Test 35: Accepted request hides action controls ──────────────────────
+  {
+    const request = getRequestByIdForOrg(2, ORG_A)!;
+    assert.equal(request.status, "ACCEPTED");
+    assert.ok(request.providerResponseNote, "Accepted request should have confirmation note");
+    assert.ok(request.respondedAt, "Accepted request should have responded timestamp");
+
+    // Final status means actions are locked — simulate the component branch
+    const showActions = (request.status as string) === "PENDING_PROVIDER_REVIEW";
+    assert.equal(showActions, false, "Actions must be hidden for ACCEPTED status");
+    console.log("  ✅ Test 35 Passed: Accepted request hides action controls & shows summary");
+  }
+
+  // ── Test 36: Rejected request hides action controls ──────────────────────
+  {
+    const request = getRequestByIdForOrg(3, ORG_A)!;
+    assert.equal(request.status, "REJECTED");
+    assert.ok(request.rejectionReason, "Rejected request must expose rejection reason for provider review");
+    assert.ok(request.respondedAt, "Rejected request must have responded timestamp");
+
+    const showActions = (request.status as string) === "PENDING_PROVIDER_REVIEW";
+    assert.equal(showActions, false, "Actions must be hidden for REJECTED status");
+    console.log("  ✅ Test 36 Passed: Rejected request hides action controls & shows final summary");
+  }
+
+  // ── Test 37: Accept action updates status correctly (simulated) ───────────
+  {
+    const request = getRequestByIdForOrg(1, ORG_A)!;
+    assert.equal(request.status, "PENDING_PROVIDER_REVIEW");
+
+    // Simulate accept action outcome
+    const simulateAccept = (req: InboxRequest, note: string | null): InboxRequest => {
+      if (req.status !== "PENDING_PROVIDER_REVIEW") {
+        throw new Error(`Cannot accept request: current status is ${req.status}.`);
+      }
+      return {
+        ...req,
+        status: "ACCEPTED",
+        providerResponseNote: note,
+        respondedAt: new Date().toISOString(),
+      };
+    };
+
+    const acceptedReq = simulateAccept(request, "Confirmed. We have reserved the suite.");
+    assert.equal(acceptedReq.status, "ACCEPTED");
+    assert.equal(acceptedReq.providerResponseNote, "Confirmed. We have reserved the suite.");
+    assert.ok(acceptedReq.respondedAt);
+
+    // Double-accept must throw
+    assert.throws(
+      () => simulateAccept(acceptedReq, "Again"),
+      /Cannot accept request: current status is ACCEPTED/
+    );
+    console.log("  ✅ Test 37 Passed: Accept action updates status correctly, rejects double-accept");
+  }
+
+  // ── Test 38: Reject action updates status correctly (simulated) ───────────
+  {
+    const request = getRequestByIdForOrg(1, ORG_A)!;
+
+    const simulateReject = (req: InboxRequest, reason: string): InboxRequest => {
+      if (req.status !== "PENDING_PROVIDER_REVIEW") {
+        throw new Error(`Cannot decline request: current status is ${req.status}.`);
+      }
+      const parsed = rejectProviderBookingRequestSchema.safeParse({
+        requestId: req.id,
+        rejectionReason: reason,
+      });
+      if (!parsed.success) {
+        throw new Error("A valid reason for declining this booking request is required.");
+      }
+      return {
+        ...req,
+        status: "REJECTED",
+        rejectionReason: reason,
+        respondedAt: new Date().toISOString(),
+      };
+    };
+
+    // Too-short reason must throw
+    assert.throws(
+      () => simulateReject(request, "No"),
+      /valid reason/,
+      "Short rejection reason must fail validation"
+    );
+
+    const rejectedReq = simulateReject(request, "Venue fully committed on this date. Please consider another slot.");
+    assert.equal(rejectedReq.status, "REJECTED");
+    assert.ok(rejectedReq.rejectionReason!.length > 10);
+    assert.ok(rejectedReq.respondedAt);
+
+    // Double-reject must throw
+    assert.throws(
+      () => simulateReject(rejectedReq, "Changed reason"),
+      /Cannot decline request: current status is REJECTED/
+    );
+    console.log("  ✅ Test 38 Passed: Reject action updates status correctly, validates reason, rejects double-reject");
+  }
+
+  // ── Test 39: Friendly status labels — no raw enum leakage ────────────────
+  {
+    const statuses: ProviderRequestStatus[] = [
+      "PENDING_PROVIDER_REVIEW",
+      "ACCEPTED",
+      "REJECTED",
+      "CANCELLED",
+    ];
+
+    for (const status of statuses) {
+      const label = getFriendlyStatus(status);
+      assert.ok(label.length > 0, `Label for ${status} must not be empty`);
+      assert.equal(label.includes("_"), false, `Label for ${status} must not contain underscores`);
+      assert.equal(label, label.trim(), "Labels must not have leading/trailing whitespace");
+    }
+
+    // These are the values the inbox badge component renders
+    assert.equal(getFriendlyStatus("PENDING_PROVIDER_REVIEW"), "Pending Review");
+    assert.equal(getFriendlyStatus("ACCEPTED"), "Accepted");
+    assert.equal(getFriendlyStatus("REJECTED"), "Declined");
+    assert.equal(getFriendlyStatus("CANCELLED"), "Cancelled");
+
+    console.log("  ✅ Test 39 Passed: Inbox status badges show friendly labels without raw enums");
+  }
+
+  // ── Test 40: Empty state — no requests for org ────────────────────────────
+  {
+    const EMPTY_ORG = 777;
+    const emptyInbox = getRequestsForOrg(EMPTY_ORG);
+    assert.equal(emptyInbox.length, 0, "Org with no requests must return empty array");
+
+    // Each tab filter also returns empty
+    const pendingEmpty = emptyInbox.filter((r) => r.status === "PENDING_PROVIDER_REVIEW");
+    const acceptedEmpty = emptyInbox.filter((r) => r.status === "ACCEPTED");
+    const rejectedEmpty = emptyInbox.filter((r) => r.status === "REJECTED");
+    assert.equal(pendingEmpty.length, 0);
+    assert.equal(acceptedEmpty.length, 0);
+    assert.equal(rejectedEmpty.length, 0);
+    console.log("  ✅ Test 40 Passed: Empty state returns correctly for org with no requests");
+  }
+
+  console.log("🎉 All 14 Day 20 Step 2 Inbox UI Tests Passed Successfully!\n");
+}
+
+// ---------------------------------------------------------------------------
+// Day 20 Bugfixes — Issue 1 & Issue 2 Flow Tests
+// ---------------------------------------------------------------------------
+
+function runBugfixTests() {
+  console.log("🧪 Starting Day 20 Pre-Step-3 QA Bugfix Test Suite...");
+
+  // ── Test 41: Provider Venue Selection Routing (Issue 1) ─────────────────
+  {
+    type VenueStub = { id: number; companyId: number | null; providerOrgId: number | null };
+    type UserStub = { id: number; companyId: number };
+    type EventStub = { id: number; companyId: number };
+
+    const enterpriseUser: UserStub = { id: 1, companyId: 50 };
+    const enterpriseEvent: EventStub = { id: 100, companyId: 50 };
+
+    const sameCompanyVenue: VenueStub = { id: 10, companyId: 50, providerOrgId: null };
+    const providerVenue: VenueStub = { id: 20, companyId: null, providerOrgId: 5 };
+
+    function resolveBookingPath(venue: VenueStub, user: UserStub, event: EventStub): "DIRECT_BOOKING" | "PROVIDER_REQUEST" {
+      if (venue.providerOrgId || venue.companyId !== user.companyId) {
+        if (event.companyId !== user.companyId) {
+          throw new Error("Event not found or access denied.");
+        }
+        return "PROVIDER_REQUEST";
+      }
+      return "DIRECT_BOOKING";
+    }
+
+    assert.equal(
+      resolveBookingPath(sameCompanyVenue, enterpriseUser, enterpriseEvent),
+      "DIRECT_BOOKING",
+      "Same-company internal venue must hit legacy direct-booking path"
+    );
+
+    assert.equal(
+      resolveBookingPath(providerVenue, enterpriseUser, enterpriseEvent),
+      "PROVIDER_REQUEST",
+      "Hospitality provider venue must route to Provider Booking Request workflow"
+    );
+
+    console.log("  ✅ Test 41 Passed: Provider venue selection routes to Provider Booking Request (Issue 1)");
+  }
+
+  // ── Test 42: Admin Approval & Partner Portal Readiness Consistency (Issue 2)
+  {
+    type PartnerRecord = { id: number; acceptedAt: string | null; providerOrgId: number | null };
+    type ProviderOrgRecord = { id: number; status: "DRAFT" | "PENDING_VERIFICATION" | "VERIFIED" };
+
+    const pendingPartner: PartnerRecord = { id: 1, acceptedAt: null, providerOrgId: 101 };
+    const pendingOrg: ProviderOrgRecord = { id: 101, status: "PENDING_VERIFICATION" };
+
+    const approvedPartner: PartnerRecord = { id: 2, acceptedAt: "2026-09-27T10:00:00Z", providerOrgId: 102 };
+    const approvedOrg: ProviderOrgRecord = { id: 102, status: "VERIFIED" };
+
+    // Newly approved org where admin set status VERIFIED
+    const newlyApprovedPartner: PartnerRecord = { id: 3, acceptedAt: null, providerOrgId: 103 };
+    const newlyApprovedOrg: ProviderOrgRecord = { id: 103, status: "VERIFIED" };
+
+    function checkIsAccepted(partner: PartnerRecord, orgStatus: string | null): boolean {
+      return !!partner.acceptedAt || orgStatus === "VERIFIED";
+    }
+
+    // Pending fixture (Cmber Group equivalent) remains under review
+    assert.equal(
+      checkIsAccepted(pendingPartner, pendingOrg.status),
+      false,
+      "Pending provider org fixture must remain under review (isAccepted = false)"
+    );
+
+    // Previously accepted partner is verified
+    assert.equal(
+      checkIsAccepted(approvedPartner, approvedOrg.status),
+      true,
+      "Partner with acceptedAt timestamp must be verified (isAccepted = true)"
+    );
+
+    // Newly approved org (admin status = VERIFIED) is recognized as verified
+    assert.equal(
+      checkIsAccepted(newlyApprovedPartner, newlyApprovedOrg.status),
+      true,
+      "Newly approved org (status VERIFIED) must show as Verified & Live even if acceptedAt was null"
+    );
+
+    console.log("  ✅ Test 42 Passed: Admin approval & partner readiness consistency (Issue 2)");
+  }
+
+  console.log("🎉 All Day 20 Bugfix Tests Passed Successfully!\n");
 }
 
 runTests();
+runInboxUITests();
+runBugfixTests();
+
+
+

@@ -64,10 +64,12 @@ export async function createPaymentOrder(
   const { eventId, user } = input;
 
   // 1. Role Authorization Guard
-  const allowedRoles = ["FINANCE", "ADMIN"];
+  // Only FINANCE role is authorized to initiate payment orders.
+  // REQUESTER and ADMIN do not have normal payment initiation authority.
+  const allowedRoles = ["FINANCE"];
   if (!allowedRoles.includes(user.role)) {
     throw new Error(
-      `Users with role '${user.role}' cannot initiate payment orders.`,
+      `Users with role '${user.role}' cannot initiate payment orders. Payment is restricted to Finance.`,
     );
   }
 

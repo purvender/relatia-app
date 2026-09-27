@@ -53,8 +53,8 @@ export async function requestBooking(
 ): Promise<RequestBookingResult> {
   const { eventId, user } = input;
 
-  // 1. Role check — only REQUESTER or ADMIN can trigger booking request
-  const allowedRoles = ["REQUESTER", "ADMIN"];
+  // 1. Role check — only REQUESTER, COMPANY_ADMIN, or ADMIN can trigger booking request
+  const allowedRoles = ["REQUESTER", "COMPANY_ADMIN", "ADMIN"];
   if (!allowedRoles.includes(user.role)) {
     throw new Error(
       `Users with role '${user.role}' cannot request booking confirmation.`,

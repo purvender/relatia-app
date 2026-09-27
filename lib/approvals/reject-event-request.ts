@@ -27,7 +27,7 @@ export async function rejectEventRequest({
   reason,
   user,
 }: RejectParams): Promise<RejectResult> {
-  if (user.role !== "APPROVER" && user.role !== "ADMIN") {
+  if (user.role !== "APPROVER" && user.role !== "COMPANY_ADMIN" && user.role !== "ADMIN") {
     throw new Error("Unauthorized: Only approvers or admins can reject event requests.");
   }
 
@@ -49,8 +49,9 @@ export async function rejectEventRequest({
     throw new Error("Event not found or access denied.");
   }
 
-  // Non-ADMIN approver can only act on approvals assigned to them
-  if (user.role !== "ADMIN" && approval.approverId !== user.id) {
+  // Non-admin approver can only act on approvals assigned to them
+  const isAdmin = user.role === "COMPANY_ADMIN" || user.role === "ADMIN";
+  if (!isAdmin && approval.approverId !== user.id) {
     throw new Error("Unauthorized: You are not assigned to reject this request.");
   }
 

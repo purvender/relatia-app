@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CreditCard } from "lucide-react";
+import { ArrowLeft, CreditCard, Clock, FileText, AlertCircle } from "lucide-react";
 import { requireAppUser } from "@/lib/auth";
 import { getEventById } from "@/lib/events/get-event-by-id";
 import { getBookingByEvent } from "@/lib/bookings/get-booking-by-event";
+import { getEventBookingRequests } from "@/lib/provider/service";
 import { EventDetailsCard } from "@/components/events/event-details-card";
 import { EventSubmitButton } from "@/components/events/event-submit-button";
 import { RequestBookingButton } from "@/components/events/request-booking-button";
@@ -33,6 +34,9 @@ export default async function EventDetailPage({
 
   // Fetch optional booking if venue has been selected for this event
   const booking = await getBookingByEvent(eventId, user.companyId);
+
+  // Fetch partner booking requests for this event
+  const providerBookingRequests = await getEventBookingRequests(eventId, user.companyId);
 
   return (
     <div className="space-y-6">
@@ -72,11 +76,11 @@ export default async function EventDetailPage({
           <RequestBookingButton eventId={event.id} />
         )}
 
-      {/* Payment CTA — shown when booking requested, payment pending, and user is FINANCE or ADMIN */}
+      {/* Payment CTA — shown only to FINANCE role when booking requested & payment pending */}
       {event.status === "BOOKING_REQUESTED" &&
         booking &&
         booking.paymentStatus !== "PAID" &&
-        (user.role === "FINANCE" || user.role === "ADMIN") && (
+        user.role === "FINANCE" && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-purple-200 bg-purple-50/50 p-5 shadow-2xs">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
@@ -98,10 +102,50 @@ export default async function EventDetailPage({
           </div>
         )}
 
+      {/* Awaiting Finance Payment Banner — shown to REQUESTER, APPROVER, ADMIN when invoice generated but payment pending */}
+      {event.status === "BOOKING_REQUESTED" &&
+        booking &&
+        booking.paymentStatus !== "PAID" &&
+        user.role !== "FINANCE" && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50/60 p-5 shadow-2xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-amber-700 shrink-0" />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+                  Invoice Generated · Awaiting Finance Payment
+                </h3>
+              </div>
+              <p className="text-sm text-slate-600">
+                Your commercial booking is confirmed and the invoice is created. Payment and final confirmation will be processed by your Finance team.
+              </p>
+            </div>
+            {booking.invoiceId && (
+              <div className="shrink-0">
+                <Link
+                  href={`/dashboard/finance/invoices/${booking.invoiceId}`}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-white px-3.5 py-2 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-50 transition-colors"
+                >
+                  <FileText className="h-3.5 w-3.5 text-amber-700" />
+                  <span>View Tax Invoice</span>
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+
+      {/* Payment Failure Banner — shown if payment attempted and failed */}
+      {booking && booking.paymentStatus === "FAILED" && (
+        <div className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-rose-800 text-xs shadow-2xs">
+          <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
+          <span>Finance payment failed. Please check with your finance team to retry payment settlement.</span>
+        </div>
+      )}
+
       {/* Main detail card */}
       <EventDetailsCard
         event={event}
         booking={booking}
+        providerBookingRequests={providerBookingRequests}
         currentUserId={user.id}
         currentUserRole={user.role}
       />

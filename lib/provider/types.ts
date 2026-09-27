@@ -303,3 +303,57 @@ export type PublicSafeVenueDetail = {
   availability: PublicSafeAvailabilitySummary | null;
   cancellation: PublicSafeCancellationSummary | null;
 };
+
+// Provider Booking Request lifecycle & domain representations
+export type ProviderRequestStatus =
+  | "PENDING_PROVIDER_REVIEW"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "CANCELLED";
+
+export type ProviderBookingRequestRecord = {
+  id: number;
+  eventId: number;
+  companyId: number;
+  createdById: number;
+  providerOrgId: number;
+  venueId: number;
+  bookableSpaceId: number | null;
+  offeringId: number | null;
+  requestedDateTime: string;
+  attendees: number;
+  estimatedAmountPaise: number | null;
+  dietaryNotes: string | null;
+  operationalNotes: string | null;
+  status: ProviderRequestStatus;
+  providerResponseNote: string | null;
+  rejectionReason: string | null;
+  respondedByPartnerUserId: number | null;
+  respondedAt: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+};
+
+export type ProviderBookingRequestDetail = ProviderBookingRequestRecord & {
+  eventTitle: string;
+  companyName: string;
+  requesterName: string;
+  requesterEmail: string;
+  venueName: string;
+  venueCity: string;
+  spaceName: string | null;
+  offeringName: string | null;
+  providerOrgName: string;
+};
+
+export const PROVIDER_REQUEST_STATUS_LABELS: Record<ProviderRequestStatus, string> = {
+  PENDING_PROVIDER_REVIEW: "Waiting for provider response",
+  ACCEPTED: "Provider accepted the request",
+  REJECTED: "Provider declined the request",
+  CANCELLED: "Request cancelled",
+};
+
+export function getProviderRequestStatusLabel(status: ProviderRequestStatus): string {
+  return PROVIDER_REQUEST_STATUS_LABELS[status] ?? "Unknown status";
+}
+

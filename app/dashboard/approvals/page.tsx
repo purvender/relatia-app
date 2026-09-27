@@ -3,7 +3,7 @@ import { listPendingApprovals } from "@/lib/approvals/list-pending-approvals";
 import { ApprovalsList } from "@/components/approvals/approvals-list";
 
 export default async function ApprovalsPage() {
-  const user = await requireUserRole(["APPROVER", "ADMIN"]);
+  const user = await requireUserRole(["APPROVER", "COMPANY_ADMIN", "ADMIN"]);
 
   const pendingApprovals = await listPendingApprovals(user);
 

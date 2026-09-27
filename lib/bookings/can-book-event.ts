@@ -58,7 +58,7 @@ export function canBookEvent(
   }
 
   // Rule 4: Role authorization
-  const allowedRoles = ["REQUESTER", "ADMIN"];
+  const allowedRoles = ["REQUESTER", "COMPANY_ADMIN", "ADMIN"];
   if (!allowedRoles.includes(user.role)) {
     return {
       canBook: false,

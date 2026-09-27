@@ -1,6 +1,8 @@
 // use prisma-8
 
 enum Role {
+  PLATFORM_ADMIN
+  COMPANY_ADMIN
   ADMIN
   REQUESTER
   APPROVER
@@ -147,6 +149,13 @@ enum PartnerOnboardingStep {
   SUBMITTED
 }
 
+enum ProviderRequestStatus {
+  PENDING_PROVIDER_REVIEW
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
 model Company {
   id       Int      @id @default(autoincrement())
   name     String
@@ -155,6 +164,7 @@ model Company {
   events   Event[]
   venues   Venue[]
   policies Policy[]
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model User {
@@ -167,6 +177,7 @@ model User {
   company   Company? @relation(fields: [companyId], references: [id])
   events    Event[]
   approvals Approval[]
+  createdProviderBookingRequests ProviderBookingRequest[]
 }
 
 model PartnerUser {
@@ -181,6 +192,7 @@ model PartnerUser {
   acceptedAt      TimestamptzString?
   createdAt       TimestamptzString      @default(now())
   updatedAt       TimestamptzString?
+  respondedProviderBookingRequests ProviderBookingRequest[]
 }
 
 model Event {
@@ -209,6 +221,7 @@ model Event {
 
   // One confirmed booking per event for MVP.
   booking     Booking?
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model ProviderOrganization {
@@ -229,6 +242,7 @@ model ProviderOrganization {
   verificationRecords VerificationRecord[]
   offerings        Offering[]
   partnerUsers     PartnerUser[]
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model ProviderContact {
@@ -310,6 +324,7 @@ model Venue {
   verificationRecords VerificationRecord[]
   availabilityMetadata AvailabilityMetadata?
   cancellationPolicy CancellationPolicy?
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model BookableSpace {
@@ -332,6 +347,7 @@ model BookableSpace {
 
   offerings         Offering[]
   blackoutDates     BlackoutDateRange[]
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model Offering {
@@ -365,6 +381,7 @@ model Offering {
   isDiscoverable  Boolean      @default(false)
   internalNotes   String?
   createdAt       TimestamptzString @default(now())
+  providerBookingRequests ProviderBookingRequest[]
 }
 
 model AvailabilityMetadata {
@@ -491,3 +508,47 @@ model WebhookEventLog {
   eventType String
   createdAt TimestamptzString @default(now())
 }
+
+model ProviderBookingRequest {
+  id                       Int                   @id @default(autoincrement())
+
+  eventId                  Int
+  event                    Event                 @relation(fields: [eventId], references: [id])
+
+  companyId                Int
+  company                  Company               @relation(fields: [companyId], references: [id])
+
+  createdById              Int
+  createdBy                User                  @relation(fields: [createdById], references: [id])
+
+  providerOrgId            Int
+  providerOrg              ProviderOrganization  @relation(fields: [providerOrgId], references: [id])
+
+  venueId                  Int
+  venue                    Venue                 @relation(fields: [venueId], references: [id])
+
+  bookableSpaceId          Int?
+  bookableSpace            BookableSpace?        @relation(fields: [bookableSpaceId], references: [id])
+
+  offeringId               Int?
+  offering                 Offering?             @relation(fields: [offeringId], references: [id])
+
+  requestedDateTime        TimestamptzString
+  attendees                Int
+  estimatedAmountPaise     Int?
+  dietaryNotes             String?
+  operationalNotes         String?
+
+  status                   ProviderRequestStatus @default(PENDING_PROVIDER_REVIEW)
+
+  providerResponseNote     String?
+  rejectionReason          String?
+
+  respondedByPartnerUserId Int?
+  respondedByPartnerUser   PartnerUser?          @relation(fields: [respondedByPartnerUserId], references: [id])
+  respondedAt              TimestamptzString?
+
+  createdAt                TimestamptzString     @default(now())
+  updatedAt                TimestamptzString?
+}
+

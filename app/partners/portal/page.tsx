@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requirePartnerUser } from "@/lib/partner-auth";
+import { getProviderPendingRequestsCount } from "@/lib/provider/service";
 import { db } from "@/prisma/db";
 import {
   CheckCircle2,
@@ -102,26 +103,33 @@ export default async function PartnerPortalPage() {
   const currentStepIndex = STEP_ORDER.indexOf(currentStep);
   const nextStep = getNextStep(currentStep);
   const isSubmitted = currentStep === "SUBMITTED";
-  const isAccepted = !!partner.acceptedAt;
-  const progressPct = Math.round(
-    ((currentStepIndex + 1) / STEP_ORDER.length) * 100,
-  );
 
-  // Fetch org summary if linked
+  // Fetch org summary & pending requests if linked
   let orgName: string | null = null;
   let venueCount = 0;
+  let pendingRequestsCount = 0;
+  let orgStatus: string | null = null;
   if (partner.providerOrgId) {
     const org = await db.orm.public.ProviderOrganization.where({
       id: partner.providerOrgId,
     }).first();
     if (org) {
       orgName = org.name;
+      orgStatus = org.status;
       const venues = await db.orm.public.Venue.where({
         providerOrgId: partner.providerOrgId,
       }).all();
       venueCount = venues.length;
     }
+    pendingRequestsCount = await getProviderPendingRequestsCount(
+      partner.providerOrgId,
+    );
   }
+
+  const isAccepted = !!partner.acceptedAt || orgStatus === "VERIFIED";
+  const progressPct = Math.round(
+    ((currentStepIndex + 1) / STEP_ORDER.length) * 100,
+  );
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10 space-y-8">
@@ -266,9 +274,9 @@ export default async function PartnerPortalPage() {
         })}
       </div>
 
-      {/* Quick stats */}
+      {/* Quick stats & Booking Requests */}
       {partner.providerOrgId && (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-xl border border-[#E8E3DA] bg-white p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-[#F5F2EC]">
               <Building2 className="h-4 w-4 text-[#7A756D]" />
@@ -280,6 +288,7 @@ export default async function PartnerPortalPage() {
               </p>
             </div>
           </div>
+
           <div className="rounded-xl border border-[#E8E3DA] bg-white p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-[#F5F2EC]">
               <Layers className="h-4 w-4 text-[#7A756D]" />
@@ -291,6 +300,26 @@ export default async function PartnerPortalPage() {
               <p className="text-[11px] text-[#A9A49C]">Current step</p>
             </div>
           </div>
+
+          <Link
+            href="/partners/portal/inbox"
+            className="rounded-xl border border-[#E8E3DA] bg-white p-4 flex items-center justify-between gap-3 hover:border-[#1A1714]/40 transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-50 border border-amber-200">
+                <Clock className="h-4 w-4 text-amber-700" />
+              </div>
+              <div>
+                <p className="text-xl font-semibold text-[#1A1714]">
+                  {pendingRequestsCount}
+                </p>
+                <p className="text-[11px] text-[#A9A49C]">
+                  {pendingRequestsCount === 1 ? "Pending Request" : "Pending Requests"}
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-[#A9A49C] group-hover:text-[#1A1714] transition-colors" />
+          </Link>
         </div>
       )}
 

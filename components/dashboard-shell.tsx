@@ -16,7 +16,7 @@ import {
   ShieldCheck,
   Layers,
 } from "lucide-react";
-import type { AppUserWithCompany } from "@/lib/auth";
+import type { AppUserWithCompany, ScopedUser } from "@/lib/auth";
 
 type NavItem = {
   label: string;
@@ -45,25 +45,35 @@ const NAV_ITEMS: NavItem[] = [
     label: "Approvals",
     href: "/dashboard/approvals",
     icon: CheckSquare,
-    allowedRoles: ["APPROVER", "ADMIN"],
+    allowedRoles: ["APPROVER", "COMPANY_ADMIN", "ADMIN"],
   },
   {
     label: "Finance",
     href: "/dashboard/finance",
     icon: Receipt,
-    allowedRoles: ["FINANCE", "ADMIN"],
+    allowedRoles: ["FINANCE", "COMPANY_ADMIN", "ADMIN"],
   },
   {
     label: "Providers",
     href: "/dashboard/admin/providers",
     icon: Layers,
-    allowedRoles: ["ADMIN"],
+    allowedRoles: ["PLATFORM_ADMIN"],
   },
   {
     label: "Settings",
     href: "/dashboard/settings",
     icon: Settings,
-    allowedRoles: ["ADMIN"],
+    allowedRoles: ["COMPANY_ADMIN", "ADMIN"],
+  },
+];
+
+
+const PLATFORM_NAV_ITEMS: NavItem[] = [
+  {
+    label: "Providers",
+    href: "/dashboard/admin/providers",
+    icon: Layers,
+    allowedRoles: ["PLATFORM_ADMIN"],
   },
 ];
 
@@ -72,16 +82,26 @@ export function DashboardShell({
   user,
   children,
 }: {
-  user: AppUserWithCompany;
+  user: ScopedUser;
   children: React.ReactNode;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const isPlatform = user.context.scope === "platform";
+  // Tenant company is always present via the tenant guard; platform never
+  // dereferences a workspace (stays platform-scoped even if companyId is set).
+  const workspaceName =
+    isPlatform ? "Relatia Platform" : (user.company?.name ?? "Relatia Platform");
 
-  const filteredNavItems = NAV_ITEMS.filter((item) => {
-    if (!item.allowedRoles) return true;
-    return item.allowedRoles.includes(user.role);
-  });
+  const filteredNavItems = isPlatform
+    ? PLATFORM_NAV_ITEMS.filter((item) => {
+        if (!item.allowedRoles) return true;
+        return item.allowedRoles.includes(user.role);
+      })
+    : NAV_ITEMS.filter((item) => {
+        if (!item.allowedRoles) return true;
+        return item.allowedRoles.includes(user.role);
+      });
 
   const isLinkActive = (href: string) => {
     if (href === "/dashboard") {
@@ -108,25 +128,35 @@ export function DashboardShell({
           </div>
         </div>
 
-        {/* Company Info Box */}
-        <div className="px-4 py-4 border-b border-slate-100 bg-slate-50/50">
-          <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600">
-              <Building2 className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-slate-900">
-                {user.company.name}
-              </p>
-              <div className="flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="h-3 w-3 text-slate-400" />
-                <span className="text-[10px] font-medium uppercase text-slate-500">
-                  {user.role}
-                </span>
+        {/* Workspace header: tenant only. Platform gets dedicated badge. */}
+        {isPlatform ? (
+          <div className="px-4 py-4 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-900 text-white">
+                <ShieldCheck className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-slate-900">Relatia Platform</p>
+                <span className="text-[10px] font-medium uppercase text-slate-500">PLATFORM_ADMIN</span>
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="px-4 py-4 border-b border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white p-2.5 shadow-2xs">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600">
+                <Building2 className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-semibold text-slate-900">{workspaceName}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <ShieldCheck className="h-3 w-3 text-slate-400" />
+                  <span className="text-[10px] font-medium uppercase text-slate-500">{user.role}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Links */}
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -190,7 +220,7 @@ export function DashboardShell({
 
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-600 max-w-[120px] truncate">
-            {user.company.name}
+            {workspaceName}
           </span>
           <UserButton />
         </div>
@@ -226,7 +256,7 @@ export function DashboardShell({
 
             <div className="px-4 py-3 bg-slate-50">
               <p className="text-xs font-semibold text-slate-900 truncate">
-                {user.company.name}
+                {workspaceName}
               </p>
               <p className="text-[11px] font-medium text-slate-500 uppercase mt-0.5">
                 Role: {user.role}
@@ -279,10 +309,10 @@ export function DashboardShell({
         <header className="hidden md:flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8 sticky top-0 z-20 shadow-2xs">
           <div className="flex items-center gap-3">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Workspace
+              {isPlatform ? "Platform" : "Workspace"}
             </span>
             <span className="text-sm font-bold text-slate-900">
-              {user.company.name}
+              {workspaceName}
             </span>
             <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-700">
               {user.role}

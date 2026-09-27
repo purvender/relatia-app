@@ -9,7 +9,7 @@ import { verifyPayment } from "@/lib/payments/verify-payment";
 /**
  * Server Action: Initiates a Razorpay payment order for an event.
  *
- * Permission: FINANCE or ADMIN role only.
+ * Permission: FINANCE role only.
  * Tenant Isolation: Enforced via requireUserRole and companyId checks in service layer.
  */
 export async function createPaymentOrderAction(eventId: number) {
@@ -17,7 +17,8 @@ export async function createPaymentOrderAction(eventId: number) {
     throw new Error("Invalid event ID.");
   }
 
-  const user = await requireUserRole(["FINANCE", "ADMIN"]);
+  // Payment creation is strictly controlled by the FINANCE role
+  const user = await requireUserRole(["FINANCE"]);
 
   return await createPaymentOrder({
     eventId,
@@ -40,7 +41,7 @@ export type VerifyPaymentActionInput = {
  * Server Action: Cryptographically verifies a completed Razorpay checkout signature
  * and atomically updates the event, booking, and invoice states to PAID / BOOKED.
  *
- * Permission: FINANCE or ADMIN role only.
+ * Permission: FINANCE role only.
  * Tenant Isolation: Enforced via event companyId checks.
  *
  * Atomic Transaction on Success:
@@ -61,7 +62,8 @@ export async function verifyPaymentAction(input: VerifyPaymentActionInput) {
     throw new Error("Invalid event ID.");
   }
 
-  const user = await requireUserRole(["FINANCE", "ADMIN"]);
+  // Payment verification is strictly controlled by the FINANCE role
+  const user = await requireUserRole(["FINANCE"]);
 
   // 1. Fetch event — tenant scoped
   const event = await db.orm.public.Event.where({ id: eventId }).first();

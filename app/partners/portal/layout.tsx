@@ -31,6 +31,9 @@ export default function PartnerPortalLayout({
             <Link href="/partners/portal" className="hover:text-[#1A1714] transition-colors">
               Dashboard
             </Link>
+            <Link href="/partners/portal/inbox" className="hover:text-[#1A1714] transition-colors">
+              Booking Requests
+            </Link>
             <Link href="/partners/portal/onboarding" className="hover:text-[#1A1714] transition-colors">
               Complete Profile
             </Link>

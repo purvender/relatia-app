@@ -2,7 +2,7 @@ import { requireUserRole } from "@/lib/auth";
 import { db } from "@/prisma/db";
 
 export default async function SettingsPage() {
-  const user = await requireUserRole(["ADMIN"]);
+  const user = await requireUserRole(["COMPANY_ADMIN", "ADMIN"]);
 
   const policy = await db.orm.public.Policy.where({
     companyId: user.companyId,

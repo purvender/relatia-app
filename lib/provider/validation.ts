@@ -414,3 +414,46 @@ export const recordVerificationSchema = z.object({
   verificationSource: z.string().trim().max(100).optional().nullable(),
   notes: z.string().trim().max(1000).optional().nullable(),
 });
+
+export const providerRequestStatusEnum = z.enum(
+  [
+    "PENDING_PROVIDER_REVIEW",
+    "ACCEPTED",
+    "REJECTED",
+    "CANCELLED",
+  ],
+  {
+    message: "Please provide a valid request status.",
+  },
+);
+
+export const createProviderBookingRequestSchema = z.object({
+  eventId: z.number().int().positive("Event ID is required"),
+  venueId: z.number().int().positive("Venue ID is required"),
+  bookableSpaceId: z.number().int().positive().optional().nullable(),
+  offeringId: z.number().int().positive().optional().nullable(),
+  requestedDateTime: z.string().trim().min(1, "Requested date and time is required"),
+  attendees: z.number().int().positive("Attendee count must be at least 1 guest"),
+  estimatedAmountPaise: z.number().int().nonnegative("Estimated budget cannot be negative").optional().nullable(),
+  dietaryNotes: z.string().trim().max(500).optional().nullable(),
+  operationalNotes: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const acceptProviderBookingRequestSchema = z.object({
+  requestId: z.number().int().positive("Request ID is required"),
+  providerResponseNote: z.string().trim().max(1000).optional().nullable(),
+});
+
+export const rejectProviderBookingRequestSchema = z.object({
+  requestId: z.number().int().positive("Request ID is required"),
+  rejectionReason: z
+    .string()
+    .trim()
+    .min(3, "Please provide a reason for declining this request (at least 3 characters)")
+    .max(1000),
+});
+
+export const cancelProviderBookingRequestSchema = z.object({
+  requestId: z.number().int().positive("Request ID is required"),
+});
+

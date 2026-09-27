@@ -29,7 +29,14 @@ function getPaymentStatusBadge(status: string) {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
           <CheckCircle2 className="h-3.5 w-3.5" />
-          Paid
+          Paid by Finance
+        </span>
+      );
+    case "FAILED":
+      return (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200">
+          <Clock className="h-3.5 w-3.5" />
+          Finance Payment Failed
         </span>
       );
     case "PENDING":
@@ -37,7 +44,7 @@ function getPaymentStatusBadge(status: string) {
       return (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
           <Clock className="h-3.5 w-3.5" />
-          Payment Pending
+          Awaiting Finance Payment
         </span>
       );
   }

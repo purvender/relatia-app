@@ -54,19 +54,25 @@ async function main() {
     console.log(`ℹ️ Policy already exists for ${company.name}`);
   }
 
-  // 3. Seed Internal Employee Users (8 Employees across 4 roles)
+  // 3. Seed Internal Employee Users & Platform Ops Users
   const employeeSeedData = [
+    {
+      clerkId: "clerk_relatia_platform_admin",
+      email: "platform.admin@relatia.in",
+      name: "Relatia Platform Admin",
+      role: "PLATFORM_ADMIN" as const,
+    },
     {
       clerkId: "clerk_northstar_ananya",
       email: "ananya.sharma@northstarconsumer.com",
       name: "Ananya Sharma",
-      role: "ADMIN" as const,
+      role: "COMPANY_ADMIN" as const,
     },
     {
       clerkId: "clerk_northstar_rahul",
       email: "rahul.mehra@northstarconsumer.com",
       name: "Rahul Mehra",
-      role: "ADMIN" as const,
+      role: "COMPANY_ADMIN" as const,
     },
     {
       clerkId: "clerk_northstar_priya",

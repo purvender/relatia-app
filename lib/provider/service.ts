@@ -1,6 +1,8 @@
 import "server-only";
 
+import { revalidatePath } from "next/cache";
 import { db } from "@/prisma/db";
+import { calculateGst, isIntraState } from "@/lib/finance/gst";
 import type {
   ProviderOrganizationRecord,
   ProviderContactRecord,
@@ -16,6 +18,9 @@ import type {
   PublicSafeOffering,
   PublicSafeAvailabilitySummary,
   PublicSafeCancellationSummary,
+  ProviderRequestStatus,
+  ProviderBookingRequestRecord,
+  ProviderBookingRequestDetail,
 } from "./types";
 import {
   evaluateDiscoveryReadiness,
@@ -297,7 +302,7 @@ export async function updateProviderOrganization(
   const existing = await db.orm.public.ProviderOrganization.where({ id }).first();
   if (!existing) throw new Error(`Provider organization #${id} not found`);
 
-  return await db.orm.public.ProviderOrganization.where({ id }).update({
+  const updated = await db.orm.public.ProviderOrganization.where({ id }).update({
     name: data.name ?? existing.name,
     legalName: data.legalName !== undefined ? data.legalName : existing.legalName,
     providerType: data.providerType ?? existing.providerType,
@@ -307,6 +312,21 @@ export async function updateProviderOrganization(
     internalNotes: data.internalNotes !== undefined ? data.internalNotes : existing.internalNotes,
     updatedAt: new Date().toISOString(),
   });
+
+  if (data.status === "VERIFIED") {
+    const now = new Date().toISOString();
+    const partners = await db.orm.public.PartnerUser.where({ providerOrgId: id }).all();
+    for (const p of partners) {
+      if (!p.acceptedAt) {
+        await db.orm.public.PartnerUser.where({ id: p.id }).update({
+          acceptedAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+  }
+
+  return updated;
 }
 
 export async function createProviderContact(data: {
@@ -767,6 +787,18 @@ export async function recordVerification(data: {
       status: orgStatus,
       updatedAt: now,
     });
+
+    if (data.status === "VERIFIED") {
+      const partners = await db.orm.public.PartnerUser.where({ providerOrgId: data.providerOrgId }).all();
+      for (const p of partners) {
+        if (!p.acceptedAt) {
+          await db.orm.public.PartnerUser.where({ id: p.id }).update({
+            acceptedAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+    }
   }
 
   return record;
@@ -1073,3 +1105,731 @@ export async function updateVenueVisibility(
     });
   }
 }
+
+// ---------------------------------------------------------------------------
+// Provider Booking Request Service Foundation (Day 20 Step 1)
+// ---------------------------------------------------------------------------
+
+export async function createProviderBookingRequestRecord(
+  input: {
+    eventId: number;
+    venueId: number;
+    bookableSpaceId?: number | null;
+    offeringId?: number | null;
+    requestedDateTime: string;
+    attendees: number;
+    estimatedAmountPaise?: number | null;
+    dietaryNotes?: string | null;
+    operationalNotes?: string | null;
+  },
+  user: {
+    id: number;
+    companyId: number;
+    role?: string;
+  },
+): Promise<ProviderBookingRequestRecord> {
+  // 1. Validate enterprise event context and tenant boundary
+  const event = await db.orm.public.Event.where({ id: input.eventId }).first();
+  if (!event || event.companyId !== user.companyId) {
+    throw new Error("Event not found or does not belong to your company.");
+  }
+
+  // 2. Validate venue and provider organization
+  const venue = await db.orm.public.Venue.where({ id: input.venueId }).first();
+  if (!venue || !venue.active) {
+    throw new Error("The selected venue is unavailable or does not exist.");
+  }
+
+  if (!venue.providerOrgId) {
+    throw new Error("The selected venue is not linked to a registered hospitality partner.");
+  }
+
+  const providerOrg = await db.orm.public.ProviderOrganization.where({
+    id: venue.providerOrgId,
+  }).first();
+
+  if (!providerOrg || providerOrg.status !== "VERIFIED") {
+    throw new Error("The partner organization is not yet verified to accept corporate bookings.");
+  }
+
+  if (venue.visibility !== "DISCOVERABLE" && venue.verificationStatus !== "VERIFIED") {
+    throw new Error("This venue is not currently eligible to receive booking requests.");
+  }
+
+  // 3. Validate optional bookable space
+  if (input.bookableSpaceId) {
+    const space = await db.orm.public.BookableSpace.where({
+      id: input.bookableSpaceId,
+    }).first();
+
+    if (!space || space.venueId !== venue.id || !space.isActive) {
+      throw new Error("The selected bookable space does not belong to this venue or is inactive.");
+    }
+
+    if (input.attendees > space.maxCapacity) {
+      throw new Error(
+        `Requested guest count (${input.attendees}) exceeds space capacity (${space.maxCapacity}).`,
+      );
+    }
+  } else if (input.attendees > venue.capacity) {
+    throw new Error(
+      `Requested guest count (${input.attendees}) exceeds venue capacity (${venue.capacity}).`,
+    );
+  }
+
+  // 4. Validate optional offering
+  if (input.offeringId) {
+    const offering = await db.orm.public.Offering.where({
+      id: input.offeringId,
+    }).first();
+
+    if (!offering || !offering.isActive) {
+      throw new Error("The selected package or offering is inactive or not found.");
+    }
+
+    if (
+      offering.venueId !== venue.id &&
+      offering.providerOrgId !== providerOrg.id
+    ) {
+      throw new Error("The selected package does not belong to this venue or provider.");
+    }
+  }
+
+  // 5. Create the provider booking request in PENDING_PROVIDER_REVIEW state
+  const created = await db.orm.public.ProviderBookingRequest.create({
+    eventId: event.id,
+    companyId: user.companyId,
+    createdById: user.id,
+    providerOrgId: providerOrg.id,
+    venueId: venue.id,
+    bookableSpaceId: input.bookableSpaceId ?? null,
+    offeringId: input.offeringId ?? null,
+    requestedDateTime: input.requestedDateTime,
+    attendees: input.attendees,
+    estimatedAmountPaise: input.estimatedAmountPaise ?? null,
+    dietaryNotes: input.dietaryNotes ?? null,
+    operationalNotes: input.operationalNotes ?? null,
+    status: "PENDING_PROVIDER_REVIEW",
+  });
+
+  return {
+    id: created.id,
+    eventId: created.eventId,
+    companyId: created.companyId,
+    createdById: created.createdById,
+    providerOrgId: created.providerOrgId,
+    venueId: created.venueId,
+    bookableSpaceId: created.bookableSpaceId ?? null,
+    offeringId: created.offeringId ?? null,
+    requestedDateTime: created.requestedDateTime,
+    attendees: created.attendees,
+    estimatedAmountPaise: created.estimatedAmountPaise ?? null,
+    dietaryNotes: created.dietaryNotes ?? null,
+    operationalNotes: created.operationalNotes ?? null,
+    status: created.status as ProviderRequestStatus,
+    providerResponseNote: created.providerResponseNote ?? null,
+    rejectionReason: created.rejectionReason ?? null,
+    respondedByPartnerUserId: created.respondedByPartnerUserId ?? null,
+    respondedAt: created.respondedAt ?? null,
+    createdAt: created.createdAt,
+    updatedAt: created.updatedAt ?? null,
+  };
+}
+
+export async function getProviderBookingRequests(
+  providerOrgId: number,
+  filter?: { status?: ProviderRequestStatus },
+): Promise<ProviderBookingRequestDetail[]> {
+  const allRequests = await db.orm.public.ProviderBookingRequest.where({
+    providerOrgId,
+  }).all();
+
+  const filtered = filter?.status
+    ? allRequests.filter((r) => r.status === filter.status)
+    : allRequests;
+
+  // Order newest first
+  filtered.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
+  const [events, companies, users, venues, spaces, offerings, orgs] = await Promise.all([
+    db.orm.public.Event.all(),
+    db.orm.public.Company.all(),
+    db.orm.public.User.all(),
+    db.orm.public.Venue.all(),
+    db.orm.public.BookableSpace.all(),
+    db.orm.public.Offering.all(),
+    db.orm.public.ProviderOrganization.all(),
+  ]);
+
+  const eventMap = new Map(events.map((e) => [e.id, e]));
+  const companyMap = new Map(companies.map((c) => [c.id, c]));
+  const userMap = new Map(users.map((u) => [u.id, u]));
+  const venueMap = new Map(venues.map((v) => [v.id, v]));
+  const spaceMap = new Map(spaces.map((s) => [s.id, s]));
+  const offeringMap = new Map(offerings.map((o) => [o.id, o]));
+  const orgMap = new Map(orgs.map((o) => [o.id, o]));
+
+  return filtered.map((r) => {
+    const event = eventMap.get(r.eventId);
+    const company = companyMap.get(r.companyId);
+    const requester = userMap.get(r.createdById);
+    const venue = venueMap.get(r.venueId);
+    const space = r.bookableSpaceId ? spaceMap.get(r.bookableSpaceId) : null;
+    const offering = r.offeringId ? offeringMap.get(r.offeringId) : null;
+    const org = orgMap.get(r.providerOrgId);
+
+    return {
+      id: r.id,
+      eventId: r.eventId,
+      companyId: r.companyId,
+      createdById: r.createdById,
+      providerOrgId: r.providerOrgId,
+      venueId: r.venueId,
+      bookableSpaceId: r.bookableSpaceId ?? null,
+      offeringId: r.offeringId ?? null,
+      requestedDateTime: r.requestedDateTime,
+      attendees: r.attendees,
+      estimatedAmountPaise: r.estimatedAmountPaise ?? null,
+      dietaryNotes: r.dietaryNotes ?? null,
+      operationalNotes: r.operationalNotes ?? null,
+      status: r.status as ProviderRequestStatus,
+      providerResponseNote: r.providerResponseNote ?? null,
+      rejectionReason: r.rejectionReason ?? null,
+      respondedByPartnerUserId: r.respondedByPartnerUserId ?? null,
+      respondedAt: r.respondedAt ?? null,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt ?? null,
+      eventTitle: event?.title ?? `Event #${r.eventId}`,
+      companyName: company?.name ?? "Enterprise Client",
+      requesterName: requester?.name ?? "Corporate Requester",
+      requesterEmail: requester?.email ?? "",
+      venueName: venue?.name ?? "Venue",
+      venueCity: venue?.city ?? "",
+      spaceName: space?.name ?? null,
+      offeringName: offering?.name ?? null,
+      providerOrgName: org?.name ?? "Partner",
+    };
+  });
+}
+
+export async function getProviderBookingRequestById(
+  requestId: number,
+  providerOrgId: number,
+): Promise<ProviderBookingRequestDetail | null> {
+  const request = await db.orm.public.ProviderBookingRequest.where({
+    id: requestId,
+  }).first();
+
+  if (!request || request.providerOrgId !== providerOrgId) {
+    return null;
+  }
+
+  const [event, company, requester, venue, space, offering, org] = await Promise.all([
+    db.orm.public.Event.where({ id: request.eventId }).first(),
+    db.orm.public.Company.where({ id: request.companyId }).first(),
+    db.orm.public.User.where({ id: request.createdById }).first(),
+    db.orm.public.Venue.where({ id: request.venueId }).first(),
+    request.bookableSpaceId
+      ? db.orm.public.BookableSpace.where({ id: request.bookableSpaceId }).first()
+      : null,
+    request.offeringId
+      ? db.orm.public.Offering.where({ id: request.offeringId }).first()
+      : null,
+    db.orm.public.ProviderOrganization.where({ id: request.providerOrgId }).first(),
+  ]);
+
+  return {
+    id: request.id,
+    eventId: request.eventId,
+    companyId: request.companyId,
+    createdById: request.createdById,
+    providerOrgId: request.providerOrgId,
+    venueId: request.venueId,
+    bookableSpaceId: request.bookableSpaceId ?? null,
+    offeringId: request.offeringId ?? null,
+    requestedDateTime: request.requestedDateTime,
+    attendees: request.attendees,
+    estimatedAmountPaise: request.estimatedAmountPaise ?? null,
+    dietaryNotes: request.dietaryNotes ?? null,
+    operationalNotes: request.operationalNotes ?? null,
+    status: request.status as ProviderRequestStatus,
+    providerResponseNote: request.providerResponseNote ?? null,
+    rejectionReason: request.rejectionReason ?? null,
+    respondedByPartnerUserId: request.respondedByPartnerUserId ?? null,
+    respondedAt: request.respondedAt ?? null,
+    createdAt: request.createdAt,
+    updatedAt: request.updatedAt ?? null,
+    eventTitle: event?.title ?? `Event #${request.eventId}`,
+    companyName: company?.name ?? "Enterprise Client",
+    requesterName: requester?.name ?? "Corporate Requester",
+    requesterEmail: requester?.email ?? "",
+    venueName: venue?.name ?? "Venue",
+    venueCity: venue?.city ?? "",
+    spaceName: space?.name ?? null,
+    offeringName: offering?.name ?? null,
+    providerOrgName: org?.name ?? "Partner",
+  };
+}
+
+export async function getProviderPendingRequestsCount(
+  providerOrgId: number,
+): Promise<number> {
+  const requests = await db.orm.public.ProviderBookingRequest.where({
+    providerOrgId,
+  }).all();
+
+  return requests.filter((r) => r.status === "PENDING_PROVIDER_REVIEW").length;
+}
+
+export async function getEventBookingRequests(
+  eventId: number,
+  companyId: number,
+): Promise<ProviderBookingRequestDetail[]> {
+  const event = await db.orm.public.Event.where({ id: eventId }).first();
+  if (!event || event.companyId !== companyId) {
+    return [];
+  }
+
+  const allRequests = await db.orm.public.ProviderBookingRequest.where({
+    eventId,
+  }).all();
+
+  const scoped = allRequests.filter((r) => r.companyId === companyId);
+  scoped.sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+
+  const [company, requester, venues, spaces, offerings, orgs] = await Promise.all([
+    db.orm.public.Company.where({ id: companyId }).first(),
+    db.orm.public.User.where({ id: event.createdById }).first(),
+    db.orm.public.Venue.all(),
+    db.orm.public.BookableSpace.all(),
+    db.orm.public.Offering.all(),
+    db.orm.public.ProviderOrganization.all(),
+  ]);
+
+  const venueMap = new Map(venues.map((v) => [v.id, v]));
+  const spaceMap = new Map(spaces.map((s) => [s.id, s]));
+  const offeringMap = new Map(offerings.map((o) => [o.id, o]));
+  const orgMap = new Map(orgs.map((o) => [o.id, o]));
+
+  return scoped.map((r) => {
+    const venue = venueMap.get(r.venueId);
+    const space = r.bookableSpaceId ? spaceMap.get(r.bookableSpaceId) : null;
+    const offering = r.offeringId ? offeringMap.get(r.offeringId) : null;
+    const org = orgMap.get(r.providerOrgId);
+
+    return {
+      id: r.id,
+      eventId: r.eventId,
+      companyId: r.companyId,
+      createdById: r.createdById,
+      providerOrgId: r.providerOrgId,
+      venueId: r.venueId,
+      bookableSpaceId: r.bookableSpaceId ?? null,
+      offeringId: r.offeringId ?? null,
+      requestedDateTime: r.requestedDateTime,
+      attendees: r.attendees,
+      estimatedAmountPaise: r.estimatedAmountPaise ?? null,
+      dietaryNotes: r.dietaryNotes ?? null,
+      operationalNotes: r.operationalNotes ?? null,
+      status: r.status as ProviderRequestStatus,
+      providerResponseNote: r.providerResponseNote ?? null,
+      rejectionReason: r.rejectionReason ?? null,
+      respondedByPartnerUserId: r.respondedByPartnerUserId ?? null,
+      respondedAt: r.respondedAt ?? null,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt ?? null,
+      eventTitle: event.title,
+      companyName: company?.name ?? "Company",
+      requesterName: requester?.name ?? "Requester",
+      requesterEmail: requester?.email ?? "",
+      venueName: venue?.name ?? "Venue",
+      venueCity: venue?.city ?? "",
+      spaceName: space?.name ?? null,
+      offeringName: offering?.name ?? null,
+      providerOrgName: org?.name ?? "Partner",
+    };
+  });
+}
+
+export async function acceptProviderBookingRequestRecord(
+  requestId: number,
+  partner: { id: number; providerOrgId: number },
+  providerResponseNote?: string | null,
+): Promise<ProviderBookingRequestRecord> {
+  const request = await db.orm.public.ProviderBookingRequest.where({
+    id: requestId,
+  }).first();
+
+  if (!request) {
+    throw new Error("Booking request not found.");
+  }
+
+  if (request.providerOrgId !== partner.providerOrgId) {
+    throw new Error("Access denied: You cannot act on a request for another provider organization.");
+  }
+
+  const providerOrg = await db.orm.public.ProviderOrganization.where({
+    id: partner.providerOrgId,
+  }).first();
+
+  if (!providerOrg || providerOrg.status !== "VERIFIED") {
+    throw new Error("Your partner organization must be fully verified before accepting requests.");
+  }
+
+  if (request.status !== "PENDING_PROVIDER_REVIEW") {
+    throw new Error(
+      `Cannot accept request: current status is ${request.status}. Only pending requests can be accepted.`,
+    );
+  }
+
+  const now = new Date().toISOString();
+  await db.orm.public.ProviderBookingRequest.where({ id: requestId }).update({
+    status: "ACCEPTED",
+    respondedByPartnerUserId: partner.id,
+    respondedAt: now,
+    providerResponseNote: providerResponseNote?.trim() || null,
+    updatedAt: now,
+  });
+
+  return {
+    id: request.id,
+    eventId: request.eventId,
+    companyId: request.companyId,
+    createdById: request.createdById,
+    providerOrgId: request.providerOrgId,
+    venueId: request.venueId,
+    bookableSpaceId: request.bookableSpaceId ?? null,
+    offeringId: request.offeringId ?? null,
+    requestedDateTime: request.requestedDateTime,
+    attendees: request.attendees,
+    estimatedAmountPaise: request.estimatedAmountPaise ?? null,
+    dietaryNotes: request.dietaryNotes ?? null,
+    operationalNotes: request.operationalNotes ?? null,
+    status: "ACCEPTED",
+    providerResponseNote: providerResponseNote?.trim() || null,
+    rejectionReason: null,
+    respondedByPartnerUserId: partner.id,
+    respondedAt: now,
+    createdAt: request.createdAt,
+    updatedAt: now,
+  };
+}
+
+export async function rejectProviderBookingRequestRecord(
+  requestId: number,
+  partner: { id: number; providerOrgId: number },
+  rejectionReason: string,
+): Promise<ProviderBookingRequestRecord> {
+  const request = await db.orm.public.ProviderBookingRequest.where({
+    id: requestId,
+  }).first();
+
+  if (!request) {
+    throw new Error("Booking request not found.");
+  }
+
+  if (request.providerOrgId !== partner.providerOrgId) {
+    throw new Error("Access denied: You cannot act on a request for another provider organization.");
+  }
+
+  const providerOrg = await db.orm.public.ProviderOrganization.where({
+    id: partner.providerOrgId,
+  }).first();
+
+  if (!providerOrg || providerOrg.status !== "VERIFIED") {
+    throw new Error("Your partner organization must be verified before acting on requests.");
+  }
+
+  if (request.status !== "PENDING_PROVIDER_REVIEW") {
+    throw new Error(
+      `Cannot decline request: current status is ${request.status}. Only pending requests can be declined.`,
+    );
+  }
+
+  if (!rejectionReason || rejectionReason.trim().length < 3) {
+    throw new Error("A valid reason for declining this booking request is required.");
+  }
+
+  const now = new Date().toISOString();
+  await db.orm.public.ProviderBookingRequest.where({ id: requestId }).update({
+    status: "REJECTED",
+    respondedByPartnerUserId: partner.id,
+    respondedAt: now,
+    rejectionReason: rejectionReason.trim(),
+    updatedAt: now,
+  });
+
+  return {
+    id: request.id,
+    eventId: request.eventId,
+    companyId: request.companyId,
+    createdById: request.createdById,
+    providerOrgId: request.providerOrgId,
+    venueId: request.venueId,
+    bookableSpaceId: request.bookableSpaceId ?? null,
+    offeringId: request.offeringId ?? null,
+    requestedDateTime: request.requestedDateTime,
+    attendees: request.attendees,
+    estimatedAmountPaise: request.estimatedAmountPaise ?? null,
+    dietaryNotes: request.dietaryNotes ?? null,
+    operationalNotes: request.operationalNotes ?? null,
+    status: "REJECTED",
+    providerResponseNote: null,
+    rejectionReason: rejectionReason.trim(),
+    respondedByPartnerUserId: partner.id,
+    respondedAt: now,
+    createdAt: request.createdAt,
+    updatedAt: now,
+  };
+}
+
+export async function cancelProviderBookingRequestRecord(
+  requestId: number,
+  user: { id: number; companyId: number },
+): Promise<ProviderBookingRequestRecord> {
+  const request = await db.orm.public.ProviderBookingRequest.where({
+    id: requestId,
+  }).first();
+
+  if (!request || request.companyId !== user.companyId) {
+    throw new Error("Booking request not found or access denied.");
+  }
+
+  if (request.status !== "PENDING_PROVIDER_REVIEW") {
+    throw new Error(
+      `Cannot cancel request: current status is ${request.status}. Only pending requests can be cancelled.`,
+    );
+  }
+
+  const now = new Date().toISOString();
+  await db.orm.public.ProviderBookingRequest.where({ id: requestId }).update({
+    status: "CANCELLED",
+    updatedAt: now,
+  });
+
+  return {
+    id: request.id,
+    eventId: request.eventId,
+    companyId: request.companyId,
+    createdById: request.createdById,
+    providerOrgId: request.providerOrgId,
+    venueId: request.venueId,
+    bookableSpaceId: request.bookableSpaceId ?? null,
+    offeringId: request.offeringId ?? null,
+    requestedDateTime: request.requestedDateTime,
+    attendees: request.attendees,
+    estimatedAmountPaise: request.estimatedAmountPaise ?? null,
+    dietaryNotes: request.dietaryNotes ?? null,
+    operationalNotes: request.operationalNotes ?? null,
+    status: "CANCELLED",
+    providerResponseNote: request.providerResponseNote ?? null,
+    rejectionReason: request.rejectionReason ?? null,
+    respondedByPartnerUserId: request.respondedByPartnerUserId ?? null,
+    respondedAt: request.respondedAt ?? null,
+    createdAt: request.createdAt,
+    updatedAt: now,
+  };
+}
+
+export type ConfirmProviderBookingRequestResult = {
+  bookingId: number;
+  eventId: number;
+  venueId: number;
+  invoiceId: number;
+  invoiceNumber: string;
+  totalAmount: number; // in paise
+  isExisting?: boolean;
+};
+
+/**
+ * Enterprise Requester Confirmation:
+ * Transitions an ACCEPTED ProviderBookingRequest into a confirmed commercial Booking
+ * and generates the official GST Tax Invoice atomically.
+ *
+ * Safety & Invariant Guarantees:
+ *   - Authenticated enterprise user check (REQUESTER or ADMIN).
+ *   - Tenant isolation: verifies request and event belong to the caller's companyId.
+ *   - Status gate: request must be in ACCEPTED status (rejects REJECTED, CANCELLED, PENDING).
+ *   - Idempotency / Duplicate safety: returns existing booking/invoice if already confirmed.
+ *   - Atomic transaction: Booking creation, Invoice creation, and Event status update to BOOKING_REQUESTED.
+ *   - GST calculation: strictly delegates to calculateGst engine with intra/inter-state rules.
+ */
+export async function confirmProviderBookingRequestRecord(
+  requestId: number,
+  user: { id: number; companyId: number; role: string },
+): Promise<ConfirmProviderBookingRequestResult> {
+  // 1. Role Authorization
+  const allowedRoles = ["REQUESTER", "COMPANY_ADMIN", "ADMIN"];
+  if (!allowedRoles.includes(user.role)) {
+    throw new Error(`Users with role '${user.role}' cannot confirm commercial bookings.`);
+  }
+
+  // 2. Fetch Provider Booking Request
+  const request = await db.orm.public.ProviderBookingRequest.where({
+    id: requestId,
+  }).first();
+
+  if (!request) {
+    throw new Error("Booking request not found.");
+  }
+
+  // 3. Tenant Isolation Check
+  if (request.companyId !== user.companyId) {
+    throw new Error("Access denied: You cannot confirm a request for another company.");
+  }
+
+  // 4. Status Validation
+  if (request.status !== "ACCEPTED") {
+    if (request.status === "REJECTED") {
+      throw new Error("Cannot confirm booking: provider has declined this request.");
+    }
+    if (request.status === "CANCELLED") {
+      throw new Error("Cannot confirm booking: request has been cancelled.");
+    }
+    if (request.status === "PENDING_PROVIDER_REVIEW") {
+      throw new Error("Cannot confirm booking: waiting for provider response.");
+    }
+    throw new Error(`Cannot confirm booking: current request status is ${request.status}.`);
+  }
+
+  // 5. Fetch Event — Tenant Isolated
+  const event = await db.orm.public.Event.where({ id: request.eventId }).first();
+  if (!event || event.companyId !== user.companyId) {
+    throw new Error("Event not found or access denied.");
+  }
+
+  // 6. Idempotency / Duplicate Check
+  const existingBooking = await db.orm.public.Booking.where({
+    eventId: event.id,
+  }).first();
+
+  if (existingBooking) {
+    const existingInvoice = await db.orm.public.Invoice.where({
+      bookingId: existingBooking.id,
+    }).first();
+
+    if (existingInvoice) {
+      return {
+        bookingId: existingBooking.id,
+        eventId: event.id,
+        venueId: existingBooking.venueId,
+        invoiceId: existingInvoice.id,
+        invoiceNumber: existingInvoice.invoiceNumber,
+        totalAmount: existingInvoice.totalAmount,
+        isExisting: true,
+      };
+    }
+  }
+
+  // 7. Fetch Venue
+  const venue = await db.orm.public.Venue.where({ id: request.venueId }).first();
+  if (!venue) {
+    throw new Error("Selected venue not found.");
+  }
+
+  // 8. Amount Calculation
+  const baseAmount = request.estimatedAmountPaise ?? event.budget;
+  if (!Number.isInteger(baseAmount) || baseAmount <= 0) {
+    throw new Error("Invalid booking amount. Amount must be a positive integer in paise.");
+  }
+
+  // 9. GST Calculation
+  const venueCity = venue.city || "";
+  const eventCity = event.city || "";
+  const intraState = isIntraState(venueCity, eventCity);
+  const gst = calculateGst(baseAmount, intraState);
+
+  // 10. Atomic Mutation: Booking + Invoice + Event Status
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
+
+  let createdBookingId: number | undefined;
+  let createdInvoiceId: number | undefined;
+  let createdInvoiceNumber: string | undefined;
+
+  try {
+    await db.transaction(async (tx) => {
+      // Create Booking row
+      const booking = await tx.orm.public.Booking.create({
+        eventId: event.id,
+        venueId: request.venueId,
+        amount: gst.baseAmount,
+        taxAmount: gst.cgstAmount + gst.sgstAmount + gst.igstAmount,
+        currency: "INR",
+        paymentStatus: "PENDING",
+      });
+
+      createdBookingId = booking.id;
+      createdInvoiceNumber = `INV-${y}${m}${d}-${booking.id}`;
+
+      // Create Invoice row
+      const invoice = await tx.orm.public.Invoice.create({
+        invoiceNumber: createdInvoiceNumber,
+        bookingId: booking.id,
+        baseAmount: gst.baseAmount,
+        cgstAmount: gst.cgstAmount,
+        sgstAmount: gst.sgstAmount,
+        igstAmount: gst.igstAmount,
+        totalAmount: gst.totalAmount,
+        supplierGstin: `GSTIN-VENUE-${venue.id}`,
+        recipientGstin: `GSTIN-COMPANY-${user.companyId}`,
+        status: "ISSUED",
+        pdfUrl: null,
+      });
+
+      createdInvoiceId = invoice.id;
+
+      // Update Event status to BOOKING_REQUESTED
+      await tx.orm.public.Event.where({ id: event.id }).update({
+        status: "BOOKING_REQUESTED",
+      });
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("unique") || msg.includes("duplicate") || msg.includes("Booking_eventId")) {
+      const dupBooking = await db.orm.public.Booking.where({ eventId: event.id }).first();
+      if (dupBooking) {
+        const dupInvoice = await db.orm.public.Invoice.where({ bookingId: dupBooking.id }).first();
+        if (dupInvoice) {
+          return {
+            bookingId: dupBooking.id,
+            eventId: event.id,
+            venueId: dupBooking.venueId,
+            invoiceId: dupInvoice.id,
+            invoiceNumber: dupInvoice.invoiceNumber,
+            totalAmount: dupInvoice.totalAmount,
+            isExisting: true,
+          };
+        }
+      }
+    }
+    throw err;
+  }
+
+  if (!createdBookingId || !createdInvoiceId || !createdInvoiceNumber) {
+    throw new Error("Commercial booking confirmation failed unexpectedly.");
+  }
+
+  // 11. Revalidate Affected Routes
+  revalidatePath(`/events/${event.id}`);
+  revalidatePath("/events");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/finance");
+  revalidatePath(`/dashboard/finance/invoices/${createdInvoiceId}`);
+
+  return {
+    bookingId: createdBookingId,
+    eventId: event.id,
+    venueId: request.venueId,
+    invoiceId: createdInvoiceId,
+    invoiceNumber: createdInvoiceNumber,
+    totalAmount: gst.totalAmount,
+  };
+}
+

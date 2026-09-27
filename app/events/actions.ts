@@ -5,6 +5,7 @@ import { requireAppUser } from "@/lib/auth";
 import { db } from "@/prisma/db";
 import { submitEventForApproval } from "@/lib/events/submit-event-for-approval";
 import { requestBooking } from "@/lib/bookings/request-booking";
+import { confirmProviderBookingRequestRecord } from "@/lib/provider/service";
 
 function readString(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -145,4 +146,30 @@ export async function requestBookingAction(eventId: number) {
   });
 
   redirect(`/events/${eventId}`);
+}
+
+/**
+ * Server action: Confirms an ACCEPTED provider booking request.
+ *
+ * Atomically creates the confirmed Booking, calculates GST, generates
+ * the official Tax Invoice (status: ISSUED), and transitions the event
+ * status to BOOKING_REQUESTED.
+ *
+ * Permission: REQUESTER or ADMIN only.
+ * Tenant Isolation: Enforced via companyId matching on both request and event.
+ */
+export async function confirmProviderBookingRequestAction(requestId: number) {
+  if (!Number.isInteger(requestId) || requestId <= 0) {
+    throw new Error("Invalid request ID.");
+  }
+
+  const user = await requireAppUser();
+
+  const result = await confirmProviderBookingRequestRecord(requestId, {
+    id: user.id,
+    companyId: user.companyId,
+    role: user.role,
+  });
+
+  return { success: true, data: result };
 }

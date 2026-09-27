@@ -41,7 +41,7 @@ export function canSubmitEvent(
     };
   }
 
-  const allowedRoles = ["REQUESTER", "ADMIN"];
+  const allowedRoles = ["REQUESTER", "COMPANY_ADMIN", "ADMIN"];
   if (!allowedRoles.includes(user.role)) {
     return {
       canSubmit: false,

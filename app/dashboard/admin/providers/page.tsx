@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Building2, ChevronRight, MapPin } from "lucide-react";
-import { requireUserRole } from "@/lib/auth";
+import { requirePlatformAdmin } from "@/lib/auth";
 import { getProviderOrganizations } from "@/lib/provider/service";
 import {
   CreateProviderDialog,
@@ -8,8 +8,8 @@ import {
 } from "@/components/provider/provider-components";
 
 export default async function ProviderAdminListPage() {
-  // Only internal ADMIN role can access provider domain administration
-  await requireUserRole(["ADMIN"]);
+  // Only internal PLATFORM_ADMIN role can access provider domain administration
+  await requirePlatformAdmin();
   const providers = await getProviderOrganizations();
 
 

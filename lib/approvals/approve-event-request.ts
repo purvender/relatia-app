@@ -25,7 +25,7 @@ export async function approveEventRequest({
   approvalId,
   user,
 }: ApproveParams): Promise<ApproveResult> {
-  if (user.role !== "APPROVER" && user.role !== "ADMIN") {
+  if (user.role !== "APPROVER" && user.role !== "COMPANY_ADMIN" && user.role !== "ADMIN") {
     throw new Error("Unauthorized: Only approvers or admins can approve event requests.");
   }
 
@@ -47,8 +47,9 @@ export async function approveEventRequest({
     throw new Error("Event not found or access denied.");
   }
 
-  // Non-ADMIN approver can only act on approvals assigned to them
-  if (user.role !== "ADMIN" && approval.approverId !== user.id) {
+  // Non-admin approver can only act on approvals assigned to them
+  const isAdmin = user.role === "COMPANY_ADMIN" || user.role === "ADMIN";
+  if (!isAdmin && approval.approverId !== user.id) {
     throw new Error("Unauthorized: You are not assigned to approve this request.");
   }
 

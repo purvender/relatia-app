@@ -13,6 +13,8 @@ export type BookingSummary = {
   currency: string;
   paymentStatus: string;
   createdAt: string;
+  invoiceId?: number;
+  invoiceNumber?: string;
 };
 
 /**
@@ -43,6 +45,9 @@ export async function getBookingByEvent(
   // Fetch venue details for display on event detail page
   const venue = await db.orm.public.Venue.where({ id: booking.venueId }).first();
 
+  // Fetch invoice if generated for this booking
+  const invoice = await db.orm.public.Invoice.where({ bookingId: booking.id }).first();
+
   return {
     id: booking.id,
     eventId: booking.eventId,
@@ -54,5 +59,7 @@ export async function getBookingByEvent(
     currency: booking.currency,
     paymentStatus: booking.paymentStatus,
     createdAt: booking.createdAt,
+    invoiceId: invoice?.id,
+    invoiceNumber: invoice?.invoiceNumber,
   };
 }
