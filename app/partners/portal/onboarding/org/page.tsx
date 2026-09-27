@@ -58,12 +58,21 @@ export default function PartnerOrgOnboardingPage() {
           <p className="font-semibold">{state.error}</p>
           {state.fieldErrors && (
             <ul className="text-xs list-disc list-inside space-y-0.5 text-rose-700">
-              {Object.entries(state.fieldErrors).map(([key, errs]) => (
-                <li key={key}>
-                  <span className="capitalize">{key}</span>:{" "}
-                  {errs?.join(", ")}
-                </li>
-              ))}
+              {Object.entries(state.fieldErrors).map(([key, errs]) => {
+                const fieldNames: Record<string, string> = {
+                  providerType: "Business Type",
+                  name: "Organisation Name",
+                  legalName: "Legal Entity Name",
+                  city: "Primary City",
+                };
+                const fieldLabel = fieldNames[key] || key;
+                return (
+                  <li key={key}>
+                    <span className="font-semibold">{fieldLabel}</span>:{" "}
+                    {errs?.join(", ")}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -114,16 +123,18 @@ export default function PartnerOrgOnboardingPage() {
             <select
               name="providerType"
               required
-              defaultValue="RESTAURANT_GROUP"
+              defaultValue="RESTAURANT"
               className="w-full rounded-xl border border-[#E8E3DA] bg-[#FDFBF7] px-4 py-2.5 text-sm text-[#1A1714] focus:border-[#C4A47C] focus:bg-white focus:outline-none transition-colors"
             >
-              <option value="RESTAURANT_GROUP">Restaurant Group</option>
-              <option value="HOTEL">Hotel / Resort</option>
-              <option value="EVENT_SPACE">Event Venue / Banquet</option>
-              <option value="CATERING">Catering &amp; Culinary</option>
-              <option value="LOUNGE">Lounge / Rooftop / Club</option>
-              <option value="INDEPENDENT_VENUE">Independent Restaurant</option>
-              <option value="OTHER">Other Partner Entity</option>
+              <option value="RESTAURANT">Restaurant / Dining Group</option>
+              <option value="HOTEL">Hotel / Resort Dining</option>
+              <option value="CLUB">Private Club / Lounge</option>
+              <option value="CATERING_COMPANY">Catering &amp; Culinary Company</option>
+              <option value="EXPERIENCE_PROVIDER">Bespoke Dining &amp; Experience Provider</option>
+              <option value="ACTIVITY_PROVIDER">Hospitality &amp; Activity Venue</option>
+              <option value="LIVE_ENTERTAINMENT">Live Entertainment &amp; Event Space</option>
+              <option value="GIFTING_PROVIDER">Corporate Gifting &amp; F&amp;B</option>
+              <option value="MERCHANDISE_PROVIDER">Hospitality Merchandise</option>
             </select>
           </div>
 

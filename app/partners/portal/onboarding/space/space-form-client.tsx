@@ -57,11 +57,25 @@ export function SpaceFormClient({ providerOrgId, venues }: Props) {
           <p className="font-semibold">{state.error}</p>
           {state.fieldErrors && (
             <ul className="text-xs list-disc list-inside space-y-0.5 text-rose-700">
-              {Object.entries(state.fieldErrors).map(([key, errs]) => (
-                <li key={key}>
-                  <span className="capitalize">{key}</span>: {errs?.join(", ")}
-                </li>
-              ))}
+              {Object.entries(state.fieldErrors).map(([key, errs]) => {
+                const fieldNames: Record<string, string> = {
+                  venueId: "Venue",
+                  name: "Space Name",
+                  spaceType: "Space Type",
+                  privacyLevel: "Privacy Level",
+                  minCapacity: "Minimum Capacity",
+                  maxCapacity: "Maximum Capacity",
+                  seatedCapacity: "Seated Capacity",
+                  standingCapacity: "Standing Capacity",
+                  publicDescription: "Space Description",
+                };
+                const fieldLabel = fieldNames[key] || key;
+                return (
+                  <li key={key}>
+                    <span className="font-semibold">{fieldLabel}</span>: {errs?.join(", ")}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -110,16 +124,18 @@ export function SpaceFormClient({ providerOrgId, venues }: Props) {
             <select
               name="spaceType"
               required
-              defaultValue="PRIVATE_ROOM"
+              defaultValue="PRIVATE_DINING"
               className="w-full rounded-xl border border-[#E8E3DA] bg-[#FDFBF7] px-4 py-2.5 text-sm text-[#1A1714] focus:border-[#C4A47C] focus:bg-white focus:outline-none transition-colors"
             >
-              <option value="PRIVATE_ROOM">Enclosed Private Dining Room</option>
-              <option value="SEMI_PRIVATE">Semi-Private Section</option>
-              <option value="MAIN_DINING">Main Dining Hall Section</option>
-              <option value="ROOFTOP">Rooftop Deck / Terrace</option>
-              <option value="FULL_BUYOUT">Full Venue Buyout</option>
-              <option value="OUTDOOR">Outdoor Courtyard</option>
-              <option value="CHEF_TABLE">Chef&apos;s Table</option>
+              <option value="PRIVATE_DINING">Private Dining Room (PDR)</option>
+              <option value="SEMI_PRIVATE_DINING">Semi-Private Section</option>
+              <option value="MAIN_DINING_SECTION">Main Dining Section</option>
+              <option value="TERRACE">Terrace / Outdoor Patio</option>
+              <option value="ROOFTOP">Rooftop Deck / Lounge</option>
+              <option value="BALLROOM">Grand Ballroom / Banquet Suite</option>
+              <option value="BOARDROOM">Executive Dining Boardroom</option>
+              <option value="LOUNGE">Cocktail Lounge Space</option>
+              <option value="CLUB_EVENT_SPACE">Private Club Event Space</option>
             </select>
           </div>
 
@@ -133,8 +149,8 @@ export function SpaceFormClient({ providerOrgId, venues }: Props) {
               defaultValue="EXCLUSIVE"
               className="w-full rounded-xl border border-[#E8E3DA] bg-[#FDFBF7] px-4 py-2.5 text-sm text-[#1A1714] focus:border-[#C4A47C] focus:bg-white focus:outline-none transition-colors"
             >
-              <option value="EXCLUSIVE">Fully Exclusive (Door/partitioned)</option>
-              <option value="SEMI_PRIVATE">Semi-Private (Screened/curtained)</option>
+              <option value="EXCLUSIVE">Fully Exclusive (Door / Partitioned)</option>
+              <option value="SEMI_PRIVATE">Semi-Private (Screened / Curtained)</option>
               <option value="OPEN">Open Atmosphere</option>
             </select>
           </div>

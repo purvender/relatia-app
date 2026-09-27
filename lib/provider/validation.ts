@@ -1,109 +1,169 @@
 import { z } from "zod";
 
-export const providerTypeEnum = z.enum([
-  "RESTAURANT",
-  "HOTEL",
-  "CLUB",
-  "CATERING_COMPANY",
-  "EXPERIENCE_PROVIDER",
-  "ACTIVITY_PROVIDER",
-  "LIVE_ENTERTAINMENT",
-  "GIFTING_PROVIDER",
-  "MERCHANDISE_PROVIDER",
-]);
+export const providerTypeEnum = z.enum(
+  [
+    "RESTAURANT",
+    "HOTEL",
+    "CLUB",
+    "CATERING_COMPANY",
+    "EXPERIENCE_PROVIDER",
+    "ACTIVITY_PROVIDER",
+    "LIVE_ENTERTAINMENT",
+    "GIFTING_PROVIDER",
+    "MERCHANDISE_PROVIDER",
+  ],
+  {
+    message: "Please select a valid business type.",
+  },
+);
 
-export const providerStatusEnum = z.enum([
-  "DRAFT",
-  "PENDING_VERIFICATION",
-  "VERIFIED",
-  "PAUSED",
-  "ARCHIVED",
-]);
+export const providerStatusEnum = z.enum(
+  [
+    "DRAFT",
+    "PENDING_VERIFICATION",
+    "VERIFIED",
+    "PAUSED",
+    "ARCHIVED",
+  ],
+  {
+    message: "Please select a valid provider status.",
+  },
+);
 
-export const onboardingStatusEnum = z.enum([
-  "NOT_STARTED",
-  "IN_PROGRESS",
-  "REVIEW_REQUIRED",
-  "READY_FOR_DISCOVERY",
-  "BLOCKED",
-  "COMPLETE",
-]);
+export const onboardingStatusEnum = z.enum(
+  [
+    "NOT_STARTED",
+    "IN_PROGRESS",
+    "REVIEW_REQUIRED",
+    "READY_FOR_DISCOVERY",
+    "BLOCKED",
+    "COMPLETE",
+  ],
+  {
+    message: "Please select a valid onboarding status.",
+  },
+);
 
-export const venueVisibilityEnum = z.enum([
-  "DRAFT",
-  "INTERNAL_ONLY",
-  "DISCOVERABLE",
-  "PAUSED",
-  "ARCHIVED",
-]);
+export const venueVisibilityEnum = z.enum(
+  [
+    "DRAFT",
+    "INTERNAL_ONLY",
+    "DISCOVERABLE",
+    "PAUSED",
+    "ARCHIVED",
+  ],
+  {
+    message: "Please select a valid visibility state.",
+  },
+);
 
-export const bookableSpaceTypeEnum = z.enum([
-  "PRIVATE_DINING",
-  "SEMI_PRIVATE_DINING",
-  "LOUNGE",
-  "TERRACE",
-  "ROOFTOP",
-  "BALLROOM",
-  "BOARDROOM",
-  "MAIN_DINING_SECTION",
-  "CLUB_EVENT_SPACE",
-]);
+export const bookableSpaceTypeEnum = z.enum(
+  [
+    "PRIVATE_DINING",
+    "SEMI_PRIVATE_DINING",
+    "LOUNGE",
+    "TERRACE",
+    "ROOFTOP",
+    "BALLROOM",
+    "BOARDROOM",
+    "MAIN_DINING_SECTION",
+    "CLUB_EVENT_SPACE",
+  ],
+  {
+    message: "Please select a valid space category.",
+  },
+);
 
-export const bookableSpaceStatusEnum = z.enum([
-  "DRAFT",
-  "ACTIVE",
-  "PAUSED",
-  "ARCHIVED",
-]);
+export const bookableSpaceStatusEnum = z.enum(
+  [
+    "DRAFT",
+    "ACTIVE",
+    "PAUSED",
+    "ARCHIVED",
+  ],
+  {
+    message: "Please select a valid space status.",
+  },
+);
 
-export const verificationStatusEnum = z.enum([
-  "UNVERIFIED",
-  "PENDING_REVIEW",
-  "VERIFIED",
-  "REJECTED",
-]);
+export const verificationStatusEnum = z.enum(
+  [
+    "UNVERIFIED",
+    "PENDING_REVIEW",
+    "VERIFIED",
+    "REJECTED",
+  ],
+  {
+    message: "Please select a valid verification status.",
+  },
+);
 
-export const offeringTypeEnum = z.enum([
-  "SET_MENU",
-  "PER_PERSON_PACKAGE",
-  "FIXED_EVENT_PACKAGE",
-  "CUSTOM_EXPERIENCE",
-  "A_LA_CARTE_MIN_SPEND",
-  "BEVERAGE_PACKAGE",
-]);
+export const offeringTypeEnum = z.enum(
+  [
+    "SET_MENU",
+    "PER_PERSON_PACKAGE",
+    "FIXED_EVENT_PACKAGE",
+    "CUSTOM_EXPERIENCE",
+    "A_LA_CARTE_MIN_SPEND",
+    "BEVERAGE_PACKAGE",
+  ],
+  {
+    message: "Please select a valid offering package type.",
+  },
+);
 
-export const pricingBasisEnum = z.enum([
-  "PER_PERSON",
-  "FIXED_TOTAL",
-  "MINIMUM_SPEND_ONLY",
-  "CUSTOM_QUOTE",
-]);
+export const pricingBasisEnum = z.enum(
+  [
+    "PER_PERSON",
+    "FIXED_TOTAL",
+    "MINIMUM_SPEND_ONLY",
+    "CUSTOM_QUOTE",
+  ],
+  {
+    message: "Please select a valid pricing model.",
+  },
+);
 
-export const documentTypeEnum = z.enum([
-  "FSSAI_LICENSE",
-  "GSTIN_CERTIFICATE",
-  "LIQUOR_LICENSE",
-  "BANK_MANDATE",
-  "PAN_CARD",
-  "RATE_CARD",
-  "VENUE_FLOOR_PLAN",
-  "OTHER",
-]);
+export const documentTypeEnum = z.enum(
+  [
+    "FSSAI_LICENSE",
+    "GSTIN_CERTIFICATE",
+    "LIQUOR_LICENSE",
+    "BANK_MANDATE",
+    "PAN_CARD",
+    "RATE_CARD",
+    "VENUE_FLOOR_PLAN",
+    "OTHER",
+  ],
+  {
+    message: "Please select a valid document type.",
+  },
+);
 
-export const documentReviewStatusEnum = z.enum([
-  "PENDING_REVIEW",
-  "VERIFIED",
-  "REJECTED",
-  "EXPIRED",
-]);
+export const documentReviewStatusEnum = z.enum(
+  [
+    "PENDING_REVIEW",
+    "VERIFIED",
+    "REJECTED",
+    "EXPIRED",
+  ],
+  {
+    message: "Please select a valid document review status.",
+  },
+);
 
-export const contactRoleCategoryEnum = z.enum([
-  "OPERATIONS",
-  "SALES",
-  "FINANCE",
-  "MANAGEMENT",
-  "GENERAL",
-]);
+export const contactRoleCategoryEnum = z.enum(
+  [
+    "OPERATIONS",
+    "SALES",
+    "FINANCE",
+    "MANAGEMENT",
+    "GENERAL",
+  ],
+  {
+    message: "Please select a valid functional category.",
+  },
+);
 
 export const createProviderSchema = z.object({
   name: z.string().trim().min(2, "Provider name must be at least 2 characters").max(100),
@@ -125,7 +185,11 @@ export const createProviderContactSchema = z.object({
   role: z.string().trim().min(2, "Role / Title is required").max(80),
   email: z.string().trim().email("Valid email is required"),
   phone: z.string().trim().max(20).optional().nullable(),
-  preferredContactMethod: z.enum(["EMAIL", "PHONE", "WHATSAPP"]).default("EMAIL"),
+  preferredContactMethod: z
+    .enum(["EMAIL", "PHONE", "WHATSAPP"], {
+      message: "Please select a preferred contact method.",
+    })
+    .default("EMAIL"),
   category: contactRoleCategoryEnum.default("GENERAL"),
   internalNotes: z.string().trim().max(500).optional().nullable(),
 });
@@ -137,7 +201,11 @@ export const updateProviderContactSchema = z.object({
   role: z.string().trim().min(2, "Role / Title is required").max(80).optional(),
   email: z.string().trim().email("Valid email is required").optional(),
   phone: z.string().trim().max(20).optional().nullable(),
-  preferredContactMethod: z.enum(["EMAIL", "PHONE", "WHATSAPP"]).optional(),
+  preferredContactMethod: z
+    .enum(["EMAIL", "PHONE", "WHATSAPP"], {
+      message: "Please select a preferred contact method.",
+    })
+    .optional(),
   category: contactRoleCategoryEnum.optional(),
   isActive: z.boolean().optional(),
   internalNotes: z.string().trim().max(500).optional().nullable(),
@@ -161,7 +229,11 @@ export const createProviderVenueSchema = z.object({
   address: z.string().trim().max(255).optional().nullable(),
   capacity: z.number().int().positive("Capacity must be at least 1 guest"),
   cuisine: z.string().trim().min(2, "Cuisine is required").max(80),
-  priceBand: z.enum(["MODERATE", "PREMIUM", "LUXURY"]).default("PREMIUM"),
+  priceBand: z
+    .enum(["MODERATE", "PREMIUM", "LUXURY"], {
+      message: "Please select a valid price band.",
+    })
+    .default("PREMIUM"),
   tags: z.array(z.string()).default([]),
   rating: z.number().min(1.0).max(5.0).default(4.8),
   venueType: z.string().default("RESTAURANT"),
@@ -179,7 +251,11 @@ export const updateProviderVenueSchema = z.object({
   address: z.string().trim().max(255).optional().nullable(),
   capacity: z.number().int().positive("Capacity must be at least 1 guest").optional(),
   cuisine: z.string().trim().min(2, "Cuisine is required").max(80).optional(),
-  priceBand: z.enum(["MODERATE", "PREMIUM", "LUXURY"]).optional(),
+  priceBand: z
+    .enum(["MODERATE", "PREMIUM", "LUXURY"], {
+      message: "Please select a valid price band.",
+    })
+    .optional(),
   tags: z.array(z.string()).optional(),
   rating: z.number().min(1.0).max(5.0).optional(),
   venueType: z.string().optional(),
@@ -197,7 +273,11 @@ export const createBookableSpaceSchema = z
     spaceType: bookableSpaceTypeEnum.default("PRIVATE_DINING"),
     minCapacity: z.number().int().positive("Min capacity must be at least 1"),
     maxCapacity: z.number().int().positive("Max capacity must be positive"),
-    privacyLevel: z.enum(["EXCLUSIVE", "SEMI_PRIVATE", "OPEN"]).default("EXCLUSIVE"),
+    privacyLevel: z
+      .enum(["EXCLUSIVE", "SEMI_PRIVATE", "OPEN"], {
+        message: "Please select a valid privacy level.",
+      })
+      .default("EXCLUSIVE"),
     seatedCapacity: z.number().int().positive().optional().nullable(),
     standingCapacity: z.number().int().positive().optional().nullable(),
     publicDescription: z.string().trim().max(1000).optional().nullable(),

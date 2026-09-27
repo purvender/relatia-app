@@ -7,14 +7,15 @@ import { RelatiaLogo } from "@/components/marketing/relatia-logo";
 
 export const metadata: Metadata = {
   title: "Partner Portal Sign In — Relatia Hospitality Network",
-  description: "Sign in to the Relatia Hospitality Partner Portal to manage venues, bookable spaces, set menus, pricing, and reservation briefs.",
+  description:
+    "Sign in to the Relatia Hospitality Partner Portal to manage venues, bookable spaces, set menus, pricing, and reservation briefs.",
 };
 
 export default async function PartnerLoginPage() {
   const { userId } = await auth();
 
   if (userId) {
-    redirect("/dashboard");
+    redirect("/partners/portal");
   }
 
   return (
@@ -59,14 +60,28 @@ export default async function PartnerLoginPage() {
 
             <div className="space-y-3 pt-2">
               {[
-                { label: "Bookable Spaces", desc: "PDRs, boardrooms, rooftop terraces & banquet suites" },
-                { label: "Packages & Menus", desc: "Corporate set menus, sommelier pairings & dietary specs" },
-                { label: "Operational Controls", desc: "Lead times, cancellation rules & discovery visibility" },
+                {
+                  label: "Bookable Spaces",
+                  desc: "PDRs, boardrooms, rooftop terraces & banquet suites",
+                },
+                {
+                  label: "Packages & Menus",
+                  desc: "Corporate set menus, sommelier pairings & dietary specs",
+                },
+                {
+                  label: "Operational Controls",
+                  desc: "Lead times, cancellation rules & discovery visibility",
+                },
               ].map((item) => (
-                <div key={item.label} className="flex items-start gap-2.5 text-xs text-[var(--m-text-secondary)]">
+                <div
+                  key={item.label}
+                  className="flex items-start gap-2.5 text-xs text-[var(--m-text-secondary)]"
+                >
                   <span className="text-[var(--m-brand)] font-bold mt-0.5">✓</span>
                   <div>
-                    <span className="font-semibold text-[var(--m-text)]">{item.label}: </span>
+                    <span className="font-semibold text-[var(--m-text)]">
+                      {item.label}:{" "}
+                    </span>
                     {item.desc}
                   </div>
                 </div>
@@ -74,9 +89,11 @@ export default async function PartnerLoginPage() {
             </div>
 
             <div className="pt-4 border-t border-[var(--m-border)] flex flex-wrap items-center justify-between gap-3 text-xs">
-              <span className="text-[var(--m-text-muted)]">Don’t have a partner account yet?</span>
+              <span className="text-[var(--m-text-muted)]">
+                Don’t have a partner account yet?
+              </span>
               <Link
-                href="/partners#apply"
+                href="/partners/sign-up"
                 className="text-[var(--m-brand)] font-semibold hover:underline"
               >
                 Apply as Hospitality Partner →
@@ -87,7 +104,12 @@ export default async function PartnerLoginPage() {
           {/* Auth Card Column */}
           <div className="lg:col-span-6 flex justify-center">
             <div className="w-full max-w-sm rounded-2xl border border-[var(--m-border)] bg-white p-2 shadow-xl">
-              <SignIn fallbackRedirectUrl="/dashboard" />
+              <SignIn
+                routing="path"
+                path="/partners/login"
+                signUpUrl="/partners/sign-up"
+                fallbackRedirectUrl="/partners/portal"
+              />
             </div>
           </div>
         </div>
@@ -95,7 +117,9 @@ export default async function PartnerLoginPage() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--m-border)] bg-[var(--m-bg-alt)] py-4 text-center text-xs text-[var(--m-text-muted)] px-6">
-        <p>© {new Date().getFullYear()} Relatia Technologies Pvt. Ltd. · Hospitality Partner Gateway</p>
+        <p>
+          © {new Date().getFullYear()} Relatia Technologies Pvt. Ltd. · Hospitality Partner Gateway
+        </p>
       </footer>
     </div>
   );

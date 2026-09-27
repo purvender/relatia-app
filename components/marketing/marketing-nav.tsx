@@ -165,15 +165,15 @@ export function MarketingNav() {
 
             {/* Contextual CTA */}
             {isPartners ? (
-              <a
-                href="#apply"
+              <Link
+                href="/partners/sign-up"
                 className="inline-flex items-center gap-2 rounded-full bg-[var(--m-brand)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.02]"
               >
                 Apply as Partner
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </a>
+              </Link>
             ) : (
               <>
                 <Link
@@ -294,7 +294,7 @@ export function MarketingNav() {
                   </span>
                   <div className="flex flex-col gap-2">
                     <Link
-                      href="/partners#apply"
+                      href="/partners/sign-up"
                       onClick={() => setMenuOpen(false)}
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--m-brand)] px-6 py-3 text-sm font-semibold text-white"
                     >

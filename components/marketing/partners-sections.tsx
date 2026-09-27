@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -42,15 +41,15 @@ export function PartnersHero() {
 
             <FadeInUp delay={0.3}>
               <div className="mt-8 flex flex-wrap items-center gap-4">
-                <a
-                  href="#apply"
+                <Link
+                  href="/partners/sign-up"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[var(--m-brand)] px-7 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.02]"
                 >
                   Apply as a Partner
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                </a>
+                </Link>
                 <Link
                   href="/partners/login"
                   className="inline-flex items-center justify-center rounded-full border border-[var(--m-border)] bg-[var(--m-bg)] px-6 py-3.5 text-sm font-medium text-[var(--m-text)] hover:bg-[var(--m-bg-alt)] transition-colors"
@@ -526,235 +525,124 @@ export function PartnersTestimonials() {
 }
 
 /* ================================================================
-   8. PARTNER APPLICATION & FUNNEL INTAKE
+   8. PARTNER APPLICATION & REGISTRATION FUNNEL
    ================================================================ */
 export function PartnersApplication() {
-  const [submitted, setSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    establishmentName: "",
-    spaceType: "Private Dining Room (PDR)",
-    city: "Mumbai",
-    capacityPdr: "",
-    contactName: "",
-    title: "",
-    email: "",
-    phone: "",
-    notes: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
   return (
     <section id="apply" className="py-24 bg-[var(--m-bg)] border-t border-[var(--m-border)]">
-      <div className="mx-auto max-w-3xl px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl px-6 lg:px-8">
         <div className="text-center">
           <FadeIn>
             <span className="text-xs font-semibold uppercase tracking-wider text-[var(--m-brand)]">
-              Partner Intake Application
+              Hospitality Partner Registration
             </span>
-            <h2 className="mt-3 font-serif text-3xl sm:text-4xl text-[var(--m-text)] tracking-tight">
+            <h2 className="mt-3 font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--m-text)] tracking-tight">
               Apply to the Relatia Collection
             </h2>
-            <p className="mt-4 text-base text-[var(--m-text-secondary)] font-light">
-              Submit your property details and private dining specifications. Our partner onboarding team will review your application and coordinate a verification walkthrough.
+            <p className="mt-4 text-base sm:text-lg text-[var(--m-text-secondary)] font-light max-w-2xl mx-auto">
+              Join India’s premier network of private dining rooms, luxury hotel salons, and executive event spaces. Partner onboarding is structured, transparent, and self-serve.
             </p>
           </FadeIn>
         </div>
 
         <FadeInUp delay={0.2}>
-          <div className="mt-12 rounded-2xl border border-[var(--m-border)] bg-[var(--m-card)] p-8 sm:p-10 shadow-sm">
-            {submitted ? (
-              <div className="text-center py-12 space-y-4">
-                <div className="h-12 w-12 rounded-full bg-[var(--m-brand)]/10 text-[var(--m-brand)] flex items-center justify-center mx-auto text-xl font-bold">
-                  ✓
+          <div className="mt-12 rounded-3xl border border-[var(--m-border)] bg-[var(--m-card)] p-8 sm:p-12 shadow-lg space-y-10">
+            {/* Step breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-bg)] p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="h-8 w-8 rounded-full bg-[var(--m-brand)] text-white flex items-center justify-center font-bold text-xs">
+                    1
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--m-brand)] font-semibold bg-[var(--m-brand)]/10 px-2 py-0.5 rounded">
+                    Account First
+                  </span>
                 </div>
-                <h3 className="font-serif text-2xl text-[var(--m-text)]">Partner Application Received</h3>
-                <p className="text-sm text-[var(--m-text-secondary)] max-w-md mx-auto font-light leading-relaxed">
-                  Thank you for applying to partner with Relatia. Our partner curation team will review your spaces, menu offerings, and contact you for verification.
+                <h3 className="font-serif text-base font-semibold text-[var(--m-text)]">
+                  Create Partner Account
+                </h3>
+                <p className="text-xs text-[var(--m-text-secondary)] font-light leading-relaxed">
+                  Register your partner administrator credentials via Clerk using business email or Google.
                 </p>
-                <div className="rounded-xl border border-[var(--m-border)] bg-[var(--m-bg)] p-4 max-w-md mx-auto text-xs text-[var(--m-text-secondary)]">
-                  For priority property audits or existing partner portal assistance, email{" "}
-                  <a href="mailto:partners@relatia.in" className="text-[var(--m-brand)] font-semibold underline">
-                    partners@relatia.in
-                  </a>
-                  .
-                </div>
-                <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
-                  <Link
-                    href="/partners/login"
-                    className="rounded-full bg-[var(--m-brand)] px-6 py-2.5 text-xs font-semibold text-white"
-                  >
-                    Go to Partner Sign In →
-                  </Link>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="text-xs text-[var(--m-brand)] hover:underline font-medium"
-                  >
-                    Submit another venue application
-                  </button>
-                </div>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <h3 className="font-serif text-xl sm:text-2xl text-[var(--m-text)]">
-                      Hospitality Partner Intake Form
-                    </h3>
-                    <span className="text-[11px] font-mono font-semibold bg-[var(--m-bg-alt)] text-[var(--m-brand)] border border-[var(--m-border)] px-2.5 py-0.5 rounded-full">
-                      Vetting Pipeline
-                    </span>
-                  </div>
-                  <p className="text-xs text-[var(--m-text-secondary)] font-light mt-2">
-                    Already registered as a partner?{" "}
-                    <Link href="/partners/login" className="text-[var(--m-brand)] font-semibold underline">
-                      Sign in to your Partner Portal →
-                    </Link>
-                  </p>
+
+              <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-bg)] p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="h-8 w-8 rounded-full bg-[var(--m-brand)] text-white flex items-center justify-center font-bold text-xs">
+                    2
+                  </span>
+                  <span className="text-[10px] font-mono text-[var(--m-text-secondary)] font-semibold bg-[var(--m-bg-alt)] px-2 py-0.5 rounded">
+                    5-Step Wizard
+                  </span>
                 </div>
+                <h3 className="font-serif text-base font-semibold text-[var(--m-text)]">
+                  Configure Spaces &amp; Menus
+                </h3>
+                <p className="text-xs text-[var(--m-text-secondary)] font-light leading-relaxed">
+                  Add provider organisation, contact details, venue profile, bookable rooms, and corporate set menus.
+                </p>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Establishment / Venue Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Masala Library / The Grand Salon"
-                      value={formData.establishmentName}
-                      onChange={(e) => setFormData({ ...formData, establishmentName: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Primary Space Category
-                    </label>
-                    <select
-                      value={formData.spaceType}
-                      onChange={(e) => setFormData({ ...formData, spaceType: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] focus:border-[var(--m-brand)] focus:outline-none"
-                    >
-                      <option value="Private Dining Room (PDR)">Private Dining Room (PDR)</option>
-                      <option value="Executive Boardroom">Executive Boardroom</option>
-                      <option value="Rooftop Terrace / Lounge">Rooftop Terrace / Lounge</option>
-                      <option value="Luxury Banquet Suite">Luxury Banquet Suite</option>
-                      <option value="Full Restaurant Buyout">Full Restaurant Buyout</option>
-                    </select>
-                  </div>
+              <div className="rounded-2xl border border-[var(--m-border)] bg-[var(--m-bg)] p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="h-8 w-8 rounded-full bg-[var(--m-brand)] text-white flex items-center justify-center font-bold text-xs">
+                    3
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                    Vetted Live
+                  </span>
                 </div>
+                <h3 className="font-serif text-base font-semibold text-[var(--m-text)]">
+                  Review &amp; Publishing
+                </h3>
+                <p className="text-xs text-[var(--m-text-secondary)] font-light leading-relaxed">
+                  Submit for Relatia operational audit. Once verified, your venue goes live to corporate enterprise accounts.
+                </p>
+              </div>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      City Location
-                    </label>
-                    <select
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] focus:border-[var(--m-brand)] focus:outline-none"
-                    >
-                      <option value="Mumbai">Mumbai</option>
-                      <option value="Delhi NCR">Delhi NCR</option>
-                      <option value="Bengaluru">Bengaluru</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="Chennai">Chennai</option>
-                      <option value="Goa">Goa</option>
-                    </select>
-                  </div>
+            {/* Action Bar */}
+            <div className="rounded-2xl bg-[var(--m-bg-alt)] border border-[var(--m-border)] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="space-y-1 text-center sm:text-left">
+                <h4 className="font-serif text-lg sm:text-xl font-semibold text-[var(--m-text)]">
+                  Ready to list your establishment?
+                </h4>
+                <p className="text-xs text-[var(--m-text-secondary)] font-light">
+                  Registration takes 2 minutes. Start by creating your partner credentials.
+                </p>
+              </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Private Room Guest Capacity
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. 12 seated, 25 reception"
-                      value={formData.capacityPdr}
-                      onChange={(e) => setFormData({ ...formData, capacityPdr: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-                </div>
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <Link
+                  href="/partners/sign-up"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[var(--m-brand)] px-8 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.02]"
+                >
+                  Start Partner Registration
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/partners/login"
+                  className="w-full sm:w-auto inline-flex items-center justify-center rounded-full border border-[var(--m-border)] bg-[var(--m-bg)] px-6 py-3.5 text-sm font-medium text-[var(--m-text)] hover:bg-[var(--m-card)] transition-colors"
+                >
+                  Partner Portal Login →
+                </Link>
+              </div>
+            </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Contact Name &amp; Title
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Sameer Kapoor, General Manager"
-                      value={formData.contactName}
-                      onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Business Email
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="hospitality@establishment.com"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="+91 98765 43210"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--m-text)] mb-2">
-                      Special Features / Notes
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Dedicated sommelier, valet, private entrance"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                      className="w-full rounded-lg border border-[var(--m-border)] bg-[var(--m-bg)] px-4 py-2.5 text-sm text-[var(--m-text)] placeholder-[var(--m-text-muted)] focus:border-[var(--m-brand)] focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4">
-                  <button
-                    type="submit"
-                    className="w-full rounded-full bg-[var(--m-brand)] py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-[var(--m-brand-dark)] transition-all hover:scale-[1.01]"
-                  >
-                    Submit Partner Application
-                  </button>
-                  <p className="mt-3 text-center text-xs text-[var(--m-text-muted)]">
-                    Confidential &amp; NDA protected. Listings are published to enterprise clients only after operational verification.
-                  </p>
-                </div>
-              </form>
-            )}
+            {/* Quality & Trust Footer Note */}
+            <div className="text-center space-y-2">
+              <p className="text-xs text-[var(--m-text-muted)]">
+                Confidential &amp; NDA protected. Venue listings are published to enterprise clients only after operational review and verification.
+              </p>
+              <p className="text-[11px] text-[var(--m-text-muted)]">
+                Questions about joining or need assistance? Email{" "}
+                <a href="mailto:partners@relatia.in" className="text-[var(--m-brand)] font-medium underline">
+                  partners@relatia.in
+                </a>
+              </p>
+            </div>
           </div>
         </FadeInUp>
       </div>

@@ -61,11 +61,29 @@ export function OfferingFormClient({ providerOrgId, venues, spaces }: Props) {
           <p className="font-semibold">{state.error}</p>
           {state.fieldErrors && (
             <ul className="text-xs list-disc list-inside space-y-0.5 text-rose-700">
-              {Object.entries(state.fieldErrors).map(([key, errs]) => (
-                <li key={key}>
-                  <span className="capitalize">{key}</span>: {errs?.join(", ")}
-                </li>
-              ))}
+              {Object.entries(state.fieldErrors).map(([key, errs]) => {
+                const fieldNames: Record<string, string> = {
+                  venueId: "Venue",
+                  bookableSpaceId: "Specific Space",
+                  name: "Package / Offering Title",
+                  offeringType: "Package Type",
+                  pricingBasis: "Pricing Model",
+                  baseAmountPaise: "Base Price",
+                  baseAmountRupees: "Base Price",
+                  minimumSpendPaise: "Minimum Spend",
+                  minimumSpendRupees: "Minimum Spend",
+                  minGuests: "Minimum Guests",
+                  maxGuests: "Maximum Guests",
+                  description: "Package Description",
+                  dietaryNotes: "Dietary Specifications",
+                };
+                const fieldLabel = fieldNames[key] || key;
+                return (
+                  <li key={key}>
+                    <span className="font-semibold">{fieldLabel}</span>: {errs?.join(", ")}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -138,10 +156,11 @@ export function OfferingFormClient({ providerOrgId, venues, spaces }: Props) {
               className="w-full rounded-xl border border-[#E8E3DA] bg-[#FDFBF7] px-4 py-2.5 text-sm text-[#1A1714] focus:border-[#C4A47C] focus:bg-white focus:outline-none transition-colors"
             >
               <option value="SET_MENU">Plated Set Menu</option>
-              <option value="CANAPE">Cocktail &amp; Canapé Reception</option>
-              <option value="BEVERAGE_PACKAGE">Beverage &amp; Wine Package</option>
-              <option value="BUYOUT_PACKAGE">Full Buyout Package</option>
-              <option value="EXPERIENCE">Chef Experience / Tasting</option>
+              <option value="PER_PERSON_PACKAGE">Per-Person Banquet Package</option>
+              <option value="FIXED_EVENT_PACKAGE">Fixed Event Package / Full Buyout</option>
+              <option value="CUSTOM_EXPERIENCE">Chef Tasting &amp; Wine Experience</option>
+              <option value="A_LA_CARTE_MIN_SPEND">A La Carte (Minimum Spend Commitment)</option>
+              <option value="BEVERAGE_PACKAGE">Beverage &amp; Sommelier Package</option>
             </select>
           </div>
 
@@ -156,9 +175,9 @@ export function OfferingFormClient({ providerOrgId, venues, spaces }: Props) {
               className="w-full rounded-xl border border-[#E8E3DA] bg-[#FDFBF7] px-4 py-2.5 text-sm text-[#1A1714] focus:border-[#C4A47C] focus:bg-white focus:outline-none transition-colors"
             >
               <option value="PER_PERSON">Per Person Price (₹)</option>
-              <option value="FLAT_RATE">Fixed Rental / Space Fee (₹)</option>
-              <option value="MINIMUM_SPEND">Minimum Food &amp; Beverage Spend (₹)</option>
-              <option value="CUSTOM">Custom Bespoke Quote</option>
+              <option value="FIXED_TOTAL">Fixed Total Package Fee (₹)</option>
+              <option value="MINIMUM_SPEND_ONLY">Minimum Spend Commitment (₹)</option>
+              <option value="CUSTOM_QUOTE">Custom Quote on Request</option>
             </select>
           </div>
         </div>

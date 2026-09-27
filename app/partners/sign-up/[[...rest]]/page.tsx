@@ -7,14 +7,15 @@ import { RelatiaLogo } from "@/components/marketing/relatia-logo";
 
 export const metadata: Metadata = {
   title: "Register as Hospitality Partner — Relatia",
-  description: "Create your partner credentials for the Relatia Hospitality Network to list private dining spaces, configure set menus, and receive verified enterprise bookings.",
+  description:
+    "Create your partner credentials for the Relatia Hospitality Network to list private dining spaces, configure set menus, and receive verified enterprise bookings.",
 };
 
 export default async function PartnerSignUpPage() {
   const { userId } = await auth();
 
   if (userId) {
-    redirect("/dashboard");
+    redirect("/partners/portal/onboarding/org");
   }
 
   return (
@@ -54,7 +55,7 @@ export default async function PartnerSignUpPage() {
             </h1>
 
             <p className="text-sm text-[var(--m-text-secondary)] font-light leading-relaxed">
-              Create your partner administrator credentials. Once registered, you can configure your venue profile, catalog private dining spaces, define set packages, and submit for verification.
+              Create your partner administrator credentials to access the self-serve onboarding wizard. You will configure your provider organization, primary contact, venue profile, and bookable spaces.
             </p>
 
             <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-amber-900 space-y-1">
@@ -64,18 +65,29 @@ export default async function PartnerSignUpPage() {
               </p>
             </div>
 
-            <div className="pt-2 text-xs text-[var(--m-text-secondary)]">
-              Prefer a direct onboarding consultation with our team?{" "}
-              <Link href="/partners#apply" className="text-[var(--m-brand)] font-semibold underline">
-                Fill the fast intake form →
-              </Link>
+            <div className="space-y-2 pt-1 text-xs text-[var(--m-text-secondary)]">
+              <div className="font-semibold text-[var(--m-text)]">
+                Onboarding steps after registration:
+              </div>
+              <ol className="list-decimal list-inside space-y-1 text-[var(--m-text-secondary)]">
+                <li>Create credentials &amp; verify email via Clerk</li>
+                <li>Set up Provider Organisation &amp; Legal Entity</li>
+                <li>Add Primary Operational &amp; Financial Contact</li>
+                <li>Add Venue, Bookable Spaces &amp; Set Menus</li>
+                <li>Submit for Relatia operational review</li>
+              </ol>
             </div>
           </div>
 
           {/* Auth Card Column */}
           <div className="lg:col-span-6 flex justify-center">
             <div className="w-full max-w-sm rounded-2xl border border-[var(--m-border)] bg-white p-2 shadow-xl">
-              <SignUp fallbackRedirectUrl="/dashboard" />
+              <SignUp
+                routing="path"
+                path="/partners/sign-up"
+                signInUrl="/partners/login"
+                fallbackRedirectUrl="/partners/portal/onboarding/org"
+              />
             </div>
           </div>
         </div>
@@ -83,7 +95,9 @@ export default async function PartnerSignUpPage() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--m-border)] bg-[var(--m-bg-alt)] py-4 text-center text-xs text-[var(--m-text-muted)] px-6">
-        <p>© {new Date().getFullYear()} Relatia Technologies Pvt. Ltd. · Hospitality Partner Gateway</p>
+        <p>
+          © {new Date().getFullYear()} Relatia Technologies Pvt. Ltd. · Hospitality Partner Gateway
+        </p>
       </footer>
     </div>
   );

@@ -56,11 +56,25 @@ export function VenueFormClient({ providerOrgId }: Props) {
           <p className="font-semibold">{state.error}</p>
           {state.fieldErrors && (
             <ul className="text-xs list-disc list-inside space-y-0.5 text-rose-700">
-              {Object.entries(state.fieldErrors).map(([key, errs]) => (
-                <li key={key}>
-                  <span className="capitalize">{key}</span>: {errs?.join(", ")}
-                </li>
-              ))}
+              {Object.entries(state.fieldErrors).map(([key, errs]) => {
+                const fieldNames: Record<string, string> = {
+                  name: "Venue Name",
+                  venueType: "Venue Type",
+                  priceBand: "Price Positioning",
+                  city: "City",
+                  locality: "Locality / District",
+                  address: "Street Address",
+                  cuisine: "Cuisine / Concept",
+                  capacity: "Total Overall Capacity",
+                  tags: "Venue Tags",
+                };
+                const fieldLabel = fieldNames[key] || key;
+                return (
+                  <li key={key}>
+                    <span className="font-semibold">{fieldLabel}</span>: {errs?.join(", ")}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -115,7 +129,7 @@ export function VenueFormClient({ providerOrgId }: Props) {
             >
               <option value="LUXURY">Luxury (High-end corporate &amp; VIP)</option>
               <option value="PREMIUM">Premium (Upper mid-scale &amp; executive)</option>
-              <option value="MID_SCALE">Mid-Scale (Accessible team dining)</option>
+              <option value="MODERATE">Moderate (Accessible team dining)</option>
             </select>
           </div>
         </div>

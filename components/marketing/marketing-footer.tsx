@@ -28,7 +28,7 @@ const footerSections = [
       { label: "Hospitality Network", href: "/partners" },
       { label: "Partner Economics", href: "/partners#value" },
       { label: "Curation Standards", href: "/partners#standards" },
-      { label: "Apply to Join", href: "/partners#apply" },
+      { label: "Apply to Join", href: "/partners/sign-up" },
       { label: "Partner Portal Login", href: "/partners/login" },
     ],
   },

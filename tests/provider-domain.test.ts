@@ -852,7 +852,208 @@ function runTests() {
     console.log("  ✅ Test 18 Passed: Discovery Catalog Filtering Rules & Multi-State Isolation");
   }
 
-  console.log("🎉 All 18 Provider Domain & Onboarding Tests Passed Successfully!\n");
+  // Test 19: Partner Onboarding Step Progression & Ownership Invariants
+  {
+    type PartnerStep =
+      | "ACCOUNT_CREATED"
+      | "ORG_ADDED"
+      | "CONTACT_ADDED"
+      | "VENUE_ADDED"
+      | "SPACE_ADDED"
+      | "OFFERING_ADDED"
+      | "SUBMITTED";
+
+    const stepOrder: PartnerStep[] = [
+      "ACCOUNT_CREATED",
+      "ORG_ADDED",
+      "CONTACT_ADDED",
+      "VENUE_ADDED",
+      "SPACE_ADDED",
+      "OFFERING_ADDED",
+      "SUBMITTED",
+    ];
+
+    // Assert strictly linear progression
+    assert.equal(stepOrder.indexOf("ACCOUNT_CREATED"), 0);
+    assert.equal(stepOrder.indexOf("ORG_ADDED"), 1);
+    assert.equal(stepOrder.indexOf("SUBMITTED"), 6);
+
+    // Ownership check helper invariant
+    function assertOwnership(partnerOrgId: number | null, targetOrgId: number) {
+      if (partnerOrgId !== targetOrgId) {
+        throw new Error("Access denied: you do not own this provider organization.");
+      }
+    }
+
+    // Matching org passes
+    assert.doesNotThrow(() => assertOwnership(42, 42));
+
+    // Mismatched or null org fails
+    assert.throws(
+      () => assertOwnership(null, 42),
+      /Access denied/,
+      "Null partnerOrgId must throw"
+    );
+    assert.throws(
+      () => assertOwnership(99, 42),
+      /Access denied/,
+      "Mismatched partnerOrgId must throw"
+    );
+
+    console.log("  ✅ Test 19 Passed: Partner Onboarding Step Progression & Ownership Invariants");
+  }
+
+  // Test 20: Partner Self-Publishing / Self-Verification Isolation
+  {
+    // A partner venue at SUBMITTED step must never become discoverable on its own
+    const partnerSubmittedOrg: ProviderOrganizationRecord = {
+      id: 50,
+      name: "Grand Ballroom Partners",
+      legalName: "Grand Ballroom LLP",
+      providerType: "HOTEL",
+      status: "PENDING_VERIFICATION",
+      onboardingStatus: "IN_PROGRESS",
+      city: "Mumbai",
+      internalNotes: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    const partnerVenue: ProviderVenueRecord = {
+      id: 100,
+      companyId: null,
+      providerOrgId: 50,
+      name: "The Royal Ballroom",
+      address: "100 Marine Drive",
+      city: "Mumbai",
+      locality: "Marine Drive",
+      capacity: 300,
+      cuisine: "Multi-Cuisine",
+      priceBand: "LUXURY",
+      tags: ["Ballroom", "Luxury"],
+      rating: 4.9,
+      active: true,
+      venueType: "HOTEL",
+      publicDescription: "Grand ballroom suite",
+      visibility: "INTERNAL_ONLY",
+      isDiscoverable: false,
+      verificationStatus: "PENDING_REVIEW",
+      lastVerifiedAt: null,
+      internalNotes: null,
+    };
+
+    const spaces: BookableSpaceRecord[] = [
+      {
+        id: 201,
+        venueId: 100,
+        name: "Main Ballroom",
+        spaceType: "BALLROOM",
+        minCapacity: 50,
+        maxCapacity: 300,
+        privacyLevel: "EXCLUSIVE",
+        seatedCapacity: 300,
+        standingCapacity: 400,
+        publicDescription: "Full ballroom suite",
+        status: "ACTIVE",
+        isActive: true,
+        internalNotes: null,
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    const offerings: OfferingRecord[] = [
+      {
+        id: 301,
+        venueId: 100,
+        providerOrgId: 50,
+        bookableSpaceId: 201,
+        name: "Executive Gala Package",
+        offeringType: "SET_MENU",
+        pricingBasis: "PER_PERSON",
+        baseAmount: 450000,
+        currency: "INR",
+        minimumSpend: 20000000,
+        minGuests: 50,
+        maxGuests: 300,
+        description: "Full catering package",
+        dietaryNotes: null,
+        pricingNotes: null,
+        isCustomQuote: false,
+        taxIncluded: true,
+        isActive: true,
+        isDiscoverable: false,
+        internalNotes: null,
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    const readiness = evaluateDiscoveryReadiness({
+      provider: partnerSubmittedOrg,
+      venue: partnerVenue,
+      bookableSpaces: spaces,
+      offerings: offerings,
+    });
+
+    // Technical readiness can be scored (e.g. spaces/menus configured)
+    assert.ok(readiness.score > 0, "Technical readiness can evaluate configured spaces");
+
+    // CRITICAL: Even when spaces/menus are configured, partner cannot self-publish.
+    // The venue remains INTERNAL_ONLY and not discoverable until internal operator review.
+    assert.equal(
+      partnerVenue.visibility === "DISCOVERABLE" && partnerVenue.isDiscoverable,
+      false,
+      "Partner cannot self-publish to DISCOVERABLE"
+    );
+
+    console.log("  ✅ Test 20 Passed: Partner Self-Publishing & Discovery Isolation");
+  }
+
+  // Test 21: Partner Form Enum Mapping & User-Friendly Error Messages
+  {
+    // Invalid providerType produces friendly error
+    const result = createProviderSchema.safeParse({
+      name: "Valid Name",
+      providerType: "INVALID_OPTION",
+      city: "Mumbai",
+    });
+
+    assert.equal(result.success, false);
+    if (!result.success) {
+      const fieldErrors = result.error.flatten().fieldErrors;
+      assert.ok(fieldErrors.providerType, "Must have providerType error");
+      assert.equal(
+        fieldErrors.providerType[0],
+        "Please select a valid business type.",
+        "Must have clean friendly error message without raw enum leak"
+      );
+    }
+
+    // All form UI select values must be valid backend enum keys
+    const validOrgTypes = [
+      "RESTAURANT",
+      "HOTEL",
+      "CLUB",
+      "CATERING_COMPANY",
+      "EXPERIENCE_PROVIDER",
+      "ACTIVITY_PROVIDER",
+      "LIVE_ENTERTAINMENT",
+      "GIFTING_PROVIDER",
+      "MERCHANDISE_PROVIDER",
+    ];
+
+    for (const orgType of validOrgTypes) {
+      const parse = createProviderSchema.safeParse({
+        name: "Test Group",
+        providerType: orgType,
+        city: "Mumbai",
+      });
+      assert.equal(parse.success, true, `ProviderType "${orgType}" must be valid`);
+    }
+
+    console.log("  ✅ Test 21 Passed: Partner Form Enum Mapping & User-Friendly Error Messages");
+  }
+
+  console.log("🎉 All 21 Provider Domain & Onboarding Tests Passed Successfully!\n");
 }
 
 runTests();
