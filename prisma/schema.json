@@ -44,6 +44,10 @@
       "model": "Offering",
       "namespace": "public"
     },
+    "partnerUser": {
+      "model": "PartnerUser",
+      "namespace": "public"
+    },
     "policy": {
       "model": "Policy",
       "namespace": "public"
@@ -356,6 +360,39 @@
               {
                 "name": "COMPLETE",
                 "value": "COMPLETE"
+              }
+            ]
+          },
+          "PartnerOnboardingStep": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ACCOUNT_CREATED",
+                "value": "ACCOUNT_CREATED"
+              },
+              {
+                "name": "ORG_ADDED",
+                "value": "ORG_ADDED"
+              },
+              {
+                "name": "CONTACT_ADDED",
+                "value": "CONTACT_ADDED"
+              },
+              {
+                "name": "VENUE_ADDED",
+                "value": "VENUE_ADDED"
+              },
+              {
+                "name": "SPACE_ADDED",
+                "value": "SPACE_ADDED"
+              },
+              {
+                "name": "OFFERING_ADDED",
+                "value": "OFFERING_ADDED"
+              },
+              {
+                "name": "SUBMITTED",
+                "value": "SUBMITTED"
               }
             ]
           },
@@ -2125,6 +2162,140 @@
               "table": "offering"
             }
           },
+          "PartnerUser": {
+            "fields": {
+              "acceptedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "clerkId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "onboardingStep": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "PartnerOnboardingStep",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "providerOrgId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
+              "submittedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "providerOrg": {
+                "cardinality": "N:1",
+                "nullable": true,
+                "on": {
+                  "localFields": [
+                    "providerOrgId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "ProviderOrganization",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "acceptedAt": {
+                  "column": "acceptedAt"
+                },
+                "clerkId": {
+                  "column": "clerkId"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "email": {
+                  "column": "email"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "onboardingStep": {
+                  "column": "onboardingStep"
+                },
+                "providerOrgId": {
+                  "column": "providerOrgId"
+                },
+                "submittedAt": {
+                  "column": "submittedAt"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                }
+              },
+              "namespaceId": "public",
+              "table": "partnerUser"
+            }
+          },
           "Policy": {
             "fields": {
               "allowedCities": {
@@ -2628,6 +2799,21 @@
                 },
                 "to": {
                   "model": "Offering",
+                  "namespace": "public"
+                }
+              },
+              "partnerUsers": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "providerOrgId"
+                  ]
+                },
+                "to": {
+                  "model": "PartnerUser",
                   "namespace": "public"
                 }
               },
@@ -4669,6 +4855,130 @@
               },
               "uniques": []
             },
+            "partnerUser": {
+              "checks": [
+                {
+                  "expression": "\"onboardingStep\" IN ('ACCOUNT_CREATED', 'ORG_ADDED', 'CONTACT_ADDED', 'VENUE_ADDED', 'SPACE_ADDED', 'OFFERING_ADDED', 'SUBMITTED')",
+                  "name": "partnerUser_onboardingStep_check_32ba3efe",
+                  "prefix": "partnerUser_onboardingStep_check"
+                }
+              ],
+              "columns": {
+                "acceptedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "clerkId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "email": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "expression": "autoincrement()",
+                    "kind": "function"
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "onboardingStep": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "ACCOUNT_CREATED"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "PartnerOnboardingStep",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "providerOrgId": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
+                  "nullable": true
+                },
+                "submittedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-string@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "source": {
+                    "columns": [
+                      "providerOrgId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "partnerUser"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "providerOrganization"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "providerOrgId"
+                  ],
+                  "name": "partnerUser_providerOrgId_idx_947f8436",
+                  "prefix": "partnerUser_providerOrgId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "clerkId"
+                  ]
+                },
+                {
+                  "columns": [
+                    "email"
+                  ]
+                }
+              ]
+            },
             "policy": {
               "checks": [
                 {
@@ -5722,6 +6032,18 @@
                 "COMPLETE"
               ]
             },
+            "PartnerOnboardingStep": {
+              "kind": "valueSet",
+              "values": [
+                "ACCOUNT_CREATED",
+                "ORG_ADDED",
+                "CONTACT_ADDED",
+                "VENUE_ADDED",
+                "SPACE_ADDED",
+                "OFFERING_ADDED",
+                "SUBMITTED"
+              ]
+            },
             "PaymentStatus": {
               "kind": "valueSet",
               "values": [
@@ -5798,7 +6120,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "a4d926a5ebeb3e04cc2b011c74cc33b0219a4aa27d69e24f24da7e49130f2f03"
+    "storageHash": "c6dcf99668b8f666c39e6ae08a154979851a2a8134aed0521f5b4644a2f539ca"
   },
   "capabilities": {
     "postgres": {

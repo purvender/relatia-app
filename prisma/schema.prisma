@@ -137,6 +137,16 @@ enum ContactRoleCategory {
   GENERAL
 }
 
+enum PartnerOnboardingStep {
+  ACCOUNT_CREATED
+  ORG_ADDED
+  CONTACT_ADDED
+  VENUE_ADDED
+  SPACE_ADDED
+  OFFERING_ADDED
+  SUBMITTED
+}
+
 model Company {
   id       Int      @id @default(autoincrement())
   name     String
@@ -157,6 +167,20 @@ model User {
   company   Company? @relation(fields: [companyId], references: [id])
   events    Event[]
   approvals Approval[]
+}
+
+model PartnerUser {
+  id              Int                    @id @default(autoincrement())
+  clerkId         String                 @unique
+  email           String                 @unique
+  name            String
+  providerOrgId   Int?
+  providerOrg     ProviderOrganization?  @relation(fields: [providerOrgId], references: [id])
+  onboardingStep  PartnerOnboardingStep  @default(ACCOUNT_CREATED)
+  submittedAt     TimestamptzString?
+  acceptedAt      TimestamptzString?
+  createdAt       TimestamptzString      @default(now())
+  updatedAt       TimestamptzString?
 }
 
 model Event {
@@ -204,6 +228,7 @@ model ProviderOrganization {
   documents        ProviderDocument[]
   verificationRecords VerificationRecord[]
   offerings        Offering[]
+  partnerUsers     PartnerUser[]
 }
 
 model ProviderContact {
